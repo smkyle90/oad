@@ -1,24 +1,34 @@
-from datetime import datetime 
+from datetime import datetime
+
 from flask_login import UserMixin
+
 from . import db
 
-class User(UserMixin, db.Model):
 
-    id = db.Column(db.Integer, primary_key=True) # primary keys are required by SQLAlchemy
+class User(UserMixin, db.Model):
+    __table_args__ = {"extend_existing": True}
+    id = db.Column(
+        db.Integer, primary_key=True
+    )  # primary keys are required by SQLAlchemy
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100))
     name = db.Column(db.String(1000), unique=True)
-    picks = db.relationship('Pick', backref='user', lazy=True)
+    picks = db.relationship("Pick", backref="user", lazy=True)
+
 
 class Pick(db.Model):
-    id = db.Column(db.Integer, primary_key=True) # primary keys are required by SQLAlchemy
+    __table_args__ = {"extend_existing": True}
+    id = db.Column(
+        db.Integer, primary_key=True
+    )  # primary keys are required by SQLAlchemy
     event = db.Column(db.String(1000))
     pick = db.Column(db.String(1000))
     # timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    name = db.Column(db.Integer, db.ForeignKey('user.name'))
+    name = db.Column(db.String(1000), db.ForeignKey("user.name"), nullable=False)
 
     # def __repr__(self):
     #     return "{} picks {}".format(self.name, self.pick)
+
 
 # class User(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)

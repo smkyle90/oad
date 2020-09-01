@@ -1,22 +1,26 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_required, current_user
-from .models import User, Pick
-from .views import UserTable, PickTable
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
 
 from . import db
+from .helpers import get_event, get_picks
+from .models import Pick, User
+from .views import PickTable, UserTable
 
-main = Blueprint('main', __name__)
+main = Blueprint("main", __name__)
 
-@main.route('/')
+
+@main.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")
 
-@main.route('/profile')
+
+@main.route("/profile")
 @login_required
 def profile():
-    return render_template('profile.html', user=current_user)
+    return render_template("profile.html", user=current_user)
 
-@main.route('/leaders')
+
+@main.route("/leaders")
 @login_required
 def leaders():
     users = User.query.all()
@@ -25,31 +29,34 @@ def leaders():
     picks = Pick.query.all()
     pick_table = PickTable(picks)
 
-    return render_template('leaders.html', u_table=user_table, p_table=pick_table)
+    return render_template("leaders.html", u_table=user_table, p_table=pick_table)
 
-@main.route('/pick')
+
+@main.route("/pick")
 @login_required
 def pick():
     current_user
     # Get pick history for current user
 
     # Available picks
-    avail_picks = ['TW', 'PM', 'DJ', 'AS']
+    avail_picks = get_picks()
 
     # Get current event
-    curr_event = "Test Open"
-    return render_template('pick.html', avail=avail_picks, event=curr_event)
+    curr_event = get_event()
 
-@main.route("/submit_pick" , methods=['POST'])
+    return render_template("pick.html", avail=avail_picks, event=curr_event)
+
+
+@main.route("/submit_pick", methods=["POST"])
 @login_required
 def submit_pick():
     # Get current event
     curr_event = "Test Open"
-    selection = request.form.get('Select')
+    selection = request.form.get("Select")
 
-    user_pick = Pick(event=curr_event, pick=selection)
+    user_pick = Pick(event=curr_event, pick=selection, name=current_user.name)
     db.session.add(user_pick)
     db.session.commit()
 
-    flash('Pick made')
-    return redirect(url_for('main.profile'))
+    flash("Pick made")
+    return redirect(url_for("main.profile"))
