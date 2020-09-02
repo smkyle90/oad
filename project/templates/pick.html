@@ -2,11 +2,11 @@
 
 {% block content %}
 <h1 class="title">
-  Make your pick for the {{ event }}.
+  {{ user }} make your pick for the {{ event }}.
 </h1>
 
 <form name="Select" action="{{ url_for('main.submit_pick') }}" method='POST'>
-	<select class="dropbtn is-block ids-fullwidth" name='Select' type='text' placeholder='Select your golfer.'>
+	<select class="dropbtn is-block ids-fullwidth" name='Select' type='text' placeholder='Select your golfer.' style="width: auto">
 		{% for pick in avail %}
 			<option>
 					{{ pick }}

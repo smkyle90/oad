@@ -13,3 +13,10 @@ class PickTable(Table):
     event = Col("event")
     pick = Col("pick")
     name = Col("name")
+
+
+# Declare your table
+class PlayerTable(Table):
+    id = Col("id")
+    name = Col("name")
+    cumulative_points = Col("cumulative_points")
