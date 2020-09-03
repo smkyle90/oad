@@ -14,6 +14,7 @@ class User(UserMixin, db.Model):
     picks = db.relationship("Pick", backref="user", lazy=True)
     strikes_remaining = db.Column(db.Integer, default=1)
 
+
 class Pick(db.Model):
     __table_args__ = {"extend_existing": True}
     id = db.Column(db.Integer, primary_key=True)
