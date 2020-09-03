@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="title">
+  League Information
+</h1>
+
+
+    {{ u_table | safe }}
+
+
+
+<table>
+<tr>
+<td></td>
+
+{% if show_picks %}
+<td>{{ p_table }}</td>
+{% endif %}
+</tr>
+</table>
+{{ pl_table }}
+
+{% endblock %}

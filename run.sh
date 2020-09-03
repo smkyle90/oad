@@ -1,10 +1,4 @@
 
-echo "Install Virtual Environment"
-pipenv install
-pipenv shell
-
-
-
 echo "Initialise the Flask DB."
 python3 run_db.py
 

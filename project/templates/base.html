@@ -20,18 +20,14 @@
                                 Home
                             </a>
                             {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('main.profile') }}" class="navbar-item">
-                                Profile
+                            <a href="{{ url_for('main.league') }}" class="navbar-item">
+                                League
                             </a>
-                            {% endif %}
-                            {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('main.leaders') }}" class="navbar-item">
-                                Leaderboard
-                            </a>
-                            {% endif %}
-                            {% if current_user.is_authenticated %}
                             <a href="{{ url_for('main.pick') }}" class="navbar-item">
                                 Pick
+                            </a>
+                            <a href="{{ url_for('main.profile') }}" class="navbar-item">
+                                Profile
                             </a>
                             {% endif %}
                             {% if not current_user.is_authenticated %}

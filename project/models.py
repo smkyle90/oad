@@ -12,7 +12,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100))
     name = db.Column(db.String(1000), unique=True)
     picks = db.relationship("Pick", backref="user", lazy=True)
-
+    strikes_remaining = db.Column(db.Integer, default=1)
 
 class Pick(db.Model):
     __table_args__ = {"extend_existing": True}

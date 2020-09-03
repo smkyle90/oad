@@ -9,6 +9,9 @@ flask-sqlalchemy = "*"
 flask-login = "*"
 flask-table = "*"
 pre-commit = "*"
+requests = "*"
+pandas = "*"
+lxml = "*"
 
 [dev-packages]
 
