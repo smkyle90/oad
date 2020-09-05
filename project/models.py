@@ -13,6 +13,7 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(1000), unique=True)
     picks = db.relationship("Pick", backref="user", lazy=True)
     strikes_remaining = db.Column(db.Integer, default=1)
+    is_admin = db.Column(db.Boolean, default=False)
 
 
 class Pick(db.Model):

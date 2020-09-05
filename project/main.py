@@ -4,21 +4,11 @@ from flask_login import current_user, login_required
 from . import db
 from .helpers import construct_user_table, get_earnings, get_event_info
 from .models import Pick, Player, User
-from .scheduled import add_user_points
-from .views import PickTable, PlayerTable, UserPickTable, UserTable
+from .scheduled import set_state
+from .views import PickTable, PlayerTable, UserPickTable, UserTable, create_plot
+from .admin import update_player_earnings, add_user_points
 
 main = Blueprint("main", __name__)
-
-
-def set_state():
-    """Set the session variables.
-    """
-    event_name, __, tournament_state = get_event_info()
-
-    if "event_state" not in session:
-        session["event_state"] = tournament_state
-    if "event_name" not in session:
-        session["name"] = event_name
 
 
 @main.route("/")
@@ -40,14 +30,14 @@ def profile():
         user_points=total_points,
     )
 
-
 @main.route("/league")
 @login_required
 def league():
-    add_user_points()
+    curr_event, __, tournament_state = get_event_info()
+
     users = User.query.all()
 
-    picks = Pick.query.filter_by(event=session["event_name"]).all()
+    picks = Pick.query.filter_by(event=curr_event).all()
     pick_table = PickTable(picks)
 
     players = Player.query.all()
@@ -55,11 +45,13 @@ def league():
 
     user_table = construct_user_table(users, picks)
 
+    bar = create_plot()
+
     # Determine if we are going to show the picks for the week
-    if session["event_state"] != "pre":
+    if tournament_state != "pre":
         show_picks = True
     else:
-        show_picks = True
+        show_picks = False
 
     return render_template(
         "league.html",
@@ -67,24 +59,15 @@ def league():
         p_table=pick_table,
         pl_table=player_table,
         show_picks=show_picks,
+        event_name=curr_event,
+        plot=bar,
     )
 
 
 @main.route("/pick")
 @login_required
 def pick():
-    # Get pick history for current user
-    # Available picks
-    # avail_picks = get_picks()
-    # # Get current event
-    # curr_event = get_event()
-
     curr_event, avail_picks, tournament_state = get_event_info()
-
-    if "event_name" not in session:
-        session["event_name"] = curr_event
-    if "event_state" not in session:
-        session["event_state"] = tournament_state
 
     # Check if the user has made a previous pick
     prev_pick = (
@@ -94,7 +77,7 @@ def pick():
     button_state = True
     button_text = "Submit Pick"
     # Warn the user about the picking state
-    if session["event_state"] == "pre":
+    if tournament_state == "pre":
         if prev_pick is None:
             pick_state = "you have yet to pick."
         else:
@@ -124,7 +107,7 @@ def pick():
 @login_required
 def submit_pick():
     # Get current event from the session
-    curr_event = session["event_name"]
+    curr_event, __, tournament_state = get_event_info()
 
     # Get the selection
     selection = request.form.get("Select")
@@ -147,7 +130,7 @@ def submit_pick():
     # Ensure a player does not pick before the tournament has started.
     # If they do not pick before it starts, and have a strike, they can make
     # a pick and use it.
-    if session["event_state"] == "pre":
+    if tournament_state == "pre":
         if prev_pick is None:
             user_pick = Pick(event=curr_event, pick=selection, name=current_user.name)
             db.session.add(user_pick)
@@ -168,3 +151,24 @@ def submit_pick():
     db.session.commit()
 
     return redirect(url_for("main.profile"))
+
+
+@main.route("/update")
+@login_required
+def update():
+    return render_template("update.html")
+
+
+@main.route("/end_week")
+@login_required
+def end_week():
+    add_user_points()
+    update_player_earnings()
+    return redirect(url_for("main.update"))
+
+@main.route("/send_email", methods=['POST'])
+@login_required
+def send_email():
+    text = request.form.get("Email")
+    
+    return redirect(url_for("main.update"))

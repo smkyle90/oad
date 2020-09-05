@@ -1,7 +1,7 @@
 """App helper functions
 """
 import random
-
+import json
 import pandas as pd
 import requests
 
@@ -27,20 +27,11 @@ def get_event_info():
             if a["status"]["type"]["state"] == "pre"
         ]
 
-        tournament_state = data["events"][0]["status"]["type"]
+        tournament_state = data["events"][0]["status"]["type"]["state"]
     except Exception as e:
         print("Issue getting data from ESPN API. Message: {}".format(e))
 
     return event_name, avail_picks, tournament_state
-
-
-def get_picks():
-    avail_picks = ["TW", "PM", "DJ", "AS"]
-    return avail_picks
-
-
-def get_event():
-    return "Test Open"
 
 
 def get_earnings(player):

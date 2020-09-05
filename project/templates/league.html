@@ -1,24 +1,29 @@
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+
 {% extends "base.html" %}
 
 {% block content %}
 <h1 class="title">
   League Information
 </h1>
-
-
-    {{ u_table | safe }}
-
-
-
-<table>
-<tr>
-<td></td>
+<br></br>
 
 {% if show_picks %}
-<td>{{ p_table }}</td>
+<h3 class="subtitle">{{ event_name }} Picks</h3>
+	{{ p_table }}
+<br></br>
 {% endif %}
-</tr>
-</table>
-{{ pl_table }}
+<h3 class="subtitle">League Leaders</h3>
+	{{ u_table | safe }}	
+<br></br>
 
+<h3 class="subtitle">Points History</h3>
+<div class="chart" id="bargraph">
+    <script>
+        var graphs = {{ plot | safe }};
+        Plotly.plot('bargraph',graphs,{});
+    </script>
+</div>
+<br></br>
 {% endblock %}

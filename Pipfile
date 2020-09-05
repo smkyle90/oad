@@ -12,6 +12,8 @@ pre-commit = "*"
 requests = "*"
 pandas = "*"
 lxml = "*"
+apscheduler = "*"
+plotly = "*"
 
 [dev-packages]
 

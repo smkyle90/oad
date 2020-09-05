@@ -1,12 +1,26 @@
+import time
 from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.combining import OrTrigger
+from apscheduler.triggers.cron import CronTrigger
 
+# from .scheduled import add_user_points, update_player_earnings, set_state
 # init SQLAlchemy so we can use it later in our models
 db = SQLAlchemy()
+# init the scheduler to run the DB updates.
+# sched = BackgroundScheduler(daemon=True)
 
 
 def create_app():
+    # TODO: Add scheduling
+    # trigger = OrTrigger([CronTrigger(day_of_week='mon', hour=10)])
+    # sched.add_job(func=set_state, trigger='interval', seconds=)
+    # sched.add_job(func=add_user_points,  args=[db], trigger=trigger)
+    # sched.add_job(func=update_player_earnings,  args=[db], trigger='interval', seconds=10)
+    # sched.start()
+    
     app = Flask(__name__)
 
     app.config["SECRET_KEY"] = "secret-key-goes-here"

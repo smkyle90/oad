@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="title">
+  Admin Actions
+</h1>
+<br></br>
+<h3 class="subtitle">
+  Update DB 
+</h3>
+<button class="button is-block is-info is-large is-fullwidth" onclick="window.location.href='/end_week';">
+  End Week
+</button>
+<br></br>
+
+<h3 class="subtitle">
+  Send Weekly Summary
+</h3>
+<form name="Email" action="{{ url_for('main.send_email') }}" method='POST'>
+	<textarea rows="10" cols="50" name="Email", style="width: auto">
+	</textarea>
+    <button class="button is-block is-info is-large is-fullwidth">Send Email</button>
+</form>
+<br></br>
+
+{% endblock %}
