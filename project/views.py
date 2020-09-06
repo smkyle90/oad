@@ -34,13 +34,11 @@ class UserPickTable(Table):
 
 
 def create_plot():
-    data = go.Data([
-        go.Bar(
+    data = go.Bar(
             x=['Sivaranjani S', 'Vijayalakshmi C', 'Rajeshwari S', 'Shanthi Priscilla', 'Pandiyaraj G', 'Kamatchi S', 'MohanaPriya', 'Madhumitha G', 'Franklin Alphones Raj J', 'Akfaris Almaas', 'Biswajit Champati', 'Priya R', 'Rekha Rajasekaran', 'Sarath Kumar B', 'Jegan L', 'Karthick A', 'Mahalakshmi S', 'Ragunathan V', 'Anu S', 'Ramkumar KS', 'Uthra R'],
             y=[1640, 1394, 1390, 1313, 2166, 1521, 1078, 1543, 780, 1202, 1505, 2028, 2032, 1769, 1238, 1491, 1477, 1329, 2038, 1339, 1458],
             text=['Scuti', 'Scuti', 'Cygni', 'Scorpii', 'Scuti', 'Pollux', 'Scorpii', 'Pollux', 'Scuti', 'Pollux', 'Scorpii', 'Scorpii', 'Scuti', 'Cygni', 'Scorpii', 'Scuti', 'Scuti', 'Pollux', 'Scuti', 'Pollux', 'Pollux']
         )
-    ])
 
     layout = go.Layout(
         paper_bgcolor='rgba(0,0,0,0)',
