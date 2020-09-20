@@ -4,7 +4,6 @@
 <h1 class="title">
   Admin Actions
 </h1>
-<br></br>
 <h3 class="subtitle">
   Update DB 
 </h3>
@@ -17,7 +16,7 @@
   Send Weekly Summary
 </h3>
 <form name="Email" action="{{ url_for('main.send_email') }}" method='POST'>
-	<textarea rows="10" cols="50" name="Email", style="width: auto">
+	<textarea rows="10" name="Email", style="width: 100%">
 	</textarea>
     <button class="button is-block is-info is-large is-fullwidth">Send Email</button>
 </form>
