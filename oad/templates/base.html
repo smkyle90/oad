@@ -5,54 +5,167 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Flask Auth Example</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css" />
+    <title>1993 OAD. Pick 'em and stick 'em.</title>
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.0/css/bulma.min.css" /> -->
     <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" /> -->
+
+    <link rel="icon" 
+      type="image/png" 
+      href="http://www.mcdowellmountaingc.com/blog/wp-content/uploads/2014/10/jumping_phil_logo-1.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+    /*https://coolors.co/30bced-303036-fffaff-fc5130*/
+    /*charcoal #303036
+    blue #30BCED
+    red #FC5130
+    light grey #FFFAFF*/
+    * {
+        font-family: Arial, Helvetica, sans-serif;
+      }
+    body {background-color: #FFFAFF;}
+    h1   {color: #303036;}
+    h2   {color: #30BCED;}
+    h3   {color: #307692;}
+    p    {color: #FC5130;}
+
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    td, th {
+      border: 1px solid #303036;
+      text-align: center;
+      padding: 8px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #98959B;
+    }
+
+    input[type=text], input[type=password] {
+      font-size: 16px;
+      padding: 20px 20px;
+      margin: 20px 0;
+      box-sizing: border-box;
+      border: 2px #FEA698;
+      border-radius: 10px;
+      width: 100%;
+      /*max-width: 600px*/
+    }
+    
+    .button {
+      background-color: #FEA698;
+      border: none;
+      color: white;
+      padding: 16px 32px;
+      text-align: center;
+      font-size: 16px;
+      margin: 4px 2px;
+      transition: 0.3s;
+      width: 100%;
+      /*max-width: 600px*/
+    }
+
+    .button:hover {background-color: #FC5130}
+
+    .topnav {
+      overflow: hidden;
+      background-color: #303036;
+    }
+
+    .topnav a {
+      float: left;
+      display: block;
+      color: #30BCED;
+      text-align: center;
+      padding: 14px 16px;
+      text-decoration: none;
+      font-size: 17px;
+    }
+
+    .topnav a:hover {
+      background-color: #FFFAFF;
+      color: black;
+    }
+
+    .topnav a.active {
+      background-color: #FC5130;
+      color: white;
+    }
+
+    .topnav .icon {
+      display: none;
+    }
+
+    @media screen and (max-width: 600px) {
+      .topnav a:not(:first-child) {display: none;}
+      .topnav a.icon {
+        float: right;
+        display: block;
+      }
+    }
+
+    @media screen and (max-width: 600px) {
+      .topnav.responsive {position: relative;}
+      .topnav.responsive .icon {
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+      .topnav.responsive a {
+        float: none;
+        display: block;
+        text-align: left;
+      }
+    }
+    </style>
+
 </head>
 
 <body>
     <section class="hero is-primary is-fullheight">
-        <div class="hero-head">
-            <nav class="navbar">
-                <div class="container">
-                    <div id="navbarMenuHeroA" class="navbar-menu">
-                        <div class="navbar-end">
-                            {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('main.league') }}" class="navbar-item">
-                                League
-                            </a>
-                            <a href="{{ url_for('main.pick') }}" class="navbar-item">
-                                Pick
-                            </a>
-                            <a href="{{ url_for('main.profile') }}" class="navbar-item">
-                                Profile
-                            </a>
-                            {% endif %}
-                            {% if not current_user.is_authenticated %}
-                            <a href="{{ url_for('auth.login') }}" class="navbar-item">
-                                Login
-                            </a>
-                            <a href="{{ url_for('auth.signup') }}" class="navbar-item">
-                                Sign Up
-                            </a>
-                            {% endif %}
-                            {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('auth.logout') }}" class="navbar-item">
-                                Logout
-                            </a>
-                            {% endif %}
-                            {% if current_user.is_authenticated %}
-                                <!-- {% if current_user.is_admin %} -->
-                                <a href="{{ url_for('main.update') }}" class="navbar-item">
-                                    Admin
-                                </a>
-                                <!-- {% endif %} -->
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </nav>
+        <div class="topnav" id="myTopnav">
+            <!-- <a class="navbar-brand" href="https://www.youtube.com/watch?v=nfGMkZnT1uU" >
+                <img src="http://clipart-library.com/images_k/female-golfer-silhouette/female-golfer-silhouette-20.png" alt="Logo" style="width:40px;">
+            </a> -->
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('main.league') }}" class="active">
+                League
+            </a>
+            <a href="{{ url_for('main.pick') }}" class="navbar-item">
+                Pick
+            </a>
+            <a href="{{ url_for('main.profile') }}" class="navbar-item">
+                Profile
+            </a>
+            {% endif %}
+            {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('auth.login') }}" class="navbar-item">
+                Login
+            </a>
+            <a href="{{ url_for('auth.signup') }}" class="navbar-item">
+                Sign Up
+            </a>
+            {% endif %}
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('auth.logout') }}" class="navbar-item">
+                Logout
+            </a>
+            {% endif %}
+            {% if current_user.is_authenticated %}
+                {% if current_user.is_admin %}
+                <a href="{{ url_for('main.update') }}" class="navbar-item">
+                    Admin
+                </a>
+                {% endif %}
+            {% endif %}
+            <a href="javascript:void(0);" class="icon" onclick="getNavItems()">
+                <i class="fa fa-bars"></i>
+            </a>
         </div>
+
 
         <div class="hero-body">
             <div class="container has-text-centered">
@@ -61,6 +174,18 @@
             </div>
         </div>
     </section>
+
+    <script>
+        function getNavItems() {
+            var x = document.getElementById("myTopnav");
+            if (x.className === "topnav") {
+                x.className += " responsive";
+            } else {
+                x.className = "topnav";
+            }
+        }
+    </script>
+
 </body>
 
 </html>

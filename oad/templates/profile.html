@@ -1,17 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="title">
-  Welcome, {{ user.name }}!
-  Email, {{ user.email }}!
+<h1 class="title" style="text-align: center">
+	{{ user.name }} total earnings: ${{ user_points }}
 </h1>
 
-<h3 class="subtitle">Pick History</h3>
+<h3 class="title" style="text-align: center">
+  {{ user.name }} Pick History
+</h3>
+
 {{ pick_table }}
-
-<h1 class="title">
-	Total Earnings:
-	${{ user_points }}
-</h1>
 
 {% endblock %}

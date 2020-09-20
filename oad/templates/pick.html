@@ -8,7 +8,9 @@
   {{ user }}, {{ pick_text }}
 </h2 class="title">
 {% if button %}
-
+	<p>
+		Pick from the golfers who have not teed off.
+	</p>
 	<form name="Select" action="{{ url_for('main.submit_pick') }}" method='POST'>
 		<select class="dropbtn is-block ids-fullwidth" name='Select' type='text' placeholder='Select your golfer.' style="width: auto">
 			{% for pick in avail %}

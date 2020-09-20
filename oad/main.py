@@ -79,17 +79,17 @@ def pick():
     # Warn the user about the picking state
     if tournament_state == "pre":
         if prev_pick is None:
-            pick_state = "you have yet to pick."
+            pick_state = "you have yet to pick. Pick any golfer in the field."
         else:
             pick_state = (
-                "you have already picked, but can modify your pick free of charge."
+                "you have already picked, but can modify your pick free of charge. Pick any other golfer in the field."
             )
     else:
         if (prev_pick is None) and (current_user.strikes_remaining):
-            pick_state = "the tourney has started and you have not picked, but you have a strike. Picking now will use this up."
+            pick_state = "the tourney has started and you have not picked, but you have a strike. Picking now will use this up. You can pick a player who has yet to tee off."
             button_text = "Pick and Use Strike"
         else:
-            pick_state = "mate, the tourney has started and you have either made your pick, or don't have any strikes left."
+            pick_state = "mate, the tourney has started and you have either made your pick, or don't have any strikes left... better luck next week."
             button_state = False
 
     return render_template(
