@@ -2,6 +2,7 @@ import time
 from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
+
 # from apscheduler.schedulers.background import BackgroundScheduler
 # from apscheduler.triggers.combining import OrTrigger
 # from apscheduler.triggers.cron import CronTrigger
@@ -20,10 +21,10 @@ def create_app():
     # sched.add_job(func=add_user_points,  args=[db], trigger=trigger)
     # sched.add_job(func=update_player_earnings,  args=[db], trigger='interval', seconds=10)
     # sched.start()
-    
+
     app = Flask(__name__)
 
-    app.config["SECRET_KEY"] = "secret-key-goes-here"
+    app.config["SECRET_KEY"] = "1234"
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 

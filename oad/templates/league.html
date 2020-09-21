@@ -5,23 +5,28 @@
 
 {% block content %}
 <h1 class="title">
-  League Information
+  league information
 </h1>
 
 {% if show_picks %}
-<h3 class="subtitle">{{ event_name }} Picks</h3>
+<h3 class="subtitle">{{ event_name }} picks</h3>
 	{{ p_table }}
 <br></br>
 {% endif %}
-<h3 class="subtitle">League Leaders</h3>
+<h3 class="subtitle">league leaders</h3>
 	{{ u_table | safe }}	
 <br></br>
-
-<h3 class="subtitle">Points History</h3>
+<h3 class="subtitle">points history</h3>
 <div class="chart" id="bargraph">
-    <script>
+    <script style="width: 100%">
         var graphs = {{ plot | safe }};
         Plotly.plot('bargraph',graphs,{});
+    </script>
+</div>
+<div class="chart" id="chart">
+    <script style="width: 100%">
+        var graphs = {{ points | safe }};
+        Plotly.plot('chart',graphs,{});
     </script>
 </div>
 <br></br>

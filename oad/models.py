@@ -14,6 +14,7 @@ class User(UserMixin, db.Model):
     picks = db.relationship("Pick", backref="user", lazy=True)
     strikes_remaining = db.Column(db.Integer, default=1)
     is_admin = db.Column(db.Boolean, default=False)
+    email_confirmed = db.Column(db.Boolean, default=False)
 
 
 class Pick(db.Model):

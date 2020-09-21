@@ -1,5 +1,6 @@
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from . import db
 from .helpers import construct_user_table, get_earnings, get_event_info
@@ -7,6 +8,7 @@ from .models import Pick, Player, User
 from .scheduled import set_state
 from .views import PickTable, PlayerTable, UserPickTable, UserTable, create_plot
 from .admin import update_player_earnings, add_user_points
+from .util import send_email
 
 main = Blueprint("main", __name__)
 
@@ -30,6 +32,7 @@ def profile():
         user_points=total_points,
     )
 
+
 @main.route("/league")
 @login_required
 def league():
@@ -45,7 +48,7 @@ def league():
 
     user_table = construct_user_table(users, picks)
 
-    bar = create_plot()
+    bar, line = create_plot()
 
     # Determine if we are going to show the picks for the week
     if tournament_state != "pre":
@@ -61,6 +64,7 @@ def league():
         show_picks=show_picks,
         event_name=curr_event,
         plot=bar,
+        points=line,
     )
 
 
@@ -69,10 +73,20 @@ def league():
 def pick():
     curr_event, avail_picks, tournament_state = get_event_info()
 
-    # Check if the user has made a previous pick
+    # Check if the user has made a previous pick for this event
     prev_pick = (
         Pick.query.filter_by(event=curr_event).filter_by(name=current_user.name).first()
     )
+
+    # Get all picks for this user
+    all_picks = Pick.query.filter_by(name=current_user.name).all()
+
+    # Get the list of players already picked
+    all_players = [pick.pick for pick in all_picks]
+
+    # We can pick from the available picks, minus the players we've already picked.
+    # TODO: set operations?
+    eligible_picks = [p for p in avail_picks if a not in all_players]
 
     button_state = True
     button_text = "Submit Pick"
@@ -81,9 +95,7 @@ def pick():
         if prev_pick is None:
             pick_state = "you have yet to pick. Pick any golfer in the field."
         else:
-            pick_state = (
-                "you have already picked, but can modify your pick free of charge. Pick any other golfer in the field."
-            )
+            pick_state = "you have already picked, but can modify your pick free of charge. Pick any other golfer in the field."
     else:
         if (prev_pick is None) and (current_user.strikes_remaining):
             pick_state = "the tourney has started and you have not picked, but you have a strike. Picking now will use this up. You can pick a player who has yet to tee off."
@@ -92,9 +104,13 @@ def pick():
             pick_state = "mate, the tourney has started and you have either made your pick, or don't have any strikes left... better luck next week."
             button_state = False
 
+    if not eligible_picks:
+        pick_state = "no players left to pick from."
+        button_state = False
+
     return render_template(
         "pick.html",
-        avail=avail_picks,
+        avail=eligible_picks,
         event=curr_event,
         user=current_user.name,
         pick_text=pick_state,
@@ -156,19 +172,70 @@ def submit_pick():
 @main.route("/update")
 @login_required
 def update():
-    return render_template("update.html")
+
+    __, __, tournament_state = get_event_info()
+
+    update_button = False
+
+    if tournament_state == "post":
+        update_button = True
+
+    return render_template("update.html", update_button=update_button)
 
 
 @main.route("/end_week")
 @login_required
 def end_week():
     add_user_points()
-    update_player_earnings()
+    # update_player_earnings()
     return redirect(url_for("main.update"))
 
-@main.route("/send_email", methods=['POST'])
+
+@main.route("/user_password_change", methods=["POST"])
 @login_required
-def send_email():
-    text = request.form.get("Email")
-    
+def user_password_change():
+
+    old_pass = request.form.get("old_pw")
+    new_pass1 = request.form.get("pw1")
+    new_pass2 = request.form.get("pw2")
+
+    user = User.query.filter_by(email=current_user.email).first()
+
+    if check_password_hash(user.password, old_pass):
+        if new_pass1 == new_pass2:
+            user.password = generate_password_hash(new_pass1, method="sha256")
+            # db.session.add(user)
+            db.session.commit()
+            flash("Password has been updated!", "success")
+            return redirect(url_for("main.profile"))
+        else:
+            flash("The new password entries do not match.")
+    else:
+        flash("The old password is incorrect.")
+
+    return render_template("update_password.html")
+
+
+@main.route("/update_password")
+@login_required
+def update_password():
+    return render_template("update_password.html")
+
+
+@main.route("/weekly_update", methods=["POST"])
+@login_required
+def weekly_update():
+    curr_event, __, tournament_state = get_event_info()
+
+    users = User.query.all()
+    picks = Pick.query.filter_by(event=curr_event).all()
+
+    written_text = request.form.get("Email")
+    points_table = construct_user_table(users, picks)
+
+    email_text = "{}\n\n{}".format(written_text, points_table)
+
+    # for user_addr in [user.email for user in users]:
+    send_email("scott.m.kyle@gmail.com", "Weekly Update", email_text)
+
     return redirect(url_for("main.update"))

@@ -22,13 +22,13 @@ def send_weekly_update():
     """
     return
 
+
 def set_state():
     """Set the session variables.
     """
     event_name, __, tournament_state = get_event_info()
 
-    print ("Setting {} State to {}.".format(event_name, tournament_state))
+    print("Setting {} State to {}.".format(event_name, tournament_state))
     session["event_state"] = tournament_state
     session["name"] = event_name
-    session.modified =  True
-
+    session.modified = True

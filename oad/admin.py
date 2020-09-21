@@ -5,6 +5,7 @@ from .helpers import get_earnings
 from .models import Pick, Player
 from . import db
 
+
 def update_player_earnings():
     """Update the player earnings in the player DB with their
     updated TOTAL MONEY (or MONEY)
@@ -12,11 +13,12 @@ def update_player_earnings():
     all_players = Player.query.all()
 
     for player in all_players:
-        print (player.name)
+        print(player.name)
         curr_earnings = get_earnings(player.name)
         player.cumulative_points = curr_earnings
         # Commit the changes
         db.session.commit()
+
 
 def add_user_points():
     """Add the user points for their pick.
@@ -25,20 +27,12 @@ def add_user_points():
     picks = Pick.query.filter(Pick.points < 0).all()
 
     for pick in picks:
-        print (pick)
         # Get the golfer's name
         player_name = pick.pick
-        new_earnings = get_earnings(player_name)
-
-        # Get the old earnings
-        player = Player.query.filter_by(name=player_name).first()
-        old_earnings = player.cumulative_points
-
-        # This is what the player earned this week.
-        delta_earnings = new_earnings - old_earnings
+        weekly_earnings = get_earnings(player_name)
 
         # Update the pick with this value
-        pick.points = delta_earnings
+        pick.points = weekly_earnings
 
         # Commit the changes
         db.session.commit()

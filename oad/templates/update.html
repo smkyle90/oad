@@ -4,22 +4,30 @@
 <h1 class="title">
   Admin Actions
 </h1>
+
 <h3 class="subtitle">
   Update DB 
 </h3>
+
+{% if update_button %}
 <button class="button is-block is-info is-large is-fullwidth" onclick="window.location.href='/end_week';">
   End Week
 </button>
+{% else %}
+<button class="button is-block is-disabled is-large is-fullwidth" style="background-color: grey" disabled>
+  End Week
+</button>
+{% endif %}
+
+
 <br></br>
 
 <h3 class="subtitle">
   Send Weekly Summary
 </h3>
-<form name="Email" action="{{ url_for('main.send_email') }}" method='POST'>
-	<textarea rows="10" name="Email", style="width: 100%">
-	</textarea>
+<form name="Email" action="{{ url_for('main.weekly_update') }}" method='POST'>
+	<textarea rows="10" name="Email", style="width: 100%"></textarea>
     <button class="button is-block is-info is-large is-fullwidth">Send Email</button>
 </form>
 <br></br>
-
 {% endblock %}

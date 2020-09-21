@@ -2,25 +2,24 @@
 
 {% block content %}
 <h1 class="title">
-  {{ event }} Pick
+  {{ event }} pick
 </h1>
 <h2 class="title">
   {{ user }}, {{ pick_text }}
 </h2 class="title">
 {% if button %}
-	<p>
-		Pick from the golfers who have not teed off.
-	</p>
 	<form name="Select" action="{{ url_for('main.submit_pick') }}" method='POST'>
-		<select class="dropbtn is-block ids-fullwidth" name='Select' type='text' placeholder='Select your golfer.' style="width: auto">
+		<select class="dropbtn is-block ids-fullwidth" name='Select' type='text' placeholder='Select your golfer.' style="width: 100%">
 			{% for pick in avail %}
 				<option>
 						{{ pick }}
 				</option>
 			{% endfor %}
 		</select>
-	    <button class="button is-block is-info is-large is-fullwidth">{{ submit_text }}</button>
+		<button class="button is-block is-info is-large is-fullwidth">{{ submit_text }}</button>
 	</form>
+
+
 {% endif %}
 
 {% endblock %}

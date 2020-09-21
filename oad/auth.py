@@ -3,6 +3,7 @@ from flask_login import login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from . import db
+from .util import ts, send_email
 from .models import User
 
 auth = Blueprint("auth", __name__)
@@ -23,11 +24,20 @@ def login_post():
 
     # check if user actually exists
     # take the user supplied password, hash it, and compare it to the hashed password in database
-    if not user or not check_password_hash(user.password, password):
+    if not user:
+        flash("User not found. Please Sign Up.")
+        return redirect(url_for("auth.signup"))
+    elif not user.email_confirmed:
+        flash(
+            "Please confirm your e-mail before logging in. An email has been send to {}.".format(
+                user.email
+            )
+        )
+        generate_user_email(user.email)
+        return redirect(url_for("auth.login"))
+    elif not check_password_hash(user.password, password):
         flash("Please check your login details and try again.")
-        return redirect(
-            url_for("auth.login")
-        )  # if user doesn't exist or password is wrong, reload the page
+        return redirect(url_for("auth.login"))
 
     # if the above check passes, then we know the user has the right credentials
     login_user(user, remember=remember)
@@ -63,11 +73,31 @@ def signup_post():
         password=generate_password_hash(password, method="sha256"),
     )
 
+    generate_user_email(email)
+
     # add the new user to the database
     db.session.add(new_user)
     db.session.commit()
 
     return redirect(url_for("auth.login"))
+
+
+@auth.route("/confirm/<token>")
+def confirm_email(token):
+    try:
+        email = ts.loads(token, salt="email-confirm-key", max_age=86400)
+    except:
+        abort(404)
+
+    user = User.query.filter_by(email=email).first_or_404()
+
+    user.email_confirmed = True
+
+    db.session.add(user)
+    db.session.commit()
+
+    return redirect(url_for("auth.login"))
+
 
 @auth.route("/logout")
 @login_required
@@ -75,3 +105,16 @@ def logout():
     logout_user()
     return redirect(url_for("main.index"))
 
+
+def generate_user_email(email):
+    # Now we'll send the email confirmation link
+    subject = "1993 OAD - Confirm your email"
+
+    token = ts.dumps(email, salt="email-confirm-key")
+
+    confirm_url = url_for("auth.confirm_email", token=token, _external=True)
+
+    html = render_template("email/activate.html", confirm_url=confirm_url)
+
+    # We'll assume that send_email has been defined in myapp/util.py
+    send_email(email, subject, html)
