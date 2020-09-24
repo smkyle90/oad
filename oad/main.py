@@ -40,13 +40,14 @@ def league():
 
     users = User.query.all()
 
-    picks = Pick.query.filter_by(event=curr_event).all()
-    pick_table = PickTable(picks)
+    week_picks = Pick.query.filter_by(event=curr_event).all()
+    pick_table = PickTable(week_picks)
 
     players = Player.query.all()
     player_table = PlayerTable(players)
 
-    user_table = construct_user_table(users, picks)
+    all_picks = Pick.query.all()
+    user_table = construct_user_table(users, all_picks)
 
     bar, line = create_plot()
 
@@ -86,7 +87,7 @@ def pick():
 
     # We can pick from the available picks, minus the players we've already picked.
     # TODO: set operations?
-    eligible_picks = [p for p in avail_picks if a not in all_players]
+    eligible_picks = [p for p in avail_picks if p not in all_players]
 
     button_state = True
     button_text = "Submit Pick"

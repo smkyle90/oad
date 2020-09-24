@@ -4,18 +4,12 @@
 <h1 class="title" style="text-align: center">
 	{{ user.name }} total earnings: ${{ user_points }}
 </h1>
-
 <h3 class="title" style="text-align: center">
   {{ user.name }} pick history
 </h3>
-
 {{ pick_table }}
- 
 <h2 class="title">
 user admin
 </h2 class="title">
-
-
 <a href="{{ url_for('main.update_password') }}">update password</a>
- 
 {% endblock %}

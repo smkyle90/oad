@@ -15,7 +15,7 @@ def send_email(receiver_email, subject, html):
     receiver_email = "scott.m.kyle@gmail.com"  # Enter receiver address
     # password = subprocess.check_output("gpg -dq ~/.mutt/passwords.gpg | awk '{print $4}'",shell=True).decode('utf-8').rstrip().replace("\"", "")
     
-    password = 
+    password = "test"
     # print (password)
     message = "Subject: {}\n\n{}".format(subject, html)
 

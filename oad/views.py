@@ -9,6 +9,14 @@ import json
 
 from .models import User, Pick
 
+class Earnings(Col):
+    def td_format(self, content):
+        if content < 0:
+            return "--"
+        else:
+            return int(content)
+
+
 
 # Declare your table
 class UserTable(Table):
@@ -26,13 +34,13 @@ class PickTable(Table):
 # Declare your table
 class PlayerTable(Table):
     name = Col("name")
-    cumulative_points = Col("cumulative_points")
+    cumulative_points = Earnings("cumulative_points")
 
 
 class UserPickTable(Table):
     event = Col("event")
     pick = Col("pick")
-    points = Col("points")
+    points = Earnings("points")
 
 
 def create_plot():
