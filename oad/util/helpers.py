@@ -1,11 +1,17 @@
 """App helper functions
 """
-import random
+import os
 import json
 import pandas as pd
 import requests
+import smtplib, ssl
+import subprocess
+import random
 
-from .util import send_email
+"""
+https://pthree.org/2012/01/07/encrypted-mutt-imap-smtp-passwords/
+https://gist.github.com/bnagy/8914f712f689cc01c267
+"""
 
 EVENT_URL = (
     "https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga"
@@ -13,6 +19,25 @@ EVENT_URL = (
 
 PGA_URL = "https://www.pgatour.com/stats/stat.109.html"
 NON_PGA_URL = "https://www.pgatour.com/stats/stat.02677.html"
+
+
+def send_email(receiver_email, subject, html):
+    port = 465  # For SSL
+    smtp_server = "smtp.gmail.com"
+    sender_email = "scott.m.kyle@gmail.com"  # Enter your address
+    receiver_email = "scott.m.kyle@gmail.com"  # Enter receiver address
+    # password = subprocess.check_output("gpg -dq ~/.mutt/passwords.gpg | awk '{print $4}'",shell=True).decode('utf-8').rstrip().replace("\"", "")
+
+    password = "test"
+    # print (password)
+    message = "Subject: {}\n\n{}".format(subject, html)
+
+    context = ssl.create_default_context()
+    server = smtplib.SMTP_SSL(smtp_server, port, context=context)
+    server.ehlo()
+    server.login(sender_email, password)
+    server.sendmail(sender_email, receiver_email, message)
+    server.quit()
 
 
 def get_event_info():
@@ -40,6 +65,18 @@ def get_event_info():
         print("Issue getting data from ESPN API. Message: {}".format(e))
 
     return event_name, avail_picks, tournament_state
+
+
+def get_live_scores(current_players):
+    r = requests.get(EVENT_URL)
+    data = r.json()
+    live_scores = {
+        user["athlete"]["displayName"]: user["linescores"][0]
+        for user in data["events"][0]["competitions"][0]["competitors"]
+        if user["athlete"]["displayName"] in current_players
+    }
+
+    return live_scores
 
 
 def get_earnings(player):

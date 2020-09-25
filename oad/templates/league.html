@@ -9,7 +9,7 @@
 </h1>
 {% if show_picks %}
 <h3 class="subtitle">{{ event_name }} picks</h3>
-	{{ p_table }}
+	{{ p_table | safe }}
 <br></br>
 {% endif %}
 <h3 class="subtitle">league leaders</h3>

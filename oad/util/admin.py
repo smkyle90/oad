@@ -1,9 +1,9 @@
 """Admin actions.
 """
 
-from .helpers import get_earnings
-from .models import Pick, Player
-from . import db
+from .. import db
+from ..models import Pick, Player
+from . import get_earnings
 
 
 def update_player_earnings():
@@ -13,7 +13,6 @@ def update_player_earnings():
     all_players = Player.query.all()
 
     for player in all_players:
-        print(player.name)
         curr_earnings = get_earnings(player.name)
         player.cumulative_points = curr_earnings
         # Commit the changes

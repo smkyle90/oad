@@ -3,7 +3,7 @@
 
 from flask import session
 
-from .helpers import get_earnings, get_event_info
+from .util import get_earnings, get_event_info
 from .models import Pick, Player, User
 
 

@@ -8,6 +8,8 @@ import numpy as np
 import json
 
 from .models import User, Pick
+from .util import get_live_scores
+
 
 class Earnings(Col):
     def td_format(self, content):
@@ -15,7 +17,6 @@ class Earnings(Col):
             return "--"
         else:
             return int(content)
-
 
 
 # Declare your table
@@ -43,6 +44,38 @@ class UserPickTable(Table):
     points = Earnings("points")
 
 
+def live_scores(picks):
+    user_scores = {pick.pick: [pick.name] for pick in picks}
+    print(user_scores)
+    live_scores = get_live_scores(list(user_scores.keys()))
+
+    for k, v in live_scores.items():
+        user_scores[k].append(v["displayValue"])
+        user_scores[k].append(v["currentPosition"])
+
+    live_scores = {
+        "user": [],
+        "pick": [],
+        "score": [],
+        "position": [],
+    }
+
+    for k, v in user_scores.items():
+        live_scores["pick"].append(k)
+        live_scores["user"].append(v[0])
+        live_scores["score"].append(v[1])
+        live_scores["position"].append(v[2])
+
+    df = pd.DataFrame(live_scores)
+
+    df.sort_values(["position"], inplace=True, ascending=True)
+
+    # Reorder columns
+    df = df[["user", "pick", "score", "position"]]
+
+    return df.to_html(classes="data", border=0, index=False)
+
+
 def create_plot():
     # raw_picks = {
     #     "user": [1,2,3,1,2,3,1,2,3,1,2,3],
@@ -54,22 +87,20 @@ def create_plot():
     all_picks = Pick.query.all()
 
     raw_picks = {}
-    raw_picks["user"] = [pick.name if pick.name else "test" for pick in all_picks]
+    raw_picks["user"] = [pick.name for pick in all_picks]
     raw_picks["points"] = [pick.points for pick in all_picks]
-    raw_picks["tournament"] = [
-        pick.event if pick.name else "test" for pick in all_picks
-    ]
+    raw_picks["tournament"] = [pick.event for pick in all_picks]
 
     df = pd.DataFrame(raw_picks)
-
     tournaments = df.tournament.unique()
     users = df.user.unique()
+
     data = []
     cumulative = {}
     for user in users:
         user_points = df[df.user == user].points
         user_tourns = df[df.user == user].tournament
-        data.append(go.Bar(x=user_tourns, y=user_points, name=str(user)))
+        data.append(go.Bar(x=user_tourns[-5:-1], y=user_points[-5:-1], name=str(user)))
         user_cum = 0
         cumulative[user] = []
         for tour in tournaments:
@@ -84,7 +115,9 @@ def create_plot():
             cumulative[user].append(user_cum)
 
     data1 = [
-        go.Scatter(mode="lines", x=tournaments, y=user_pts, name=str(user),)
+        go.Scatter(
+            mode="lines", x=tournaments[-5:-1], y=user_pts[-5:-1], name=str(user),
+        )
         for user, user_pts in cumulative.items()
     ]
 

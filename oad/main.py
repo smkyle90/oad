@@ -3,12 +3,18 @@ from flask_login import current_user, login_required
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from . import db
-from .helpers import construct_user_table, get_earnings, get_event_info
 from .models import Pick, Player, User
 from .scheduled import set_state
-from .views import PickTable, PlayerTable, UserPickTable, UserTable, create_plot
-from .admin import update_player_earnings, add_user_points
-from .util import send_email
+from .views import (
+    PickTable,
+    PlayerTable,
+    UserPickTable,
+    UserTable,
+    create_plot,
+    live_scores,
+)
+from .util import construct_user_table, get_earnings, get_event_info, send_email
+from .util.admin import update_player_earnings, add_user_points
 
 main = Blueprint("main", __name__)
 
@@ -41,6 +47,10 @@ def league():
     users = User.query.all()
 
     week_picks = Pick.query.filter_by(event=curr_event).all()
+
+    # try:
+    #     pick_table = live_scores(week_picks)
+    # except Exception:
     pick_table = PickTable(week_picks)
 
     players = Player.query.all()
@@ -91,21 +101,22 @@ def pick():
 
     button_state = True
     button_text = "Submit Pick"
-    # Warn the user about the picking state
-    if tournament_state == "pre":
-        if prev_pick is None:
-            pick_state = "you have yet to pick. Pick any golfer in the field."
-        else:
-            pick_state = "you have already picked, but can modify your pick free of charge. Pick any other golfer in the field."
-    else:
-        if (prev_pick is None) and (current_user.strikes_remaining):
-            pick_state = "the tourney has started and you have not picked, but you have a strike. Picking now will use this up. You can pick a player who has yet to tee off."
-            button_text = "Pick and Use Strike"
-        else:
-            pick_state = "mate, the tourney has started and you have either made your pick, or don't have any strikes left... better luck next week."
-            button_state = False
 
-    if not eligible_picks:
+    if eligible_picks:
+        # Warn the user about the picking state
+        if tournament_state == "pre":
+            if prev_pick is None:
+                pick_state = "you have yet to pick. Pick any golfer in the field."
+            else:
+                pick_state = "you have already picked, but can modify your pick free of charge. Pick any other golfer in the field."
+        else:
+            if (prev_pick is None) and (current_user.strikes_remaining):
+                pick_state = "the tourney has started and you have not picked, but you have a strike. Picking now will use this up. You can pick a player who has yet to tee off."
+                button_text = "Pick and Use Strike"
+            else:
+                pick_state = "mate, the tourney has started and you have either made your pick, or don't have any strikes left... better luck next week."
+                button_state = False
+    else:
         pick_state = "no players left to pick from."
         button_state = False
 
@@ -173,7 +184,6 @@ def submit_pick():
 @main.route("/update")
 @login_required
 def update():
-
     __, __, tournament_state = get_event_info()
 
     update_button = False
@@ -195,7 +205,6 @@ def end_week():
 @main.route("/user_password_change", methods=["POST"])
 @login_required
 def user_password_change():
-
     old_pass = request.form.get("old_pw")
     new_pass1 = request.form.get("pw1")
     new_pass2 = request.form.get("pw2")
