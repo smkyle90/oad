@@ -40,46 +40,78 @@ def send_email(receiver_email, subject, html):
     server.quit()
 
 
-def get_event_info():
-    try:
-        r = requests.get(EVENT_URL)
-        data = r.json()
-
-        # Get the current event name
-        event_name = data["events"][0]["name"]
-
-        # Get the players in the field, who have yet to tee off
-        avail_picks = [
-            a["athlete"]["displayName"]
-            for a in data["events"][0]["competitions"][0]["competitors"]
-            if (a["status"]["period"] <= 1) and (a["status"]["type"]["state"] == "pre")
-        ]
-        # avail_picks = [
-        #     a["athlete"]["displayName"]
-        #     for a in data["events"][0]["competitions"][0]["competitors"]
-        #     if a["status"]["type"]["state"] == "pre"
-        # ]
-
-        tournament_state = data["events"][0]["status"]["type"]["state"]
-    except Exception as e:
-        print("Issue getting data from ESPN API. Message: {}".format(e))
-
-    return event_name, avail_picks, tournament_state
+def get_event_from_data(data):
+    """Get event info. Function to ensure modularity if API fails.
+    """
+    # Get the current event name
+    return data["events"][0]["name"]
 
 
-def get_live_scores(current_players):
-    r = requests.get(EVENT_URL)
-    data = r.json()
-    live_scores = {
+def get_avail_from_data(data):
+    """Get players in field. Function to ensure modularity if API fails.
+    """
+    # Get the players in the field, who have yet to tee off
+    return [
+        a["athlete"]["displayName"]
+        for a in data["events"][0]["competitions"][0]["competitors"]
+        if (a["status"]["period"] <= 1) and (a["status"]["type"]["state"] == "pre")
+    ]
+
+
+def get_tourn_state_from_data(data):
+    """Get tournament state. Function to ensure modularity if API fails.
+    """
+    return data["events"][0]["status"]["type"]["state"]
+
+
+def live_scores_from_data(data, current_players):
+    """Get live scores. Function to ensure modularity if API fails.
+    """
+    return {
         user["athlete"]["displayName"]: user["linescores"][0]
         for user in data["events"][0]["competitions"][0]["competitors"]
         if user["athlete"]["displayName"] in current_players
     }
 
-    return live_scores
+def get_earnings_from_data(data, player):
+    """Get earnings. Function to ensure modularity if API fails.
+    """
+    for user in data["events"][0]["competitions"][0]["competitors"]:
+        if user["athlete"]["displayName"] == player:
+            return user["earnings"]
+    return -1
 
+
+def get_event_info():
+    """Get event info. Requires access to API.
+    """
+    try:
+        r = requests.get(EVENT_URL)
+        data = r.json()
+        event_name = get_event_from_data(data)
+        avail_picks = get_avail_from_data(data)
+        tournament_state = get_tourn_state_from_data(data)
+        return event_name, avail_picks, tournament_state
+    except Exception as e:
+        print("Issue getting data from ESPN API. Message: {}".format(e))
+        return None, None, None
+
+
+def get_live_scores(current_players):
+    """Get live scores. Requires access to API.
+    """
+    try:
+        r = requests.get(EVENT_URL)
+        data = r.json()
+        live_scores = live_scores_from_data(data, current_players)
+        return live_scores
+    except Exception as e:
+        print("Issue getting datafrom ESPN API. Message: {}".format(e))
+        return None
 
 def get_earnings(player):
+    """Get player earnings. Requires access to API.
+    """
     # # Column configuration
     # player_col = "PLAYER NAME"
     # pga_earnings_col = "MONEY"
@@ -114,23 +146,18 @@ def get_earnings(player):
     #             return int(earnings.replace("$", "").replace(",", ""))
     #         elif isinstance(earnings, float) or isinstance(earnings, int):
     #             return int(earnings)
-
-    earnings = -1
-
     try:
         r = requests.get(EVENT_URL)
         data = r.json()
     except Exception as e:
-        print(e)
+        print("Issue getting data from ESPN API. Message: {}".format(e))
         send_email(
             "scott.m.kyle@gmail.com", "User Earning Warning", "{}. {}".format(player, e)
         )
-        return earnings
+        return -1
 
     try:
-        for user in data["events"][0]["competitions"][0]["competitors"]:
-            if user["athlete"]["displayName"] == player:
-                earnings = user["earnings"]
+        earnings = get_earnings_from_data(data, player)
     except Exception as e:
         send_email(
             "scott.m.kyle@gmail.com", "User Earning Warning", "{}. {}".format(player, e)

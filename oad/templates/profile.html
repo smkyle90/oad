@@ -11,5 +11,12 @@
 <h2 class="title">
 user admin
 </h2 class="title">
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    <div class="notification is-danger" style="text-align: center">
+        {{ messages[0] }}
+    </div>
+{% endif %}
+{% endwith %}
 <a href="{{ url_for('main.update_password') }}">update password</a>
 {% endblock %}

@@ -216,7 +216,7 @@ def user_password_change():
             user.password = generate_password_hash(new_pass1, method="sha256")
             # db.session.add(user)
             db.session.commit()
-            flash("Password has been updated!", "success")
+            flash("Password has been updated.", "success")
             return redirect(url_for("main.profile"))
         else:
             flash("The new password entries do not match.")
@@ -246,6 +246,9 @@ def weekly_update():
     email_text = "{}\n\n{}".format(written_text, points_table)
 
     # for user_addr in [user.email for user in users]:
-    send_email("scott.m.kyle@gmail.com", "Weekly Update", email_text)
+    try:
+        send_email("scott.m.kyle@gmail.com", "Weekly Update", email_text)
+    except Exception as e:
+        flash("Unable to send email to users. Message: {}".format(e))
 
     return redirect(url_for("main.update"))
