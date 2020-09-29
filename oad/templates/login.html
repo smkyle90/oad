@@ -1,37 +1,42 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div>
-    <h3 class="title" style="text-align: center">Login</h3>
-    <!-- <div class="box"> -->
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="notification is-danger">
-                {{ messages[0] }}
-            </div>
-        {% endif %}
-        {% endwith %}
-        <form method="POST" action="/login">
-            <div>
-            <input type="text" id="email" name="email" placeholder="Your Email" autofocus="">
-            </div>
-            <div>
-            <input type="password" id="password" name="password" placeholder="Your Password">
-            </div>
-            <div>
-                <label class="checkbox">
-                    <input type="checkbox">
-                    Remember me
-                </label>
-            </div>
-            <div>
-            <button class="button">Login</button>
-            </div>
-        </form>
+  <h3 class="title" style="text-align: center">Login</h3>
+  <!-- <div class="box"> -->
+  {% with messages = get_flashed_messages() %} {% if messages %}
+  <div class="notification is-danger">{{ messages[0] }}</div>
+  {% endif %} {% endwith %}
+  <form method="POST" action="/login">
+    <div>
+      <input
+        type="text"
+        id="email"
+        name="email"
+        placeholder="Your Email"
+        autofocus=""
+      />
+    </div>
+    <div>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        placeholder="Your Password"
+      />
+    </div>
+    <div>
+      <label class="checkbox">
+        <input type="checkbox" />
+        Remember me
+      </label>
+    </div>
+    <div>
+      <button class="button">Login</button>
+    </div>
+  </form>
 
-        <button class="button" onclick="window.location.href='/signup';">
-          Sign-Up
-        </button>
-    <!-- </div> -->
+  <button class="button" onclick="window.location.href='/signup';">
+    Sign-Up
+  </button>
+  <!-- </div> -->
 </div>
 {% endblock %}

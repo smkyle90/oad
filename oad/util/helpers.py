@@ -1,12 +1,12 @@
 """App helper functions
 """
-import os
-import json
+import random
+import smtplib
+import ssl
+import subprocess
+
 import pandas as pd
 import requests
-import smtplib, ssl
-import subprocess
-import random
 
 """
 https://pthree.org/2012/01/07/encrypted-mutt-imap-smtp-passwords/
@@ -73,6 +73,7 @@ def live_scores_from_data(data, current_players):
         if user["athlete"]["displayName"] in current_players
     }
 
+
 def get_earnings_from_data(data, player):
     """Get earnings. Function to ensure modularity if API fails.
     """
@@ -108,6 +109,7 @@ def get_live_scores(current_players):
     except Exception as e:
         print("Issue getting datafrom ESPN API. Message: {}".format(e))
         return None
+
 
 def get_earnings(player):
     """Get player earnings. Requires access to API.
@@ -170,12 +172,12 @@ def construct_user_table(users, picks):
     user_dict = {
         "name": [],
         "total earnings": [],
-        "strikes remaining": [],
+        "strikes left": [],
     }
 
     for usr in users:
         user_dict["name"].append(usr.name)
-        user_dict["strikes remaining"].append(int(usr.strikes_remaining))
+        user_dict["strikes left"].append(int(usr.strikes_remaining))
         user_dict["total earnings"].append(
             sum([int(x.points) for x in picks if x.name == usr.name])
         )
@@ -190,7 +192,7 @@ def construct_user_table(users, picks):
 
     # Reorder columns
     user_df = user_df[
-        ["rank", "name", "total earnings", "dollars back", "strikes remaining"]
+        ["rank", "name", "total earnings", "dollars back", "strikes left"]
     ]
 
     return user_df.to_html(classes="data", border=0, index=False)

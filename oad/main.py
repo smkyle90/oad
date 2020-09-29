@@ -5,16 +5,17 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from . import db
 from .models import Pick, Player, User
 from .scheduled import set_state
-from .views import (
-    PickTable,
-    PlayerTable,
-    UserPickTable,
-    UserTable,
-    create_plot,
-    live_scores,
-)
 from .util import construct_user_table, get_earnings, get_event_info, send_email
-from .util.admin import update_player_earnings, add_user_points
+from .util.admin import add_user_points, update_player_earnings
+
+from .views import (  # create_plot,; pick_matrix,
+    PickTable,
+    # PlayerTable,
+    UserPickTable,
+    # UserTable,
+    league_page,
+    # live_scores,
+)
 
 main = Blueprint("main", __name__)
 
@@ -53,13 +54,10 @@ def league():
     # except Exception:
     pick_table = PickTable(week_picks)
 
-    players = Player.query.all()
-    player_table = PlayerTable(players)
-
     all_picks = Pick.query.all()
     user_table = construct_user_table(users, all_picks)
 
-    bar, line = create_plot()
+    pick_history_table, bar, line = league_page()
 
     # Determine if we are going to show the picks for the week
     if tournament_state != "pre":
@@ -71,7 +69,7 @@ def league():
         "league.html",
         u_table=user_table,
         p_table=pick_table,
-        pl_table=player_table,
+        ph_table=pick_history_table,
         show_picks=show_picks,
         event_name=curr_event,
         plot=bar,
@@ -235,7 +233,7 @@ def update_password():
 @main.route("/weekly_update", methods=["POST"])
 @login_required
 def weekly_update():
-    curr_event, __, tournament_state = get_event_info()
+    curr_event, __, __ = get_event_info()
 
     users = User.query.all()
     picks = Pick.query.filter_by(event=curr_event).all()

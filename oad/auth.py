@@ -3,8 +3,8 @@ from flask_login import login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from . import db
-from .util import ts, send_email
 from .models import User
+from .util import send_email, ts
 
 auth = Blueprint("auth", __name__)
 
@@ -86,7 +86,8 @@ def signup_post():
 def confirm_email(token):
     try:
         email = ts.loads(token, salt="email-confirm-key", max_age=86400)
-    except:
+    except Exception:
+        # flake8: noqa: F821
         abort(404)
 
     user = User.query.filter_by(email=email).first_or_404()

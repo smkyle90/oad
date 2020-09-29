@@ -3,8 +3,8 @@
 
 from flask import session
 
-from .util import get_earnings, get_event_info
 from .models import Pick, Player, User
+from .util import get_earnings, get_event_info
 
 
 def send_pick_reminder():

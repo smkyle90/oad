@@ -1,13 +1,11 @@
-from flask_table import Col, Table
-
-import plotly
-import plotly.graph_objs as go
-
-import pandas as pd
-import numpy as np
 import json
 
-from .models import User, Pick
+import pandas as pd
+import plotly
+import plotly.graph_objs as go
+from flask_table import Col, Table
+
+from .models import Pick
 from .util import get_live_scores
 
 
@@ -46,9 +44,7 @@ class UserPickTable(Table):
 
 def live_scores(picks):
     user_scores = {pick.pick: [pick.name] for pick in picks}
-    print(user_scores)
     live_scores = get_live_scores(list(user_scores.keys()))
-
     for k, v in live_scores.items():
         user_scores[k].append(v["displayValue"])
         user_scores[k].append(v["currentPosition"])
@@ -76,33 +72,52 @@ def live_scores(picks):
     return df.to_html(classes="data", border=0, index=False)
 
 
-def create_plot():
-    # raw_picks = {
-    #     "user": [1,2,3,1,2,3,1,2,3,1,2,3],
-    #     "points": [10, 8, 2, 0, 4, 5, 4, 2, 1, 4,6,4],
-    #     "tournament": ["Masters","Masters","Masters","Open","Open","Open","US Open","US Open","US Open","PGA Championship","PGA Championship","PGA Championship",],
-
-    # }
-
+def league_page():
     all_picks = Pick.query.all()
 
     raw_picks = {}
     raw_picks["user"] = [pick.name for pick in all_picks]
+    raw_picks["player"] = [pick.pick for pick in all_picks]
     raw_picks["points"] = [pick.points for pick in all_picks]
     raw_picks["tournament"] = [pick.event for pick in all_picks]
 
+    pick_history = pick_matrix(raw_picks)
+    bar_plot, line_plot = create_plots(raw_picks)
+
+    return pick_history, bar_plot, line_plot
+
+
+def pick_matrix(raw_picks):
+    df = pd.DataFrame(raw_picks)
+    all_users = df.user.unique()
+    for user in all_users:
+        if user:
+            df_filt = df[df.user == user]
+            df[user] = [
+                pick.points
+                if (pick.player in list(df_filt.player)) and (pick.points >= 0)
+                else "avail"
+                for pick in df.itertuples()
+            ]
+
+    df = df.drop(columns=["user", "tournament", "points"]).dropna()
+    df.sort_values(["player"], inplace=True)
+    return df.to_html(classes="data", border=0, index=False)
+
+
+def create_plots(raw_picks):
     df = pd.DataFrame(raw_picks)
     tournaments = df.tournament.unique()
     users = df.user.unique()
 
-    data = []
-    cumulative = {}
+    bar_data = []
+    cum_points = {}
     for user in users:
         user_points = df[df.user == user].points
         user_tourns = df[df.user == user].tournament
-        data.append(go.Bar(x=user_tourns[-5:-1], y=user_points[-5:-1], name=str(user)))
+        bar_data.append(go.Bar(x=user_tourns[-5:], y=user_points[-5:], name=str(user)))
         user_cum = 0
-        cumulative[user] = []
+        cum_points[user] = []
         for tour in tournaments:
             try:
                 tour_pts = df[
@@ -112,27 +127,25 @@ def create_plot():
             except Exception:
                 pass
 
-            cumulative[user].append(user_cum)
+            cum_points[user].append(user_cum)
 
-    data1 = [
-        go.Scatter(
-            mode="lines", x=tournaments[-5:-1], y=user_pts[-5:-1], name=str(user),
-        )
-        for user, user_pts in cumulative.items()
+    line_data = [
+        go.Scatter(mode="lines", x=tournaments[-5:], y=user_pts[-5:], name=str(user),)
+        for user, user_pts in cum_points.items()
     ]
 
     layout = go.Layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
 
-    fig1 = go.Figure(data=data, layout=layout)
-    fig1.update_layout(barmode="group")
-    fig2 = go.Figure(data=data1, layout=layout)
+    br_fig = go.Figure(data=bar_data, layout=layout)
+    br_fig.update_layout(barmode="group")
+    ln_fig = go.Figure(data=line_data, layout=layout)
 
-    fig1.update_xaxes(showgrid=False, title_text="tourney")
-    fig2.update_xaxes(showgrid=False, title_text="tourney")
-    fig1.update_yaxes(showgrid=True, title_text="tournament earnings [$]")
-    fig2.update_yaxes(showgrid=True, title_text="cumulative earnings [$]")
+    br_fig.update_xaxes(showgrid=False, title_text="tourney")
+    ln_fig.update_xaxes(showgrid=False, title_text="tourney")
+    br_fig.update_yaxes(showgrid=True, title_text="tournament earnings [$]")
+    ln_fig.update_yaxes(showgrid=True, title_text="cumulative earnings [$]")
 
-    g1 = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
-    g2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
+    br_json = json.dumps(br_fig, cls=plotly.utils.PlotlyJSONEncoder)
+    ln_json = json.dumps(ln_fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return g1, g2
+    return br_json, ln_json
