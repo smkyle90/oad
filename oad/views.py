@@ -91,12 +91,13 @@ def pick_matrix(raw_picks):
     df = pd.DataFrame(raw_picks)
     all_users = df.user.unique()
     for user in all_users:
+        # TODO: make sure picks are only shown if they have been picked before
         if user:
             df_filt = df[df.user == user]
             df[user] = [
                 pick.points
                 if (pick.player in list(df_filt.player)) and (pick.points >= 0)
-                else "avail"
+                else -1
                 for pick in df.itertuples()
             ]
 
