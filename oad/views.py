@@ -95,11 +95,14 @@ def pick_matrix(raw_picks):
         if user:
             df_filt = df[df.user == user]
             df[user] = [
-                pick.points
-                if (pick.player in list(df_filt.player)) and (pick.points >= 0)
-                else -1
+                (pick.points) if (pick.player in list(df_filt.player)) else -1
                 for pick in df.itertuples()
             ]
+
+    df = df[df.max(axis=1) > -1]
+
+    df.replace(-1, "avail", inplace=True)
+    df.replace(-1e-9, "current pick", inplace=True)
 
     df = df.drop(columns=["user", "tournament", "points"]).dropna()
     df.sort_values(["player"], inplace=True)

@@ -5,32 +5,39 @@
 <h1 class="title">league information</h1>
 
 {% if show_picks %}
-<div>
-  <h3 class="subtitle">{{ event_name }} picks</h3>
-  {{ p_table | safe }}
-</div>
-
+<section>
+  <div>
+    <h3 class="subtitle">{{ event_name }} picks</h3>
+    {{ p_table | safe }}
+  </div>
+</section>
 {% endif %}
-<h3 class="subtitle">league leaders</h3>
-<div>{{ u_table | safe }}</div>
 
-<h3 class="subtitle">pick history</h3>
-<div>{{ ph_table | safe }}</div>
+<section>
+  <h3 class="subtitle">league leaders</h3>
+  <div>{{ u_table | safe }}</div>
+</section>
+<section>
+  <h3 class="subtitle">pick history</h3>
+  <div>{{ ph_table | safe }}</div>
+</section>
 
-<h3 class="subtitle">points history</h3>
-<div>
-  <div class="chart" id="bargraph">
-    <script style="width: 100%">
-      var graphs = {{ plot | safe }};
-      Plotly.plot('bargraph',graphs,{});
-    </script>
+<section>
+  <h3 class="subtitle">points history</h3>
+  <div>
+    <div class="chart" id="bargraph">
+      <script style="width: 100%">
+        var graphs = {{ plot | safe }};
+        Plotly.plot('bargraph',graphs,{});
+      </script>
+    </div>
+
+    <div class="chart" id="chart">
+      <script style="width: 100%">
+        var graphs = {{ points | safe }};
+        Plotly.plot('chart',graphs,{});
+      </script>
+    </div>
   </div>
-
-  <div class="chart" id="chart">
-    <script style="width: 100%">
-      var graphs = {{ points | safe }};
-      Plotly.plot('chart',graphs,{});
-    </script>
-  </div>
-</div>
+</section>
 {% endblock %}

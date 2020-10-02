@@ -2,17 +2,21 @@
 <h1 class="title" style="text-align: center">
   {{ user.name }} total earnings: ${{ user_points }}
 </h1>
-<div>
-  <h3 class="title" style="text-align: center">pick history</h3>
-  {{ pick_table }}
-</div>
-<div>
-  <h2 class="title">user admin</h2>
-  {% with messages = get_flashed_messages() %} {% if messages %}
-  <div class="notification is-danger" style="text-align: center">
-    {{ messages[0] }}
+<section>
+  <div>
+    <h3 class="title" style="text-align: center">pick history</h3>
+    {{ pick_table }}
   </div>
-  {% endif %} {% endwith %}
-  <a href="{{ url_for('main.update_password') }}">update password</a>
-</div>
-{% endblock %}
+</section>
+<section>
+  <div>
+    <h2 class="title">user admin</h2>
+    {% with messages = get_flashed_messages() %} {% if messages %}
+    <div class="notification is-danger" style="text-align: center">
+      {{ messages[0] }}
+    </div>
+    {% endif %} {% endwith %}
+    <a href="{{ url_for('main.update_password') }}">update password</a>
+  </div>
+  <section>{% endblock %}</section>
+</section>

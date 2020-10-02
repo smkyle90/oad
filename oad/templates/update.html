@@ -1,36 +1,38 @@
 {% extends "base.html" %} {% block content %}
 <h1 class="title">Admin Actions</h1>
 
-<h3 class="subtitle">Update DB</h3>
+<section>
+  <h3 class="subtitle">Update DB</h3>
 
-{% if update_button %}
-<button
-  class="button is-block is-info is-large is-fullwidth"
-  onclick="window.location.href='/end_week';"
->
-  End Week
-</button>
-{% else %}
-<button
-  class="button is-block is-disabled is-large is-fullwidth"
-  style="background-color: grey"
-  disabled
->
-  End Week
-</button>
-{% endif %}
-
-<h3 class="subtitle">Send Weekly Summary</h3>
-{% with messages = get_flashed_messages() %} {% if messages %}
-<div class="notification is-danger" style="text-align: center">
-  {{ messages[0] }}
-</div>
-{% endif %} {% endwith %}
-<form name="Email" action="{{ url_for('main.weekly_update') }}" method="POST">
-  <textarea rows="10" name="Email" , style="width: 100%"></textarea>
-  <button class="button is-block is-info is-large is-fullwidth">
-    Send Email
+  {% if update_button %}
+  <button
+    class="button is-block is-info is-large is-fullwidth"
+    onclick="window.location.href='/end_week';"
+  >
+    End Week
   </button>
-</form>
-
+  {% else %}
+  <button
+    class="button is-block is-disabled is-large is-fullwidth"
+    style="background-color: grey"
+    disabled
+  >
+    End Week
+  </button>
+</section>
+{% endif %}
+<section>
+  <h3 class="subtitle">Send Weekly Summary</h3>
+  {% with messages = get_flashed_messages() %} {% if messages %}
+  <div class="notification is-danger" style="text-align: center">
+    {{ messages[0] }}
+  </div>
+  {% endif %} {% endwith %}
+  <form name="Email" action="{{ url_for('main.weekly_update') }}" method="POST">
+    <textarea rows="10" name="Email" , style="width: 100%"></textarea>
+    <button class="button is-block is-info is-large is-fullwidth">
+      Send Email
+    </button>
+  </form>
+</section>
 {% endblock %}
