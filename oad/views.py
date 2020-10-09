@@ -82,12 +82,15 @@ def league_page():
     raw_picks["tournament"] = [pick.event for pick in all_picks]
 
     pick_history = pick_matrix(raw_picks)
+    # best = best_picks(raw_picks)
     bar_plot, line_plot = create_plots(raw_picks)
 
     return pick_history, bar_plot, line_plot
 
 
-def pick_matrix(raw_picks):
+def player_picks(raw_picks):
+    """Picks per player.
+    """
     df = pd.DataFrame(raw_picks)
     all_users = df.user.unique()
     for user in all_users:
@@ -99,13 +102,60 @@ def pick_matrix(raw_picks):
                 for pick in df.itertuples()
             ]
 
+    return df
+
+
+def pick_matrix(raw_picks):
+    """For each player, show which player has picked them.
+
+    Args:
+        df
+
+    Returns:
+        df
+
+    """
+    df = player_picks(raw_picks)
+
     df = df[df.max(axis=1) > -1]
 
     df.replace(-1, "avail", inplace=True)
-    df.replace(-1e-9, "current pick", inplace=True)
+    df.replace(-1e-9, "in play", inplace=True)
 
     df = df.drop(columns=["user", "tournament", "points"]).dropna()
     df.sort_values(["player"], inplace=True)
+
+    return df.to_html(classes="data", border=0, index=False)
+
+
+def best_picks(raw_picks):
+    """For each player, show who made the most money over the field.
+
+    Args:
+        df
+
+    Returns:
+        df
+
+    """
+
+    df = player_picks(raw_picks)
+
+    players = df.player
+    df = df.drop(columns=["player"])
+    df.replace(-1, -1e-9, inplace=True)
+
+    df = (
+        df.sub(df.mean(axis=1), axis=0)
+        .div(df.std(axis=1), axis=0)
+        .div(df.std(axis=1), axis=0)
+    )
+    df.fillna(0)
+
+    df.astype(int)
+
+    df.insert(0, "player", players)
+
     return df.to_html(classes="data", border=0, index=False)
 
 

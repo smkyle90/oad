@@ -231,6 +231,9 @@
     </style>
   </head>
   <body>
+    {% if not current_user.in_labour %}
+    <section></section>
+    {% endif %}
     <!-- START PAGE BOTTOM - CUSTOM !-->
     <section>
       <div>

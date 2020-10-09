@@ -74,6 +74,7 @@ def league():
         event_name=curr_event,
         plot=bar,
         points=line,
+        # bp_table=best_picks,
     )
 
 
@@ -101,6 +102,8 @@ def pick():
     button_text = "Submit Pick"
 
     if eligible_picks:
+        eligible_picks.sort()
+
         # Warn the user about the picking state
         if tournament_state == "pre":
             if prev_pick is None:
@@ -236,17 +239,17 @@ def weekly_update():
     curr_event, __, __ = get_event_info()
 
     users = User.query.all()
-    picks = Pick.query.filter_by(event=curr_event).all()
+    picks = Pick.query.all()
 
     written_text = request.form.get("Email")
     points_table = construct_user_table(users, picks)
 
-    email_text = "{}\n\n{}".format(written_text, points_table)
+    email_text = "<p>{}</p>\n\n{}".format(written_text, points_table)
 
     # for user_addr in [user.email for user in users]:
-    try:
-        send_email("scott.m.kyle@gmail.com", "Weekly Update", email_text)
-    except Exception as e:
-        flash("Unable to send email to users. Message: {}".format(e))
+    # try:
+    send_email("scott.m.kyle@gmail.com", "Weekly Update", email_text)
+    # except Exception as e:
+    # flash("Unable to send email to users. Message: {}".format(e))
 
     return redirect(url_for("main.update"))

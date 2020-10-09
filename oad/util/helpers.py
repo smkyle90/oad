@@ -1,9 +1,11 @@
 """App helper functions
 """
+import os
 import random
 import smtplib
 import ssl
 import subprocess
+from email.mime.text import MIMEText
 
 import pandas as pd
 import requests
@@ -24,19 +26,22 @@ NON_PGA_URL = "https://www.pgatour.com/stats/stat.02677.html"
 def send_email(receiver_email, subject, html):
     port = 465  # For SSL
     smtp_server = "smtp.gmail.com"
-    sender_email = "scott.m.kyle@gmail.com"  # Enter your address
-    receiver_email = "scott.m.kyle@gmail.com"  # Enter receiver address
-    # password = subprocess.check_output("gpg -dq ~/.mutt/passwords.gpg | awk '{print $4}'",shell=True).decode('utf-8').rstrip().replace("\"", "")
+    # sender_email = os.environ.get("USER_EMAIL")
+    # password = os.environ.get("USER_PW")
+    sender_email = "1993oad@gmail.com"
+    password = "!((#OAD!"
 
-    password = "test"
     # print (password)
-    message = "Subject: {}\n\n{}".format(subject, html)
+    message = "{}".format(html)
+    msg = MIMEText(message, "html")
+    msg["Subject"] = subject
+    msg["From"] = sender_email
 
     context = ssl.create_default_context()
     server = smtplib.SMTP_SSL(smtp_server, port, context=context)
     server.ehlo()
     server.login(sender_email, password)
-    server.sendmail(sender_email, receiver_email, message)
+    server.sendmail(sender_email, receiver_email, msg.as_string())
     server.quit()
 
 
