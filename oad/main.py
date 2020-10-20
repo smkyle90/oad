@@ -139,7 +139,8 @@ def submit_pick():
     curr_event, __, tournament_state = get_event_info()
 
     # Get the selection
-    selection = request.form.get("Select")
+    selection = request.form.get("main")
+    alternate = request.form.get("alternate")
 
     # Get the list of Players in the DB.
     curr_players = Player.query.all()
@@ -161,13 +162,14 @@ def submit_pick():
     # a pick and use it.
     if tournament_state == "pre":
         if prev_pick is None:
-            user_pick = Pick(event=curr_event, pick=selection, name=current_user.name)
+            user_pick = Pick(event=curr_event, pick=selection, alternate=alternate, name=current_user.name)
             db.session.add(user_pick)
         else:
             prev_pick.pick = selection
+            prev_pick.alternate = alternate
     else:
         if (prev_pick is None) and (current_user.strikes_remaining):
-            user_pick = Pick(event=curr_event, pick=selection, name=current_user.name)
+            user_pick = Pick(event=curr_event, pick=selection, alternate=alternate, name=current_user.name)
             db.session.add(user_pick)
 
             # Need to issue a strike to user.

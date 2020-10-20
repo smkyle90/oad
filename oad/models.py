@@ -22,6 +22,7 @@ class Pick(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     event = db.Column(db.String(1000), index=True)
     pick = db.Column(db.String(1000))
+    alternate = db.Column(db.String(1000))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     name = db.Column(db.String(1000), db.ForeignKey("user.name"), nullable=False)
     points = db.Column(db.Float(), default=-1e-9)

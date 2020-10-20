@@ -7,9 +7,20 @@
   <form name="Select" action="{{ url_for('main.submit_pick') }}" method="POST">
     <select
       class="dropbtn is-block ids-fullwidth"
-      name="Select"
+      name="main"
       type="text"
       placeholder="Select your golfer."
+      style="width: 100%"
+    >
+      {% for pick in avail %}
+      <option>{{ pick }}</option>
+      {% endfor %}
+    </select>
+    <select
+      class="dropbtn is-block ids-fullwidth"
+      name="alternate"
+      type="text"
+      placeholder="Select your alternate."
       style="width: 100%"
     >
       {% for pick in avail %}
