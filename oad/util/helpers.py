@@ -29,7 +29,7 @@ def send_email(receiver_email, subject, html):
     # sender_email = os.environ.get("USER_EMAIL")
     # password = os.environ.get("USER_PW")
     sender_email = "1993oad@gmail.com"
-    password = os.environ["OADPW"]
+    password = os.getenv("OADPW")
 
     # print (password)
     message = "{}".format(html)
