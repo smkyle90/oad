@@ -88,21 +88,27 @@ def get_earnings_from_data(data, player):
     return -1
 
 
+def remove_canceled(data):
+    """Remove canceled tournaments from data list.
+
+    """
+    return {
+        k: [
+            event for event in v if event["status"]["type"]["description"] != "Canceled"
+        ]
+        for k, v in data.items()
+    }
+
+
 def get_event_info():
     """Get event info. Requires access to API.
     """
     try:
         r = requests.get(EVENT_URL)
-        data = r.json()
 
-        data = {
-            k: [
-                event
-                for event in v
-                if event["status"]["type"]["description"] != "Canceled"
-            ]
-            for k, v in data.items()
-        }
+        data = r.json()
+        data = remove_canceled(data)
+
         event_name = get_event_from_data(data)
         avail_picks = get_avail_from_data(data)
         tournament_state = get_tourn_state_from_data(data)
@@ -117,7 +123,10 @@ def get_live_scores(current_players):
     """
     try:
         r = requests.get(EVENT_URL)
+
         data = r.json()
+        data = remove_canceled(data)
+
         live_scores = live_scores_from_data(data, current_players)
         return live_scores
     except Exception as e:
@@ -165,6 +174,7 @@ def get_earnings(player):
     try:
         r = requests.get(EVENT_URL)
         data = r.json()
+        data = remove_canceled(data)
     except Exception as e:
         print("Issue getting data from ESPN API. Message: {}".format(e))
         send_email(
