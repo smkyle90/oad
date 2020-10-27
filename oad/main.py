@@ -123,7 +123,11 @@ def pick():
                 pick_state = "mate, the tourney has started and you have either made your pick, or don't have any strikes left... better luck next week."
                 button_state = False
     else:
-        pick_state = "no players left to pick from."
+        if tournament_state == "pre":
+            pick_state = "the field has not been finalised for this week."
+        else:
+            pick_state = "no players left to pick from."
+
         button_state = False
 
     return render_template(
