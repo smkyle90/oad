@@ -1,3 +1,5 @@
+import os
+
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -44,6 +46,9 @@ def profile():
 @login_required
 def league():
     curr_event, __, tournament_state = get_event_info()
+
+    print(os.getenv("OADPW"))
+    # print (os.environ["TEST_VAR"])
 
     users = User.query.all()
 
@@ -162,14 +167,24 @@ def submit_pick():
     # a pick and use it.
     if tournament_state == "pre":
         if prev_pick is None:
-            user_pick = Pick(event=curr_event, pick=selection, alternate=alternate, name=current_user.name)
+            user_pick = Pick(
+                event=curr_event,
+                pick=selection,
+                alternate=alternate,
+                name=current_user.name,
+            )
             db.session.add(user_pick)
         else:
             prev_pick.pick = selection
             prev_pick.alternate = alternate
     else:
         if (prev_pick is None) and (current_user.strikes_remaining):
-            user_pick = Pick(event=curr_event, pick=selection, alternate=alternate, name=current_user.name)
+            user_pick = Pick(
+                event=curr_event,
+                pick=selection,
+                alternate=alternate,
+                name=current_user.name,
+            )
             db.session.add(user_pick)
 
             # Need to issue a strike to user.

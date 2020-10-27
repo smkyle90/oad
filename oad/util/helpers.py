@@ -94,6 +94,15 @@ def get_event_info():
     try:
         r = requests.get(EVENT_URL)
         data = r.json()
+
+        data = {
+            k: [
+                event
+                for event in v
+                if event["status"]["type"]["description"] != "Canceled"
+            ]
+            for k, v in data.items()
+        }
         event_name = get_event_from_data(data)
         avail_picks = get_avail_from_data(data)
         tournament_state = get_tourn_state_from_data(data)
