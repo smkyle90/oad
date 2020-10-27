@@ -124,7 +124,9 @@ def pick():
                 button_state = False
     else:
         if tournament_state == "pre":
-            pick_state = "the field has not been finalised for this week."
+            pick_state = (
+                "our friends at ESPN have not released the field for this week."
+            )
         else:
             pick_state = "no players left to pick from."
 
