@@ -65,7 +65,7 @@ def league():
     pick_history_table, bar, line = league_page()
 
     # Determine if we are going to show the picks for the week
-    if tournament_state != "pre":
+    if tournament_state in ["in", "post"]:
         show_picks = True
     else:
         show_picks = False
