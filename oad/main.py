@@ -47,9 +47,6 @@ def profile():
 def league():
     curr_event, __, tournament_state = get_event_info()
 
-    print(os.getenv("OADPW"))
-    # print (os.environ["TEST_VAR"])
-
     users = User.query.all()
 
     week_picks = Pick.query.filter_by(event=curr_event).all()
