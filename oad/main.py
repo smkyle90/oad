@@ -220,6 +220,7 @@ def update():
 def end_week():
     add_user_points()
     # update_player_earnings()
+    flash("Update complete!")
     return redirect(url_for("main.update"))
 
 
@@ -262,14 +263,14 @@ def weekly_update():
     picks = Pick.query.all()
 
     written_text = request.form.get("Email")
-    points_table = construct_user_table(users, picks)
+    points_table = construct_user_table(users, picks, curr_event)
 
     email_text = "<p>{}</p>\n\n{}".format(written_text, points_table)
 
-    # for user_addr in [user.email for user in users]:
-    # try:
-    send_email("scott.m.kyle@gmail.com", "Weekly Update", email_text)
-    # except Exception as e:
-    # flash("Unable to send email to users. Message: {}".format(e))
-
+    for user_addr in [user.email for user in users]:
+        try:
+            send_email(user_addr, "Weekly Update - {}".format(curr_event), email_text)
+        except Exception as e:
+            flash("Unable to send email to users. Message: {}".format(e))
+    flash("Messages sent!")
     return redirect(url_for("main.update"))

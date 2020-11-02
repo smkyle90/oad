@@ -192,15 +192,28 @@ def get_earnings(player):
     return earnings
 
 
-def construct_user_table(users, picks):
+def construct_user_table(users, picks, curr_event=None):
     user_dict = {
         "name": [],
+        "weekly earnings": [],
         "total earnings": [],
         "strikes left": [],
     }
+    for x in picks:
+        print(x.event)
+        print(curr_event)
 
     for usr in users:
         user_dict["name"].append(usr.name)
+        user_dict["weekly earnings"].append(
+            sum(
+                [
+                    int(x.points)
+                    for x in picks
+                    if (x.event == curr_event) and (x.name == usr.name)
+                ]
+            )
+        )
         user_dict["strikes left"].append(int(usr.strikes_remaining))
         user_dict["total earnings"].append(
             sum([int(x.points) for x in picks if x.name == usr.name])
@@ -216,7 +229,17 @@ def construct_user_table(users, picks):
 
     # Reorder columns
     user_df = user_df[
-        ["rank", "name", "total earnings", "dollars back", "strikes left"]
+        [
+            "rank",
+            "name",
+            "weekly earnings",
+            "total earnings",
+            "dollars back",
+            "strikes left",
+        ]
     ]
+
+    if curr_event is None:
+        user_df.drop(columns=["weekly earnings"], inplace=True)
 
     return user_df.to_html(classes="data", border=0, index=False)
