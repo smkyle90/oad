@@ -199,9 +199,6 @@ def construct_user_table(users, picks, curr_event=None):
         "total earnings": [],
         "strikes left": [],
     }
-    for x in picks:
-        print(x.event)
-        print(curr_event)
 
     for usr in users:
         user_dict["name"].append(usr.name)

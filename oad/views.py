@@ -92,17 +92,17 @@ def player_picks(raw_picks):
     """Picks per player.
     """
     df = pd.DataFrame(raw_picks)
-    all_users = df.user.unique()
-    for user in all_users:
-        # TODO: make sure picks are only shown if they have been picked before
-        if user:
-            df_filt = df[df.user == user]
-            df[user] = [
-                (pick.points) if (pick.player in list(df_filt.player)) else -1
-                for pick in df.itertuples()
-            ]
 
-    return df
+    df_user = pd.pivot_table(
+        df,
+        values="player",
+        index=["tournament"],
+        columns=["user"],
+        fill_value="--",
+        aggfunc="first",
+    )
+
+    return df_user
 
 
 def pick_matrix(raw_picks):
@@ -117,13 +117,13 @@ def pick_matrix(raw_picks):
     """
     df = player_picks(raw_picks)
 
-    df = df[df.max(axis=1) > -1]
+    # df = df[df.max(axis=1) > -1]
 
-    df.replace(-1, "avail", inplace=True)
-    df.replace(-1e-9, "in play", inplace=True)
+    # df.replace(-1, "avail", inplace=True)
+    # df.replace(-1e-9, "in play", inplace=True)
 
-    df = df.drop(columns=["user", "tournament", "points"]).dropna()
-    df.sort_values(["player"], inplace=True)
+    # df = df.drop(columns=["user", "tournament", "points"]).dropna()
+    # df.sort_values(["player"], inplace=True)
 
     return df.to_html(classes="data", border=0, index=False)
 
