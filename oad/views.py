@@ -102,6 +102,8 @@ def player_picks(raw_picks):
         aggfunc="first",
     )
 
+    # df_user.reset_index(drop=True, inplace=True)
+
     return df_user
 
 
@@ -125,7 +127,7 @@ def pick_matrix(raw_picks):
     # df = df.drop(columns=["user", "tournament", "points"]).dropna()
     # df.sort_values(["player"], inplace=True)
 
-    return df.to_html(classes="data", border=0, index=False)
+    return df.to_html(classes="data", border=0, index=True)
 
 
 def best_picks(raw_picks):
