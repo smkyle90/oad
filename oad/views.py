@@ -103,7 +103,7 @@ def player_picks(raw_picks):
     )
 
     # df_user.reset_index(drop=True, inplace=True)
-
+    df_user.index.name = None
     return df_user
 
 

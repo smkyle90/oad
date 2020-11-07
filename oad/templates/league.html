@@ -14,26 +14,27 @@
 {% endif %}
 
 <section>
+<div>
   <h3 class="subtitle">league leaders</h3>
-  <div>{{ u_table | safe }}</div>
+    <div>{{ u_table | safe }}</div>
+</div>
 </section>
-  <div>
-  <section>
-    <h3 class="subtitle">earnings history</h3>
+<section>
+<div>
+  <h3 class="subtitle">earnings history</h3>
     <div class="chart" id="chart">
       <script style="width: 100%">
         var graphs = {{ points | safe }};
         Plotly.plot('chart',graphs,{});
       </script>
     </div>
-  </section>
-
-  <section>
+</div>
+</section>
+<section>
+<div>
   <h3 class="subtitle">pick history</h3>
   <div style="width: 100%; overflow-x: scroll;">
     {{ ph_table | safe }}
-  </div>
-  </section>
   </div>
     <!-- <div class="chart" id="bargraph">
       <script style="width: 100%">
@@ -41,7 +42,7 @@
         Plotly.plot('bargraph',graphs,{});
       </script>
     </div> -->
-
-
+</div>
+</section>
 
 {% endblock %}
