@@ -230,7 +230,6 @@ def construct_user_table(users, picks, curr_event=None):
 
     user_df = pd.DataFrame(user_dict)
 
-    print(user_df["weekly pick"])
     user_df.sort_values(["total earnings"], inplace=True, ascending=False)
     user_df["rank"] = user_df["total earnings"].rank(ascending=False).astype(int)
 
