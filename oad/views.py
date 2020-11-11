@@ -93,6 +93,8 @@ def player_picks(raw_picks):
     """
     df = pd.DataFrame(raw_picks)
 
+    df = df[df.points >= 0]
+
     df_user = pd.pivot_table(
         df,
         values="player",

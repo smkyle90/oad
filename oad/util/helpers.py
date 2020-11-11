@@ -195,6 +195,7 @@ def get_earnings(player):
 def construct_user_table(users, picks, curr_event=None):
     user_dict = {
         "name": [],
+        "weekly pick": [],
         "weekly earnings": [],
         "total earnings": [],
         "strikes left": [],
@@ -202,6 +203,17 @@ def construct_user_table(users, picks, curr_event=None):
 
     for usr in users:
         user_dict["name"].append(usr.name)
+
+        weekly_pick = [
+            x.pick for x in picks if ((x.event == curr_event) and (x.name == usr.name))
+        ]
+
+        if weekly_pick:
+            weekly_pick = weekly_pick[0]
+        else:
+            weekly_pick = "--"
+
+        user_dict["weekly pick"].append(weekly_pick)
         user_dict["weekly earnings"].append(
             sum(
                 [
@@ -218,6 +230,7 @@ def construct_user_table(users, picks, curr_event=None):
 
     user_df = pd.DataFrame(user_dict)
 
+    print(user_df["weekly pick"])
     user_df.sort_values(["total earnings"], inplace=True, ascending=False)
     user_df["rank"] = user_df["total earnings"].rank(ascending=False).astype(int)
 
@@ -229,6 +242,7 @@ def construct_user_table(users, picks, curr_event=None):
         [
             "rank",
             "name",
+            "weekly pick",
             "weekly earnings",
             "total earnings",
             "dollars back",
@@ -236,7 +250,16 @@ def construct_user_table(users, picks, curr_event=None):
         ]
     ]
 
+    for col in ["weekly earnings", "total earnings", "dollars back"]:
+        new_col = [
+            "$ {}".format("{:,}".format(val))
+            if val >= 0
+            else "-$ {}".format("{:,}".format(abs(val)))
+            for val in user_df[col]
+        ]
+        user_df[col] = new_col
+
     if curr_event is None:
-        user_df.drop(columns=["weekly earnings"], inplace=True)
+        user_df.drop(columns=["weekly earnings", "weekly pick"], inplace=True)
 
     return user_df.to_html(classes="data", border=0, index=False)
