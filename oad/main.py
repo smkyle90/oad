@@ -57,6 +57,7 @@ def profile():
         user=current_user,
         pick_table=pick_table,
         user_points=total_points,
+        season=SEASON,
     )
 
 
@@ -94,6 +95,7 @@ def league():
         event_name=curr_event,
         plot=bar,
         points=line,
+        season=SEASON,
         # bp_table=best_picks,
     )
 
