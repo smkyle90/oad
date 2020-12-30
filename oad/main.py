@@ -1,3 +1,5 @@
+import os
+
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -24,6 +26,8 @@ from .views import (  # create_plot,; pick_matrix,
     # live_scores,
 )
 
+SEASON = int(os.getenv("OADYR", 2021))
+
 main = Blueprint("main", __name__)
 
 
@@ -41,8 +45,8 @@ def rules():
 @main.route("/profile")
 @login_required
 def profile():
-    picks = Pick.query.filter_by(name=current_user.name).all()
-    # pick_table = UserPickTable(picks)
+    picks = Pick.query.filter_by(season=SEASON).filter_by(name=current_user.name).all()
+    # pick_table = UserfPickTable(picks)
 
     pick_table = create_pick_table(picks)
 
@@ -63,17 +67,17 @@ def league():
 
     users = User.query.all()
 
-    week_picks = Pick.query.filter_by(event=curr_event).all()
+    week_picks = Pick.query.filter_by(season=SEASON).filter_by(event=curr_event).all()
 
     # try:
     #     pick_table = live_scores(week_picks)
     # except Exception:
     pick_table = PickTable(week_picks)
 
-    all_picks = Pick.query.all()
+    all_picks = Pick.query.filter_by(season=SEASON).all()
     user_table = construct_user_table(users, all_picks)
 
-    pick_history_table, bar, line = league_page()
+    pick_history_table, bar, line = league_page(SEASON)
 
     # Determine if we are going to show the picks for the week
     if tournament_state in ["in", "post"]:
@@ -101,11 +105,16 @@ def pick():
 
     # Check if the user has made a previous pick for this event
     prev_pick = (
-        Pick.query.filter_by(event=curr_event).filter_by(name=current_user.name).first()
+        Pick.query.filter_by(season=SEASON)
+        .filter_by(event=curr_event)
+        .filter_by(name=current_user.name)
+        .first()
     )
 
     # Get all picks for this user
-    all_picks = Pick.query.filter_by(name=current_user.name).all()
+    all_picks = (
+        Pick.query.filter_by(season=SEASON).filter_by(name=current_user.name).all()
+    )
 
     # Get the list of players already picked
     all_players = [pick.pick for pick in all_picks]
@@ -176,7 +185,10 @@ def submit_pick():
 
     # See if pick has been made
     prev_pick = (
-        Pick.query.filter_by(event=curr_event).filter_by(name=current_user.name).first()
+        Pick.query.filter_by(season=SEASON)
+        .filter_by(event=curr_event)
+        .filter_by(name=current_user.name)
+        .first()
     )
 
     # Ensure a player does not pick before the tournament has started.
@@ -189,6 +201,7 @@ def submit_pick():
                 pick=selection,
                 alternate=alternate,
                 name=current_user.name,
+                season=SEASON,
             )
             db.session.add(user_pick)
         else:
@@ -201,6 +214,7 @@ def submit_pick():
                 pick=selection,
                 alternate=alternate,
                 name=current_user.name,
+                season=SEASON,
             )
             db.session.add(user_pick)
 
@@ -274,7 +288,7 @@ def weekly_update():
     curr_event, __, __ = get_event_info()
 
     users = User.query.all()
-    picks = Pick.query.all()
+    picks = Pick.query.filter_by(season=SEASON).all()
 
     written_text = request.form.get("Email")
     points_table = construct_user_table(users, picks, curr_event)

@@ -72,14 +72,16 @@ def live_scores(picks):
     return df.to_html(classes="data", border=0, index=False)
 
 
-def league_page():
+def league_page(season):
     all_picks = Pick.query.all()
 
     raw_picks = {}
-    raw_picks["user"] = [pick.name for pick in all_picks]
-    raw_picks["player"] = [pick.pick for pick in all_picks]
-    raw_picks["points"] = [pick.points for pick in all_picks]
-    raw_picks["tournament"] = [pick.event for pick in all_picks]
+    raw_picks["user"] = [pick.name for pick in all_picks if pick.season == season]
+    raw_picks["player"] = [pick.pick for pick in all_picks if pick.season == season]
+    raw_picks["points"] = [pick.points for pick in all_picks if pick.season == season]
+    raw_picks["tournament"] = [
+        pick.event for pick in all_picks if pick.season == season
+    ]
 
     pick_history = pick_matrix(raw_picks)
     # best = best_picks(raw_picks)
@@ -88,8 +90,15 @@ def league_page():
     return pick_history, bar_plot, line_plot
 
 
-def player_picks(raw_picks):
-    """Picks per player.
+def pick_matrix(raw_picks):
+    """For each player, show which player has picked them.
+
+    Args:
+        df
+
+    Returns:
+        df
+
     """
     df = pd.DataFrame(raw_picks)
 
@@ -106,20 +115,6 @@ def player_picks(raw_picks):
 
     # df_user.reset_index(drop=True, inplace=True)
     df_user.index.name = None
-    return df_user
-
-
-def pick_matrix(raw_picks):
-    """For each player, show which player has picked them.
-
-    Args:
-        df
-
-    Returns:
-        df
-
-    """
-    df = player_picks(raw_picks)
 
     # df = df[df.max(axis=1) > -1]
 
@@ -129,38 +124,7 @@ def pick_matrix(raw_picks):
     # df = df.drop(columns=["user", "tournament", "points"]).dropna()
     # df.sort_values(["player"], inplace=True)
 
-    return df.to_html(classes="data", border=0, index=True)
-
-
-def best_picks(raw_picks):
-    """For each player, show who made the most money over the field.
-
-    Args:
-        df
-
-    Returns:
-        df
-
-    """
-
-    df = player_picks(raw_picks)
-
-    players = df.player
-    df = df.drop(columns=["player"])
-    df.replace(-1, -1e-9, inplace=True)
-
-    df = (
-        df.sub(df.mean(axis=1), axis=0)
-        .div(df.std(axis=1), axis=0)
-        .div(df.std(axis=1), axis=0)
-    )
-    df.fillna(0)
-
-    df.astype(int)
-
-    df.insert(0, "player", players)
-
-    return df.to_html(classes="data", border=0, index=False)
+    return df_user.to_html(classes="data", border=0, index=True)
 
 
 def create_plots(raw_picks):

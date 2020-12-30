@@ -26,8 +26,6 @@ NON_PGA_URL = "https://www.pgatour.com/stats/stat.02677.html"
 def send_email(receiver_email, subject, html):
     port = 465  # For SSL
     smtp_server = "smtp.gmail.com"
-    # sender_email = os.environ.get("USER_EMAIL")
-    # password = os.environ.get("USER_PW")
     sender_email = "1993oad@gmail.com"
     password = os.getenv("OADPW")
 
