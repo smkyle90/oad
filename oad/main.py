@@ -35,6 +35,12 @@ def index():
     return render_template("index.html")
 
 
+@main.route("/rules")
+@login_required
+def rules():
+    return render_template("rules.html")
+
+
 @main.route("/profile")
 @login_required
 def profile():

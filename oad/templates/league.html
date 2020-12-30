@@ -3,6 +3,9 @@
  -->
 {% extends "base.html" %} {% block content %}
 <h1 class="title">League Information</h1>
+<p><a href="{{ url_for('main.rules') }}">
+  See full rules.
+</a></p>
 
 {% if show_picks %}
 <section>
