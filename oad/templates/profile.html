@@ -1,22 +1,22 @@
 {% extends "base.html" %} {% block content %}
 <h1 class="title" style="text-align: center">
-  {{ user.name }} total earnings: ${{ user_points }}
+  {{ user.name }} total earnings: {{ user_points }}
 </h1>
 <section>
   <div>
-    <h3 class="title" style="text-align: center">pick history</h3>
-    {{ pick_table }}
+    <h3 class="title" style="text-align: center">Pick History</h3>
+    {{ pick_table | safe }}
   </div>
 </section>
 <section>
   <div>
-    <h2 class="title">user admin</h2>
+    <h2 class="title">User Admin</h2>
     {% with messages = get_flashed_messages() %} {% if messages %}
     <div class="notification is-danger" style="text-align: center">
       {{ messages[0] }}
     </div>
     {% endif %} {% endwith %}
-    <a href="{{ url_for('main.update_password') }}">update password</a>
+    <a href="{{ url_for('main.update_password') }}">Update Password</a>
   </div>
   <section>{% endblock %}</section>
 </section>

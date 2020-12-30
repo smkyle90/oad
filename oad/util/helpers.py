@@ -192,6 +192,30 @@ def get_earnings(player):
     return earnings
 
 
+def format_earnings(val):
+    return "$ {}".format("{:,}".format(int(val)))
+
+
+def create_pick_table(picks):
+    pick_table = {"event": [], "pick": [], "earnings": []}
+    for pick in picks:
+        pick_table["event"].append(pick.event)
+        pick_table["pick"].append(pick.pick)
+        pick_table["earnings"].append(pick.points)
+
+    pick_table = pd.DataFrame(pick_table)
+
+    for col in ["earnings"]:
+        new_col = [
+            format_earnings(val) if val >= 0 else "$ 0" for val in pick_table[col]
+        ]
+        pick_table[col] = new_col
+
+    pick_table.columns = [x.upper() for x in pick_table.columns]
+
+    return pick_table.to_html(classes="data", border=0, index=False)
+
+
 def construct_user_table(users, picks, curr_event=None):
     user_dict = {
         "name": [],
@@ -251,14 +275,16 @@ def construct_user_table(users, picks, curr_event=None):
 
     for col in ["weekly earnings", "total earnings", "dollars back"]:
         new_col = [
-            "$ {}".format("{:,}".format(val))
+            format_earnings(val)
             if val >= 0
-            else "-$ {}".format("{:,}".format(abs(val)))
+            else "-{}".format(format_earnings(abs(val)))
             for val in user_df[col]
         ]
         user_df[col] = new_col
 
     if curr_event is None:
         user_df.drop(columns=["weekly earnings", "weekly pick"], inplace=True)
+
+    user_df.columns = [x.upper() for x in user_df.columns]
 
     return user_df.to_html(classes="data", border=0, index=False)

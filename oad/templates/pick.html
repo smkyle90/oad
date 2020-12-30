@@ -5,7 +5,7 @@
   <h2 class="title">{{ user }}, {{ pick_text }}</h2>
   {% if button %}
   <form name="Select" action="{{ url_for('main.submit_pick') }}" method="POST">
-  <h3>main pick</h3>
+  <h3>Main Pick</h3>
     <select
       class="dropbtn is-block ids-fullwidth"
       name="main"
@@ -18,7 +18,7 @@
       <option>{{ pick }}</option>
       {% endfor %}
     </select>
-  <h3>alternate pick</h3>
+  <h3>Alternate Pick</h3>
     <select
       class="dropbtn is-block ids-fullwidth"
       id="alternate"
