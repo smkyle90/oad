@@ -1,10 +1,8 @@
 """App helper functions
 """
 import os
-import random
 import smtplib
 import ssl
-import subprocess
 from email.mime.text import MIMEText
 
 import pandas as pd

@@ -15,12 +15,12 @@ from .util import (
     get_event_info,
     send_email,
 )
-from .util.admin import add_user_points, update_player_earnings
+from .util.admin import add_user_points
 
 from .views import (  # create_plot,; pick_matrix,
     PickTable,
     # PlayerTable,
-    UserPickTable,
+    # UserPickTable,
     # UserTable,
     league_page,
     # live_scores,
