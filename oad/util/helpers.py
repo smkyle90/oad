@@ -214,7 +214,7 @@ def create_pick_table(picks):
 
 def construct_user_table(users, picks, curr_event=None):
     user_dict = {
-        "name": [],
+        "team": [],
         "weekly pick": [],
         "weekly earnings": [],
         "total earnings": [],
@@ -222,7 +222,10 @@ def construct_user_table(users, picks, curr_event=None):
     }
 
     for usr in users:
-        user_dict["name"].append(usr.name)
+        if usr.display_name:
+            user_dict["team"].append(usr.display_name)
+        else:
+            user_dict["team"].append(usr.name)
 
         weekly_pick = [
             x.pick for x in picks if ((x.event == curr_event) and (x.name == usr.name))
@@ -260,7 +263,7 @@ def construct_user_table(users, picks, curr_event=None):
     user_df = user_df[
         [
             "rank",
-            "name",
+            "team",
             "weekly pick",
             "weekly earnings",
             "total earnings",

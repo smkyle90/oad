@@ -15,6 +15,7 @@ class User(UserMixin, db.Model):
     strikes_remaining = db.Column(db.Integer, default=1)
     is_admin = db.Column(db.Boolean, default=False)
     email_confirmed = db.Column(db.Boolean, default=False)
+    display_name = db.Column(db.Text, default="")
 
 
 class Pick(db.Model):

@@ -62,7 +62,7 @@
         padding-top: 10px;
       }
       p {
-        color: #fc5130;
+        color: #303036;
         padding-top: 10px;
       }
 
@@ -273,6 +273,12 @@
               class="dropdown-item"
             >
               Update Password
+            </a>
+            <a
+              href="{{ url_for('main.update_display_name') }}"
+              class="dropdown-item"
+            >
+              Update Team Name
             </a>
             <a href="{{ url_for('main.profile') }}" class="dropdown-item">
               Pick History

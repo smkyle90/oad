@@ -1,0 +1,24 @@
+{% extends "base.html" %} {% block content %} {% with messages =
+get_flashed_messages() %} {% if messages %}
+<div class="notification is-danger" style="text-align: center">
+  {{ messages[0] }}
+</div>
+{% endif %} {% endwith %}
+
+<h1> Current Display Name {{ team_name }} </h1>
+
+<form action="{{ url_for('main.user_display_name_change') }}" method="POST">
+  <div class="field">
+    <div class="control">
+      <input
+        class="input is-large"
+        type="text"
+        name="new_name"
+        placeholder="New Team Name"
+        autofocus=""
+      />
+    </div>
+  </div>
+  <button class="button">Update</button>
+</form>
+{% endblock %}

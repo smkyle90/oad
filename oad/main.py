@@ -284,6 +284,37 @@ def update_password():
     return render_template("update_password.html")
 
 
+@main.route("/user_display_name_change", methods=["POST"])
+@login_required
+def user_display_name_change():
+
+    new_name = request.form.get("new_name")
+
+    user = User.query.filter_by(email=current_user.email).first()
+
+    user.display_name = new_name
+
+    db.session.commit()
+    print("new name", new_name)
+    return render_template("update_display_name.html", team_name=new_name)
+
+
+@main.route("/update_display_name")
+@login_required
+def update_display_name():
+
+    user = User.query.filter_by(email=current_user.email).first()
+
+    team_name = user.display_name
+
+    print("team name", team_name)
+    if not team_name:
+        team_name = user.name
+    print("team name", team_name)
+
+    return render_template("update_display_name.html", team_name=team_name)
+
+
 @main.route("/weekly_update", methods=["POST"])
 @login_required
 def weekly_update():
