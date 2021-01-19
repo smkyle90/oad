@@ -1,8 +1,10 @@
 """App helper functions
 """
 import os
+import random
 import smtplib
 import ssl
+import string
 from email.mime.text import MIMEText
 
 import pandas as pd
@@ -19,6 +21,12 @@ EVENT_URL = (
 
 PGA_URL = "https://www.pgatour.com/stats/stat.109.html"
 NON_PGA_URL = "https://www.pgatour.com/stats/stat.02677.html"
+
+
+def get_random_password_string(length):
+    password_characters = string.ascii_letters + string.digits + string.punctuation[2:6]
+    password = "".join(random.choice(password_characters) for i in range(length))
+    return password
 
 
 def send_email(receiver_email, subject, html):

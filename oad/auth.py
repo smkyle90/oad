@@ -4,13 +4,47 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from . import db
 from .models import User
-from .util import send_email, ts
+from .util import get_random_password_string, send_email, ts
 
 auth = Blueprint("auth", __name__)
 
 
 @auth.route("/login")
 def login():
+    return render_template("login.html")
+
+
+@auth.route("/forgot_password")
+def forgot_password():
+    return render_template("forgot_password.html")
+
+
+@auth.route("/forgot_password", methods=["POST"])
+def forgot_password_post():
+    email = request.form.get("email")
+
+    user = User.query.filter_by(email=email).first()
+
+    # check if user actually exists
+    # take the user supplied password, hash it, and compare it to the hashed password in database
+    if not user:
+        flash("User not found. Please make sure email is associated to account.")
+        return render_template("forgot_password.html")
+    else:
+        new_pass = get_random_password_string(10)
+        user.password = generate_password_hash(new_pass, method="sha256")
+        db.session.commit()
+
+        email_text = "<p>Your temporary password is: <b>{}</b>. Please remember to change it once logging in.</p>".format(
+            new_pass
+        )
+
+        send_email(user.email, "New Password", email_text)
+
+        flash(
+            "Sent a new password to the email associated with your account. Please check your junk email."
+        )
+
     return render_template("login.html")
 
 
@@ -29,14 +63,16 @@ def login_post():
         return redirect(url_for("auth.signup"))
     elif not user.email_confirmed:
         flash(
-            "Please confirm your e-mail before logging in. An email has been send to {}.".format(
+            "Please confirm your e-mail before logging in. An email has been sent to {}. Check your junk mail!".format(
                 user.email
             )
         )
         generate_user_email(user.email)
         return redirect(url_for("auth.login"))
     elif not check_password_hash(user.password, password):
-        flash("Please check your login details and try again.")
+        flash(
+            "Please check your login details and try again. Click Forgot Password to send a new password to your account e-mail."
+        )
         return redirect(url_for("auth.login"))
 
     # if the above check passes, then we know the user has the right credentials

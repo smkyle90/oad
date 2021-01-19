@@ -5,6 +5,7 @@ from .helpers import (
     get_earnings,
     get_event_info,
     get_live_scores,
+    get_random_password_string,
     send_email,
 )
 from .security import ts

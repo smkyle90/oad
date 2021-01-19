@@ -7,6 +7,14 @@ application = create_app()
 #     app.run()
 
 """
+ensure tto use venv not pipenv when installing the virtual environment
+
+python3 -m venv venv
+
+source venv/bin/activate
+
+pip install -r requirements.txt
+
 Run this to intialise Db
 
 from oad import db, create_app
