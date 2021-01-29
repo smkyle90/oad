@@ -67,6 +67,30 @@ def get_avail_from_data(data):
     ]
 
 
+def get_tournament_info(data):
+    """Get tournament purse. Function to ensure modularity if API fails.
+    """
+    courses_separator = ", "
+    data_dict = {
+        "Purse": data["events"][0]["displayPurse"],
+        "Courses": courses_separator.join(
+            [course["name"] for course in data["events"][0]["courses"]]
+        ),
+        "Defending Champion": data["events"][0]["defendingChampion"]["athlete"][
+            "displayName"
+        ],
+    }
+
+    event_dict = {
+        "col1": list(data_dict.keys()),
+        "col2": list(data_dict.values()),
+    }
+
+    df = pd.DataFrame(event_dict)
+
+    return df.to_html(classes="data", border=0, index=False, header=False)
+
+
 def get_tourn_state_from_data(data):
     """Get tournament state. Function to ensure modularity if API fails.
     """
@@ -116,10 +140,11 @@ def get_event_info():
         event_name = get_event_from_data(data)
         avail_picks = get_avail_from_data(data)
         tournament_state = get_tourn_state_from_data(data)
-        return event_name, avail_picks, tournament_state
+        tournament_info = get_tournament_info(data)
+        return event_name, avail_picks, tournament_state, tournament_info
     except Exception as e:
         print("Issue getting data from ESPN API. Message: {}".format(e))
-        return None, None, None
+        return None, None, None, None
 
 
 def get_live_scores(current_players):

@@ -7,14 +7,33 @@
   See full rules.
 </a></p>
 
+<section>
+<div>
+  <h2>{{ event_name }}</h2>
+</div>
+</section>
+
 {% if show_picks %}
 <section>
   <div>
-    <h3 class="subtitle">{{ event_name }} Picks</h3>
+    <h3 class="subtitle">Picks</h3>
     {{ p_table | safe }}
   </div>
 </section>
 {% endif %}
+
+<section>
+<div>
+  <h3 class="subtitle">Tournament Info</h3>
+    {{ event_table | safe }}
+</div>
+</section>
+
+<section>
+<div>
+  <h2>League</h2>
+</div>
+</section>
 
 <section>
 <div>

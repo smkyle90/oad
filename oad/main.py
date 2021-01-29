@@ -24,6 +24,7 @@ from .views import (  # create_plot,; pick_matrix,
     # UserTable,
     league_page,
     # live_scores,
+    weekly_pick_table,
 )
 
 SEASON = int(os.getenv("OADYR", 2021))
@@ -64,7 +65,7 @@ def profile():
 @main.route("/league")
 @login_required
 def league():
-    curr_event, __, tournament_state = get_event_info()
+    curr_event, __, tournament_state, event_table = get_event_info()
 
     users = User.query.all()
 
@@ -73,12 +74,14 @@ def league():
     # try:
     #     pick_table = live_scores(week_picks)
     # except Exception:
-    pick_table = PickTable(week_picks)
+    # pick_table = PickTable(week_picks)
+
+    pick_table = weekly_pick_table(users, week_picks)
 
     all_picks = Pick.query.filter_by(season=SEASON).all()
     user_table = construct_user_table(users, all_picks)
 
-    pick_history_table, bar, line = league_page(SEASON)
+    pick_history_table, bar, line = league_page(users, SEASON)
 
     # Determine if we are going to show the picks for the week
     if tournament_state in ["in", "post"]:
@@ -93,6 +96,7 @@ def league():
         ph_table=pick_history_table,
         show_picks=show_picks,
         event_name=curr_event,
+        event_table=event_table,
         plot=bar,
         points=line,
         season=SEASON,
@@ -103,7 +107,7 @@ def league():
 @main.route("/pick")
 @login_required
 def pick():
-    curr_event, avail_picks, tournament_state = get_event_info()
+    curr_event, avail_picks, tournament_state, __ = get_event_info()
 
     # Check if the user has made a previous pick for this event
     prev_pick = (
@@ -169,7 +173,7 @@ def pick():
 @login_required
 def submit_pick():
     # Get current event from the session
-    curr_event, __, tournament_state = get_event_info()
+    curr_event, __, tournament_state, __ = get_event_info()
 
     # Get the selection
     selection = request.form.get("main")
@@ -235,7 +239,7 @@ def submit_pick():
 @main.route("/update")
 @login_required
 def update():
-    __, __, tournament_state = get_event_info()
+    __, __, tournament_state, __ = get_event_info()
 
     update_button = False
 
@@ -318,7 +322,7 @@ def update_display_name():
 @main.route("/weekly_update", methods=["POST"])
 @login_required
 def weekly_update():
-    curr_event, __, __ = get_event_info()
+    curr_event, __, __, __ = get_event_info()
 
     users = User.query.all()
     picks = Pick.query.filter_by(season=SEASON).all()
