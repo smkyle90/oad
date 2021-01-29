@@ -73,8 +73,12 @@ def get_tournament_info(data):
     courses_separator = ", "
     data_dict = {
         "Purse": data["events"][0]["displayPurse"],
-        "Courses": courses_separator.join([course["name"] for course in data["events"][0]["courses"]]),
-        "Defending Champion": data["events"][0]["defendingChampion"]["athlete"]["displayName"],
+        "Courses": courses_separator.join(
+            [course["name"] for course in data["events"][0]["courses"]]
+        ),
+        "Defending Champion": data["events"][0]["defendingChampion"]["athlete"][
+            "displayName"
+        ],
     }
 
     event_dict = {
@@ -85,6 +89,7 @@ def get_tournament_info(data):
     df = pd.DataFrame(event_dict)
 
     return df.to_html(classes="data", border=0, index=False, header=False)
+
 
 def get_tourn_state_from_data(data):
     """Get tournament state. Function to ensure modularity if API fails.
