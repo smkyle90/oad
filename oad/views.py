@@ -51,6 +51,7 @@ def weekly_pick_table(users, picks):
     pick_dict = {
         "team": [user_dict[p.name] for p in picks],
         "pick": [p.pick for p in picks],
+        "alternate": [p.alternate for p in picks],
     }
 
     df = pd.DataFrame(pick_dict)
