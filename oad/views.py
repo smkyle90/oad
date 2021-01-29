@@ -42,6 +42,22 @@ class UserPickTable(Table):
     points = Earnings("points")
 
 
+def weekly_pick_table(users, picks):
+
+    user_dict = {user.name: user.display_name if user.display_name else user.name for user in users}
+    pick_dict = {
+        "team": [user_dict[p.name] for p in picks],
+        "pick": [p.pick for p in picks],
+    }
+
+    df = pd.DataFrame(pick_dict)
+
+    df.columns = [x.upper() for x in df.columns]
+
+    return df.to_html(classes="data", border=0, index=False)
+
+
+
 def live_scores(picks):
     user_scores = {pick.pick: [pick.name] for pick in picks}
     live_scores = get_live_scores(list(user_scores.keys()))
@@ -72,11 +88,13 @@ def live_scores(picks):
     return df.to_html(classes="data", border=0, index=False)
 
 
-def league_page(season):
+def league_page(users, season):
     all_picks = Pick.query.all()
 
+    user_dict = {user.name: user.display_name if user.display_name else user.name for user in users}
+
     raw_picks = {}
-    raw_picks["user"] = [pick.name for pick in all_picks if pick.season == season]
+    raw_picks["user"] = [user_dict[pick.name] for pick in all_picks if pick.season == season]
     raw_picks["player"] = [pick.pick for pick in all_picks if pick.season == season]
     raw_picks["points"] = [pick.points for pick in all_picks if pick.season == season]
     raw_picks["tournament"] = [
