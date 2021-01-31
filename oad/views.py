@@ -108,7 +108,7 @@ def league_page(users, season):
     raw_picks["tournament"] = [
         pick.event for pick in all_picks if pick.season == season
     ]
-
+    print(raw_picks)
     pick_history = pick_matrix(raw_picks)
     # best = best_picks(raw_picks)
     bar_plot, line_plot = create_plots(raw_picks)
@@ -130,6 +130,26 @@ def pick_matrix(raw_picks):
 
     df = df[df.points >= 0]
 
+    all_users = df.user.unique()
+    all_tourns = df.tournament.unique()
+    data_dict = {col: [] for col in df.columns}
+
+    for user in all_users:
+        for tournament in all_tourns:
+            df_filt = df[(df["user"] == user) & (df["tournament"] == tournament)]
+
+            if not len(df_filt):
+                continue
+
+            for col in df_filt.columns:
+                if col == "player":
+                    # We concatenate the entries
+                    data_dict[col].append(", ".join(df_filt[col].astype(str).to_list()))
+                else:
+                    # We just take the first value
+                    data_dict[col].append(df_filt[col].iloc[0])
+
+    df = pd.DataFrame(data_dict)
     df_user = pd.pivot_table(
         df,
         values="player",
@@ -139,16 +159,9 @@ def pick_matrix(raw_picks):
         aggfunc="first",
     )
 
-    # df_user.reset_index(drop=True, inplace=True)
+    # df.columns = [col.upper() for col in df.columns]
+
     df_user.index.name = None
-
-    # df = df[df.max(axis=1) > -1]
-
-    # df.replace(-1, "avail", inplace=True)
-    # df.replace(-1e-9, "in play", inplace=True)
-
-    # df = df.drop(columns=["user", "tournament", "points"]).dropna()
-    # df.sort_values(["player"], inplace=True)
 
     return df_user.to_html(classes="data", border=0, index=True)
 
