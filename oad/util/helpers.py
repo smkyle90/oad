@@ -163,6 +163,26 @@ def get_live_scores(current_players):
         return None
 
 
+def get_withdrawl_list():
+    try:
+        r = requests.get(EVENT_URL)
+
+        data = r.json()
+        data = remove_canceled(data)
+
+        all_users = data["events"][0]["competitions"][0]["competitors"]
+
+        withdrawl_list = [
+            user["athlete"]["displayName"]
+            for user in all_users
+            if user["status"]["type"]["description"] == "Withdrawn"
+        ]
+        return withdrawl_list
+    except Exception as e:
+        print("Issue getting datafrom ESPN API. Message: {}".format(e))
+        return []
+
+
 def get_earnings(player):
     """Get player earnings. Requires access to API.
     """

@@ -3,7 +3,7 @@
 
 from .. import db
 from ..models import Pick, Player
-from . import get_earnings
+from . import get_earnings, get_withdrawl_list
 
 
 def update_player_earnings():
@@ -25,13 +25,34 @@ def add_user_points():
     # Get the picks for the week
     picks = Pick.query.filter(Pick.points < 0).all()
 
+    withdrawl_list = get_withdrawl_list()
+
     for pick in picks:
         # Get the golfer's name
         player_name = pick.pick
-        weekly_earnings = get_earnings(player_name)
 
-        # Update the pick with this value
-        pick.points = weekly_earnings
+        if player_name in withdrawl_list:
+            print("user withdrawn {}".format(player_name))
+
+            # They have withdrawn and thus earn 0 dollars
+            pick.points = 0
+
+            weekly_earnings = get_earnings(pick.alternate)
+            # We need to add the alternate as the main pick.
+            updated_pick = Pick(
+                event=pick.event,
+                pick=pick.alternate,
+                alternate=pick.alternate,
+                name=pick.name,
+                points=weekly_earnings,
+                season=pick.season,
+            )
+            db.session.add(updated_pick)
+        else:
+            # Get the earnings
+            weekly_earnings = get_earnings(player_name)
+            # Update the pick with this value
+            pick.points = weekly_earnings
 
         # Commit the changes
         db.session.commit()
