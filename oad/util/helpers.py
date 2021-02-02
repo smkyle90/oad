@@ -71,15 +71,26 @@ def get_tournament_info(data):
     """Get tournament purse. Function to ensure modularity if API fails.
     """
     courses_separator = ", "
-    data_dict = {
-        "Purse": data["events"][0]["displayPurse"],
-        "Courses": courses_separator.join(
+
+    data_dict = {}
+
+    try:
+        data_dict["Purse"] = data["events"][0]["displayPurse"]
+    except Exception:
+        data_dict["Purse"] = "Unavailable"
+
+    try:
+        data_dict["Courses"] = courses_separator.join(
             [course["name"] for course in data["events"][0]["courses"]]
-        ),
-        "Defending Champion": data["events"][0]["defendingChampion"]["athlete"][
-            "displayName"
-        ],
-    }
+        )
+    except Exception:
+        data_dict["Courses"] = "Unavailable"
+    try:
+        data_dict["Defending Champion"] = data["events"][0]["defendingChampion"][
+            "athlete"
+        ]["displayName"]
+    except Exception:
+        data_dict["Defending Champion"] = "Unavailable"
 
     event_dict = {
         "col1": list(data_dict.keys()),
