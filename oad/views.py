@@ -48,14 +48,20 @@ def weekly_pick_table(users, picks):
         user.name: user.display_name if user.display_name else user.name
         for user in users
     }
+
     pick_dict = {
         "team": [user_dict[p.name] for p in picks],
         "pick": [p.pick for p in picks],
         "alternate": [p.alternate for p in picks],
     }
+    live_scores = get_live_scores(pick_dict["pick"])
+
+    pick_dict["score"] = [v["displayValue"] for v in live_scores.values()]
+    pick_dict["position"] = [v["displayValue"] for v in live_scores.values()]
 
     df = pd.DataFrame(pick_dict)
-
+    df.sort_values(["position"], inplace=True, ascending=True)
+    df = df[["team", "pick", "score", "position", "alternate"]]
     df.columns = [x.upper() for x in df.columns]
 
     return df.to_html(classes="data", border=0, index=False)
