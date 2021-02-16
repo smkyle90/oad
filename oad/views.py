@@ -61,11 +61,10 @@ def weekly_pick_table(users, picks):
 
     df = pd.DataFrame(pick_dict)
     df.sort_values(["score"], inplace=True, ascending=True)
-<<<<<<< HEAD
-    df = df[["team", "pick", "score", "position", "alternate"]]
-=======
+
+#    df = df[["team", "pick", "score", "position", "alternate"]]
     df = df[["team", "pick", "score", "pos"]]
->>>>>>> f5c40bafeefcadbc84e502e1d8d16adfaae151f6
+
     df.columns = [x.upper() for x in df.columns]
 
     return df.to_html(classes="data", border=0, index=False)

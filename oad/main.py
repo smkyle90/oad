@@ -81,7 +81,6 @@ def league():
     all_picks = Pick.query.filter_by(season=SEASON).all()
     user_table = construct_user_table(users, all_picks)
 
-
     # Determine if we are going to show the picks for the week
     if tournament_state in ["in", "post"]:
         show_picks = True
