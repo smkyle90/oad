@@ -60,7 +60,7 @@ def weekly_pick_table(users, picks):
     pick_dict["position"] = [v["displayValue"] for v in live_scores.values()]
 
     df = pd.DataFrame(pick_dict)
-    df.sort_values(["position"], inplace=True, ascending=True)
+    df.sort_values(["score"], inplace=True, ascending=True)
     df = df[["team", "pick", "score", "position", "alternate"]]
     df.columns = [x.upper() for x in df.columns]
 
@@ -114,7 +114,7 @@ def league_page(users, season):
     raw_picks["tournament"] = [
         pick.event for pick in all_picks if pick.season == season
     ]
-    print(raw_picks)
+
     pick_history = pick_matrix(raw_picks)
     # best = best_picks(raw_picks)
     bar_plot, line_plot = create_plots(raw_picks)
