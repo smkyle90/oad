@@ -68,25 +68,18 @@ def league():
     curr_event, __, tournament_state, event_table = get_event_info()
 
     users = User.query.all()
-
-    week_picks = Pick.query.filter_by(season=SEASON).filter_by(event=curr_event).all()
-
-    # try:
-    #     pick_table = live_scores(week_picks)
-    # except Exception:
-    # pick_table = PickTable(week_picks)
-
-    pick_table = weekly_pick_table(users, week_picks)
-
     all_picks = Pick.query.filter_by(season=SEASON).all()
     user_table = construct_user_table(users, all_picks)
 
     # Determine if we are going to show the picks for the week
     if tournament_state in ["in", "post"]:
         show_picks = True
+        week_picks = Pick.query.filter_by(season=SEASON).filter_by(event=curr_event).all()
+        pick_table = weekly_pick_table(users, week_picks)
         pick_history_table, bar, line = "<p></p>","<p></p>", "<p></p>"
     else:
         show_picks = False
+        pick_table =  "<p></p>"
         pick_history_table, bar, line = league_page(users, SEASON)
 
     return render_template(
