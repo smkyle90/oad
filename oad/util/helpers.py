@@ -112,7 +112,10 @@ def live_scores_from_data(data, current_players):
     """Get live scores. Function to ensure modularity if API fails.
     """
     return {
-        user["athlete"]["displayName"]: {"score": int(user["score"]["displayValue"]), "position": user["status"]["position"]["displayName"]}
+        user["athlete"]["displayName"]: {
+            "score": int(user["score"]["displayValue"]),
+            "position": user["status"]["position"]["displayName"],
+        }
         for user in data["events"][0]["competitions"][0]["competitors"]
         if user["athlete"]["displayName"] in current_players
     }

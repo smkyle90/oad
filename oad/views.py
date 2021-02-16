@@ -52,17 +52,25 @@ def weekly_pick_table(users, picks):
     pick_dict = {
         "team": [user_dict[p.name] for p in picks],
         "pick": [p.pick for p in picks],
-#        "alternate": [p.alternate for p in picks],
+        #        "alternate": [p.alternate for p in picks],
     }
     live_scores = get_live_scores(pick_dict["pick"])
+    try:
+        pick_dict["score"] = [live_scores[pick]["score"] for pick in pick_dict["pick"]]
+    except Exception as e:
+        print(e)
+        pick_dict["score"] = ["--" for pick in pick_dict["pick"]]
 
-    pick_dict["score"] = [live_scores[pick]["score"] for pick in pick_dict["pick"]]
-    pick_dict["pos"] = [live_scores[pick]["position"] for pick in pick_dict["pick"]]
+    try:
+        pick_dict["pos"] = [live_scores[pick]["position"] for pick in pick_dict["pick"]]
+    except Exception as e:
+        print(e)
+        pick_dict["pos"] = ["--" for pick in pick_dict["pick"]]
 
     df = pd.DataFrame(pick_dict)
     df.sort_values(["score"], inplace=True, ascending=True)
 
-#    df = df[["team", "pick", "score", "position", "alternate"]]
+    #    df = df[["team", "pick", "score", "position", "alternate"]]
     df = df[["team", "pick", "score", "pos"]]
 
     df.columns = [x.upper() for x in df.columns]
@@ -200,7 +208,9 @@ def create_plots(raw_picks):
             cum_points[user].append(user_cum)
 
     line_data = [
-        go.Scatter(mode="lines+markers", x=tournaments[-3:], y=user_pts[-3:], name=str(user),)
+        go.Scatter(
+            mode="lines+markers", x=tournaments[-3:], y=user_pts[-3:], name=str(user),
+        )
         for user, user_pts in cum_points.items()
     ]
 

@@ -16,18 +16,11 @@ from .util import (
     send_email,
 )
 from .util.admin import add_user_points
-
-from .views import (  # create_plot,; pick_matrix,
-    PickTable,
-    # PlayerTable,
-    # UserPickTable,
-    # UserTable,
-    league_page,
-    # live_scores,
-    weekly_pick_table,
-)
+from .views import PickTable, league_page, weekly_pick_table
 
 SEASON = int(os.getenv("OADYR", 2021))
+
+EMPTY_HTML = "<div></div>"
 
 main = Blueprint("main", __name__)
 
@@ -74,12 +67,14 @@ def league():
     # Determine if we are going to show the picks for the week
     if tournament_state in ["in", "post"]:
         show_picks = True
-        week_picks = Pick.query.filter_by(season=SEASON).filter_by(event=curr_event).all()
+        week_picks = (
+            Pick.query.filter_by(season=SEASON).filter_by(event=curr_event).all()
+        )
         pick_table = weekly_pick_table(users, week_picks)
-        pick_history_table, bar, line = "<p></p>","<p></p>", "<p></p>"
+        pick_history_table, bar, line = EMPTY_HTML, EMPTY_HTML, EMPTY_HTML
     else:
         show_picks = False
-        pick_table =  "<p></p>"
+        pick_table = EMPTY_HTML
         pick_history_table, bar, line = league_page(users, SEASON)
 
     return render_template(
