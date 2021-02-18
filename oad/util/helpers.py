@@ -225,40 +225,6 @@ def get_withdrawl_list():
 def get_earnings(player):
     """Get player earnings. Requires access to API.
     """
-    # # Column configuration
-    # player_col = "PLAYER NAME"
-    # pga_earnings_col = "MONEY"
-    # non_earnings_col = "TOTAL MONEY"
-
-    # # Loop through PGA and Non-PGA tour Money lists.
-    # for M_URL in [PGA_URL, NON_PGA_URL]:
-    #     html = requests.get(M_URL).content
-    #     df_list = pd.read_html(html)
-
-    #     # Extract the player DF
-    #     player_df = df_list[-1]
-
-    #     # Make all text lower string for matching
-    #     player_df[player_col] = player_df[player_col].str.lower()
-
-    #     # Make the players a list
-    #     registered_players = list(player_df[player_col])
-
-    #     if player.lower() in registered_players:
-    #         try:
-    #             earnings = list(
-    #                 player_df[player_df[player_col] == player.lower()][pga_earnings_col]
-    #             )[0]
-    #         except Exception as e:
-    #             earnings = list(
-    #                 player_df[player_df[player_col] == player.lower()][non_earnings_col]
-    #             )[0]
-
-    #         # Extract the value
-    #         if isinstance(earnings, str):
-    #             return int(earnings.replace("$", "").replace(",", ""))
-    #         elif isinstance(earnings, float) or isinstance(earnings, int):
-    #             return int(earnings)
     try:
         r = requests.get(EVENT_URL)
         data = r.json()
