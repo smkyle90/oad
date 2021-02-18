@@ -68,7 +68,7 @@ def weekly_pick_table(users, picks):
         pick_dict["pos"] = ["--" for pick in pick_dict["pick"]]
 
     df = pd.DataFrame(pick_dict)
-    df.sort_values(["score"], inplace=True, ascending=True)
+    df.sort_values(["pos", "pick", "team"], inplace=True, ascending=True)
 
     #    df = df[["team", "pick", "score", "position", "alternate"]]
     df = df[["team", "pick", "score", "pos"]]

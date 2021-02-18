@@ -111,14 +111,39 @@ def get_tourn_state_from_data(data):
 def live_scores_from_data(data, current_players):
     """Get live scores. Function to ensure modularity if API fails.
     """
-    return {
-        user["athlete"]["displayName"]: {
-            "score": int(user["score"]["displayValue"]),
-            "position": user["status"]["position"]["displayName"],
-        }
-        for user in data["events"][0]["competitions"][0]["competitors"]
-        if user["athlete"]["displayName"] in current_players
-    }
+
+    score_data = {}
+
+    for user in data["events"][0]["competitions"][0]["competitors"]:
+        if user["athlete"]["displayName"] in current_players:
+
+            user_score_data = user["linescores"][-1]
+
+            if user_score_data["value"]:
+                try:
+                    player_score = int(user_score_data["displayValue"])
+                except Exception as e:
+                    player_score = 0
+
+                player_pos = user_score_data["currentPosition"]
+            else:
+                player_score = 0
+                player_pos = "--"
+
+            score_data[user["athlete"]["displayName"]] = {
+                "score": player_score,
+                "position": player_pos,
+            }
+
+    # data = {
+    #     user["athlete"]["displayName"]: {
+    #         "score": int(user["linescores"][-1]["displayValue"]),
+    #         "position": user["linescores"][-1]["curretPosition"],
+    #     }
+    #     for user in data["events"][0]["competitions"][0]["competitors"]
+    #     if user["athlete"]["displayName"] in current_players
+    # }
+    return score_data
 
 
 def get_earnings_from_data(data, player):
