@@ -119,8 +119,8 @@ def live_scores_from_data(data, current_players):
             player_score = 0
             player_pos = "--"
             for user_score_data in user["linescores"]:
-
-                if user_score_data["value"]:
+                print(user_score_data)
+                if user_score_data.get("value"):
                     try:
                         player_score += int(user_score_data["displayValue"])
                     except Exception as e:

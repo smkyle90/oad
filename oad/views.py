@@ -69,7 +69,7 @@ def weekly_pick_table(users, picks):
 
     df = pd.DataFrame(pick_dict)
     df.sort_values(["pos", "pick", "team"], inplace=True, ascending=True)
-
+    print(df["score"])
     df["score"] = ["+{}".format(score) if score > 0 else score for score in df["score"]]
     df["score"] = ["E" if not score else score for score in df["score"]]
 
