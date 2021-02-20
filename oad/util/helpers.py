@@ -133,14 +133,6 @@ def live_scores_from_data(data, current_players):
                 "position": player_pos,
             }
 
-    # data = {
-    #     user["athlete"]["displayName"]: {
-    #         "score": int(user["linescores"][-1]["displayValue"]),
-    #         "position": user["linescores"][-1]["curretPosition"],
-    #     }
-    #     for user in data["events"][0]["competitions"][0]["competitors"]
-    #     if user["athlete"]["displayName"] in current_players
-    # }
     return score_data
 
 
