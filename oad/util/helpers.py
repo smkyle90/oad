@@ -116,21 +116,24 @@ def live_scores_from_data(data, current_players):
 
     for user in data["events"][0]["competitions"][0]["competitors"]:
         if user["athlete"]["displayName"] in current_players:
+
+            # print (user)
             player_score = 0
             player_pos = "--"
             for user_score_data in user["linescores"]:
-                print(user_score_data)
+                # print(user_score_data)
                 if user_score_data.get("value"):
                     try:
                         player_score += int(user_score_data["displayValue"])
                     except Exception as e:
                         player_score += 0
 
-                    player_pos = user_score_data["currentPosition"]
+                    player_pos = user_score_data.get("currentPosition")
 
             score_data[user["athlete"]["displayName"]] = {
                 "score": player_score,
                 "position": player_pos,
+                "earnings": int(user.get("earnings", 0)),
             }
 
     return score_data

@@ -32,7 +32,7 @@ def add_user_points():
         player_name = pick.pick
 
         if player_name in withdrawl_list:
-            print("user withdrawn {}".format(player_name))
+            print("User withdrawn {}".format(player_name))
 
             # They have withdrawn and thus earn 0 dollars
             pick.points = 0

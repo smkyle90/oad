@@ -6,7 +6,7 @@ import plotly.graph_objs as go
 from flask_table import Col, Table
 
 from .models import Pick
-from .util import get_live_scores
+from .util import format_earnings, get_live_scores
 
 
 class Earnings(Col):
@@ -55,6 +55,7 @@ def weekly_pick_table(users, picks):
         #        "alternate": [p.alternate for p in picks],
     }
     live_scores = get_live_scores(pick_dict["pick"])
+
     try:
         pick_dict["score"] = [live_scores[pick]["score"] for pick in pick_dict["pick"]]
     except Exception as e:
@@ -67,14 +68,25 @@ def weekly_pick_table(users, picks):
         print(e)
         pick_dict["pos"] = ["--" for pick in pick_dict["pick"]]
 
+    try:
+        pick_dict["earnings"] = [
+            live_scores[pick]["earnings"] for pick in pick_dict["pick"]
+        ]
+    except Exception as e:
+        print(e)
+        pick_dict["earnings"] = ["--" for pick in pick_dict["pick"]]
+
     df = pd.DataFrame(pick_dict)
     df.sort_values(["pos", "pick", "team"], inplace=True, ascending=True)
 
     df["score"] = ["+{}".format(score) if score > 0 else score for score in df["score"]]
     df["score"] = ["E" if not score else score for score in df["score"]]
 
-    #    df = df[["team", "pick", "score", "position", "alternate"]]
-    df = df[["team", "pick", "score", "pos"]]
+    if df["earnings"].sum():
+        df = df[["team", "pick", "score", "pos", "earnings"]]
+        df["earnings"] = [format_earnings(earnings) for earnings in df["earnings"]]
+    else:
+        df = df[["team", "pick", "score", "pos"]]
 
     df.columns = [x.upper() for x in df.columns]
 
