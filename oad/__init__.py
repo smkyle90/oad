@@ -1,3 +1,4 @@
+import datetime
 import time
 
 from flask import Flask
@@ -28,6 +29,7 @@ def create_app():
     app.config["SECRET_KEY"] = "1234"
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
+    app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(weeks=52)
 
     db.init_app(app)
 

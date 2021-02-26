@@ -1,4 +1,6 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from datetime import timedelta
+
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -76,7 +78,10 @@ def login_post():
         return redirect(url_for("auth.login"))
 
     # if the above check passes, then we know the user has the right credentials
+    # remember_time = timedelta(weeks=52)
+    session.permanent = True
     login_user(user, remember=remember)
+
     return redirect(url_for("main.profile"))
 
 
