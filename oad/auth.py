@@ -78,7 +78,6 @@ def login_post():
         return redirect(url_for("auth.login"))
 
     # if the above check passes, then we know the user has the right credentials
-    # remember_time = timedelta(weeks=52)
     session.permanent = True
     login_user(user, remember=remember)
 
