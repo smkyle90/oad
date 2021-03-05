@@ -122,7 +122,12 @@ def weekly_pick_table(users, picks, event_info, user_data):
         df["pr"] = [int(current_earnings.get(row.team)[1]) for row in df.itertuples()]
         df["dr"] = df.pr - df.fr
 
-        df["proj. earns"] = [format_earnings(earnings) for earnings in df["pe"]]
+        df["proj. earns"] = [
+            "${}m".format(round(earnings / 1e6, 2))
+            if earnings > 1e6
+            else "${}k".format(round(earnings / 1e3))
+            for earnings in df["pe"]
+        ]
 
         dr_res = []
         for delta in df["dr"]:
@@ -134,7 +139,11 @@ def weekly_pick_table(users, picks, event_info, user_data):
                 dr_res.append("▼{}".format(-delta))
 
         df["Δ"] = dr_res
-        df = df[["team", "pick", "tot", "pos", "proj. earns", "Δ"]]
+        df["proj. rank"] = df[["fr", "Δ"]].apply(
+            lambda x: "{} ({})".format(x[0], x[1]), axis=1
+        )
+
+        df = df[["team", "pick", "tot", "pos", "proj. earns", "proj. rank"]]
 
     df.columns = [x.upper() for x in df.columns]
 
