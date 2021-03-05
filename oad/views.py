@@ -60,11 +60,12 @@ def weekly_pick_table(users, picks, event_info, user_data):
     }
     live_scores = get_live_scores(pick_dict["pick"])
 
+    print(live_scores)
     try:
-        pick_dict["score"] = [live_scores[pick]["score"] for pick in pick_dict["pick"]]
+        pick_dict["tot"] = [live_scores[pick]["score"] for pick in pick_dict["pick"]]
     except Exception as e:
         print(e)
-        pick_dict["score"] = ["--" for pick in pick_dict["pick"]]
+        pick_dict["tot"] = ["--" for pick in pick_dict["pick"]]
 
     try:
         pick_dict["pos"] = [live_scores[pick]["position"] for pick in pick_dict["pick"]]
@@ -107,24 +108,33 @@ def weekly_pick_table(users, picks, event_info, user_data):
     df = pd.DataFrame(pick_dict)
     df.sort_values(["pos", "pick", "team"], inplace=True, ascending=True)
 
-    df["score"] = ["+{}".format(score) if score > 0 else score for score in df["score"]]
-    df["score"] = ["E" if not score else score for score in df["score"]]
+    df["tot"] = ["+{}".format(score) if score > 0 else score for score in df["tot"]]
+    df["tot"] = ["E" if not score else score for score in df["tot"]]
 
     if df["earnings"].sum():
-        df = df[["team", "pick", "score", "pos", "earnings"]]
+        df = df[["team", "pick", "tot", "pos", "earnings"]]
         df["earnings"] = [format_earnings(earnings) for earnings in df["earnings"]]
     else:
         df["fe"] = [
             int(current_earnings.get(row.team)[0]) + row.pe for row in df.itertuples()
         ]
         df["fr"] = df["fe"].rank(ascending=False).astype(int)
-        # df["pr"]=[int(current_earnings.get(row.team)[1]) for row in df.itertuples()]
-        # df["dr"] = df.pr - df.fr
+        df["pr"] = [int(current_earnings.get(row.team)[1]) for row in df.itertuples()]
+        df["dr"] = df.pr - df.fr
 
         df["proj. earns"] = [format_earnings(earnings) for earnings in df["pe"]]
-        df["Δ"] = df["fr"]
 
-        df = df[["team", "pick", "score", "pos", "proj. earns"]]
+        dr_res = []
+        for delta in df["dr"]:
+            if delta > 0:
+                dr_res.append("▲{}".format(delta))
+            elif not delta:
+                dr_res.append("--")
+            else:
+                dr_res.append("▼{}".format(delta))
+
+        df["Δ"] = dr_res
+        df = df[["team", "pick", "tot", "pos", "proj. earns", "Δ"]]
 
     df.columns = [x.upper() for x in df.columns]
 
@@ -141,14 +151,14 @@ def live_scores(picks):
     live_scores = {
         "user": [],
         "pick": [],
-        "score": [],
+        "tot": [],
         "position": [],
     }
 
     for k, v in user_scores.items():
         live_scores["pick"].append(k)
         live_scores["user"].append(v[0])
-        live_scores["score"].append(v[1])
+        live_scores["tot"].append(v[1])
         live_scores["position"].append(v[2])
 
     df = pd.DataFrame(live_scores)
@@ -156,7 +166,7 @@ def live_scores(picks):
     df.sort_values(["position"], inplace=True, ascending=True)
 
     # Reorder columns
-    df = df[["user", "pick", "score", "position"]]
+    df = df[["user", "pick", "tot", "position"]]
 
     return df.to_html(classes="data", border=0, index=False)
 
