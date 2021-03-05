@@ -99,7 +99,7 @@ def get_tournament_info(data):
 
     df = pd.DataFrame(event_dict)
 
-    return df.to_html(classes="data", border=0, index=False, header=False)
+    return df
 
 
 def get_tourn_state_from_data(data):
@@ -113,14 +113,18 @@ def live_scores_from_data(data, current_players):
     """
 
     score_data = {}
+    rank_data = {}
 
     for user in data["events"][0]["competitions"][0]["competitors"]:
-        if user["athlete"]["displayName"] in current_players:
+        player_score = 0
+        player_pos = "--"
+        for user_score_data in user["linescores"]:
+            if rank_data.get(user_score_data.get("currentPosition")):
+                rank_data[user_score_data.get("currentPosition")] += 1
+            else:
+                rank_data[user_score_data.get("currentPosition")] = 1
 
-            # print (user)
-            player_score = 0
-            player_pos = "--"
-            for user_score_data in user["linescores"]:
+            if user["athlete"]["displayName"] in current_players:
                 # print(user_score_data)
                 if user_score_data.get("value"):
                     try:
@@ -130,11 +134,15 @@ def live_scores_from_data(data, current_players):
 
                     player_pos = user_score_data.get("currentPosition")
 
-            score_data[user["athlete"]["displayName"]] = {
-                "score": player_score,
-                "position": player_pos,
-                "earnings": int(user.get("earnings", 0)),
-            }
+                score_data[user["athlete"]["displayName"]] = {
+                    "score": player_score,
+                    "position": player_pos,
+                    "earnings": int(user.get("earnings", 0)),
+                    "freq": 1,
+                }
+
+    for user, vals in score_data.items():
+        vals["freq"] = rank_data[int(vals["position"])]
 
     return score_data
 
@@ -240,7 +248,7 @@ def get_earnings(player):
 
 
 def format_earnings(val):
-    return "$ {}".format("{:,}".format(int(val)))
+    return "${}".format("{:,}".format(int(val)))
 
 
 def create_pick_table(picks):
@@ -263,7 +271,7 @@ def create_pick_table(picks):
     return pick_table.to_html(classes="data", border=0, index=False)
 
 
-def construct_user_table(users, picks, curr_event=None):
+def construct_user_table(users, picks, curr_event=None, as_html=True):
     user_dict = {
         "team": [],
         "weekly pick": [],
@@ -337,4 +345,7 @@ def construct_user_table(users, picks, curr_event=None):
 
     user_df.columns = [x.upper() for x in user_df.columns]
 
-    return user_df.to_html(classes="data", border=0, index=False)
+    if as_html:
+        return user_df.to_html(classes="data", border=0, index=False)
+    else:
+        return user_df

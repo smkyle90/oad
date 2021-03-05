@@ -62,7 +62,7 @@ def league():
 
     users = User.query.all()
     all_picks = Pick.query.filter_by(season=SEASON).all()
-    user_table = construct_user_table(users, all_picks)
+    user_table = construct_user_table(users, all_picks, as_html=False)
 
     # Determine if we are going to show the picks for the week
     if tournament_state in ["in", "post"]:
@@ -70,7 +70,7 @@ def league():
         week_picks = (
             Pick.query.filter_by(season=SEASON).filter_by(event=curr_event).all()
         )
-        pick_table = weekly_pick_table(users, week_picks)
+        pick_table = weekly_pick_table(users, week_picks, event_table, user_table)
         pick_history_table, bar, line = EMPTY_HTML, EMPTY_HTML, EMPTY_HTML
     else:
         show_picks = False
@@ -79,12 +79,14 @@ def league():
 
     return render_template(
         "league.html",
-        u_table=user_table,
+        u_table=user_table.to_html(classes="data", border=0, index=False),
         p_table=pick_table,
         ph_table=pick_history_table,
         show_picks=show_picks,
         event_name=curr_event,
-        event_table=event_table,
+        event_table=event_table.to_html(
+            classes="data", border=0, index=False, header=False
+        ),
         plot=bar,
         points=line,
         season=SEASON,
