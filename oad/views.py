@@ -60,17 +60,16 @@ def weekly_pick_table(users, picks, event_info, user_data):
     }
     live_scores = get_live_scores(pick_dict["pick"])
 
-    print(live_scores)
     try:
         pick_dict["tot"] = [live_scores[pick]["score"] for pick in pick_dict["pick"]]
     except Exception as e:
-        print(e)
+        print("to", e)
         pick_dict["tot"] = ["--" for pick in pick_dict["pick"]]
 
     try:
         pick_dict["pos"] = [live_scores[pick]["position"] for pick in pick_dict["pick"]]
     except Exception as e:
-        print(e)
+        print("po", e)
         pick_dict["pos"] = ["--" for pick in pick_dict["pick"]]
 
     try:
@@ -78,7 +77,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
             live_scores[pick]["earnings"] for pick in pick_dict["pick"]
         ]
     except Exception as e:
-        print(e)
+        print("ea", e)
         pick_dict["earnings"] = ["--" for pick in pick_dict["pick"]]
 
     try:
@@ -95,41 +94,52 @@ def weekly_pick_table(users, picks, event_info, user_data):
             for pick in pick_dict["pick"]
         ]
     except Exception as e:
-        print(e)
+        print("pe", e)
         pick_dict["pe"] = [0 for pick in pick_dict["pick"]]
-
     current_earnings = {
         user: (float(earnings.replace("$", "").replace(",", "")), rank)
         for user, earnings, rank in zip(
             user_data["TEAM"], user_data["TOTAL EARNINGS"], user_data["RANK"]
         )
     }
-
     df = pd.DataFrame(pick_dict)
+    all_users = set(current_earnings.keys())
+    curr_users = set(df.team)
+    missing_picks = all_users - curr_users
     df.sort_values(["pos", "pick", "team"], inplace=True, ascending=True)
 
+    # Format the score
     df["tot"] = ["+{}".format(score) if score > 0 else score for score in df["tot"]]
     df["tot"] = ["E" if not score else score for score in df["tot"]]
 
+    # Add anyone who missed a pick
+    for mp in missing_picks:
+        add_list = [mp, "--", 0, "--", "--", 0]
+        add_dict = {col: [add_list[i]] for i, col in enumerate(df.columns)}
+        df = df.append(pd.DataFrame(add_dict))
+
+    # Display table based on if earnings are published
     if df["earnings"].sum():
         df = df[["team", "pick", "tot", "pos", "earnings"]]
         df["earnings"] = [format_earnings(earnings) for earnings in df["earnings"]]
-    else:
+    else:  # In tournament display
+        # Future earning
         df["fe"] = [
             int(current_earnings.get(row.team)[0]) + row.pe for row in df.itertuples()
         ]
+        # Future rank
         df["fr"] = df["fe"].rank(ascending=False).astype(int)
+        # current rank
         df["pr"] = [int(current_earnings.get(row.team)[1]) for row in df.itertuples()]
-        df["dr"] = df.pr - df.fr
-
+        # calculate projected earnings
         df["proj. earns"] = [
             "${}m".format(round(earnings / 1e6, 2))
             if earnings > 1e6
             else "${}k".format(round(earnings / 1e3))
             for earnings in df["pe"]
         ]
-
-        # Calculate the rank delta
+        # Calculate the rank delta and display
+        df["dr"] = df.pr - df.fr
         dr_res = []
         for delta in df["dr"]:
             if delta > 0:
@@ -139,8 +149,8 @@ def weekly_pick_table(users, picks, event_info, user_data):
             else:
                 dr_res.append("▼{}".format(-delta))
 
-        df["Δ"] = dr_res
-        df["proj. rank"] = df[["fr", "Δ"]].apply(
+        df["dr"] = dr_res
+        df["proj. rank"] = df[["fr", "dr"]].apply(
             lambda x: "{} ({})".format(x[0], x[1]), axis=1
         )
 

@@ -119,7 +119,8 @@ def live_scores_from_data(data, current_players):
         player_score = 0
         player_pos = "--"
         for user_score_data in user["linescores"]:
-            player_pos = user_score_data.get("currentPosition")
+            if user_score_data.get("value"):
+                player_pos = user_score_data.get("currentPosition")
 
             if user["athlete"]["displayName"] in current_players:
                 # print(user_score_data)
