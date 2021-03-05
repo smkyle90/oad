@@ -248,7 +248,7 @@ def get_earnings(player):
 
 
 def format_earnings(val):
-    return "$ {}".format("{:,}".format(int(val)))
+    return "${}".format("{:,}".format(int(val)))
 
 
 def create_pick_table(picks):
