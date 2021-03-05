@@ -131,7 +131,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
             elif not delta:
                 dr_res.append("--")
             else:
-                dr_res.append("▼{}".format(delta))
+                dr_res.append("▼{}".format(-delta))
 
         df["Δ"] = dr_res
         df = df[["team", "pick", "tot", "pos", "proj. earns", "Δ"]]
