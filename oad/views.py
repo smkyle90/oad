@@ -122,9 +122,9 @@ def weekly_pick_table(users, picks, event_info, user_data):
         # df["dr"] = df.pr - df.fr
 
         df["proj. earn"] = [format_earnings(earnings) for earnings in df["pe"]]
-        df["proj. rank"] = df["fr"]
+        df["Δ"] = df["fr"]
 
-        df = df[["team", "pick", "score", "pos", "proj. earn", "proj. rank"]]
+        df = df[["team", "pick", "score", "pos", "proj. earn", "Δ"]]
 
     df.columns = [x.upper() for x in df.columns]
 
