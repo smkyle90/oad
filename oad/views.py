@@ -129,6 +129,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
             for earnings in df["pe"]
         ]
 
+        # Calculate the rank delta
         dr_res = []
         for delta in df["dr"]:
             if delta > 0:
