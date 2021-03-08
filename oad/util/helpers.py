@@ -149,9 +149,20 @@ def live_scores_from_data(data, current_players):
     return score_data
 
 
-def get_earnings_from_data(data, player):
+def get_earnings_from_data(data, player=None):
     """Get earnings. Function to ensure modularity if API fails.
     """
+    if player is None:
+        return (
+            sum(
+                [
+                    int(user["earnings"])
+                    for user in data["events"][0]["competitions"][0]["competitors"]
+                ]
+            )
+            > 0
+        )
+
     for user in data["events"][0]["competitions"][0]["competitors"]:
         if user["athlete"]["displayName"] == player:
             return user["earnings"]
@@ -183,6 +194,12 @@ def get_event_info():
         avail_picks = get_avail_from_data(data)
         tournament_state = get_tourn_state_from_data(data)
         tournament_info = get_tournament_info(data)
+
+        if tournament_state == "post":
+            # check if the earnings are posteds
+            earnings_posted = get_earnings_from_data(data)
+            if not earnings_posted:
+                tournament_state = "in"
         return event_name, avail_picks, tournament_state, tournament_info
     except Exception as e:
         print("Issue getting data from ESPN API. Message: {}".format(e))
