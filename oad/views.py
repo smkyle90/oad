@@ -127,37 +127,11 @@ def weekly_pick_table(users, picks, event_info, user_data):
 
     # Display table based on if earnings are published
     if df["earnings"].sum():
-        # Future earning
-        df["fe"] = [
-            int(current_earnings.get(row.team)[0]) + row.earnings
-            for row in df.itertuples()
-        ]
-        # Future rank
-        df["fr"] = df["fe"].rank(ascending=False).astype(int)
-        # calculate projected earnings
         df["earnings"] = [
-            "${}m".format(round(earnings / 1e6, 2))
-            if earnings > 1e6
-            else "${}k".format(round(earnings / 1e3))
-            for earnings in df["earnings"]
+		format_earnings(earnings) for earnings in df["earnings"]
         ]
-        # Calculate the rank delta and display
-        df["dr"] = df.pr - df.fr
-        dr_res = []
-        for delta in df["dr"]:
-            if delta > 0:
-                dr_res.append("▲{}".format(delta))
-            elif not delta:
-                dr_res.append("--")
-            else:
-                dr_res.append("▼{}".format(-delta))
 
-        df["dr"] = dr_res
-        df["rank"] = df[["fr", "dr"]].apply(
-            lambda x: "{} ({})".format(x[0], x[1]), axis=1
-        )
-
-        df = df[["team", "pick", "tot", "pos", "earnings", "rank"]]
+        df = df[["team", "pick", "tot", "pos", "earnings"]]
 
     else:  # In tournament display
         # Future earning
