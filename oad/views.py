@@ -127,9 +127,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
 
     # Display table based on if earnings are published
     if df["earnings"].sum():
-        df["earnings"] = [
-		format_earnings(earnings) for earnings in df["earnings"]
-        ]
+        df["earnings"] = [format_earnings(earnings) for earnings in df["earnings"]]
 
         df = df[["team", "pick", "tot", "pos", "earnings"]]
 
@@ -236,6 +234,14 @@ def pick_matrix(raw_picks):
         df
 
     """
+
+    tourn_dict = {}
+    t_no = 1
+    for tourn in raw_picks["tournament"]:
+        if tourn not in tourn_dict:
+            tourn_dict[tourn] = t_no
+            t_no += 1
+
     df = pd.DataFrame(raw_picks)
 
     df = df[df.points >= 0]
@@ -260,18 +266,23 @@ def pick_matrix(raw_picks):
                     data_dict[col].append(df_filt[col].iloc[0])
 
     df = pd.DataFrame(data_dict)
+
+    df["tour_no"] = [tourn_dict[tourn] for tourn in df.tournament]
+
+    print(df)
+
     df_user = pd.pivot_table(
         df,
         values="player",
-        index=["tournament"],
+        index=["tour_no", "tournament"],
         columns=["user"],
         fill_value="--",
         aggfunc="first",
     )
 
     # df.columns = [col.upper() for col in df.columns]
-
-    df_user.index.name = None
+    df_user.index.names = None, None
+    # df_user.index.names = None
 
     return df_user.to_html(classes="data", border=0, index=True)
 
