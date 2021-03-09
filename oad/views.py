@@ -243,7 +243,6 @@ def pick_matrix(raw_picks):
             t_no += 1
 
     df = pd.DataFrame(raw_picks)
-
     df = df[df.points >= 0]
 
     all_users = df.user.unique()
@@ -269,8 +268,6 @@ def pick_matrix(raw_picks):
 
     df["tour_no"] = [tourn_dict[tourn] for tourn in df.tournament]
 
-    print(df)
-
     df_user = pd.pivot_table(
         df,
         values="player",
@@ -282,7 +279,6 @@ def pick_matrix(raw_picks):
 
     # df.columns = [col.upper() for col in df.columns]
     df_user.index.names = None, None
-    # df_user.index.names = None
 
     return df_user.to_html(classes="data", border=0, index=True)
 
