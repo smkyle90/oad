@@ -144,7 +144,7 @@ def live_scores_from_data(data, current_players):
             rank_data[player_pos] = 1
 
     for user, vals in score_data.items():
-        vals["freq"] = rank_data[int(vals["position"])]
+        vals["freq"] = rank_data[vals["position"]]
 
     return score_data
 

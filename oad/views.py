@@ -85,18 +85,23 @@ def weekly_pick_table(users, picks, event_info, user_data):
 
     # calculate projected earnings
     try:
-        pick_dict["pe"] = [
-            (purse_value / 100)
-            * sum(
-                pos_payouts[
-                    live_scores[pick]["position"]
-                    - 1 : (live_scores[pick]["position"] - 1)
-                    + live_scores[pick]["freq"]
-                ]
-            )
-            / (live_scores[pick]["freq"])
-            for pick in pick_dict["pick"]
-        ]
+        pot_earns = []
+        for pick in pick_dict["pick"]:
+            try:
+                pot_earns.append(
+                    (purse_value / 100)
+                    * sum(
+                        pos_payouts[
+                            live_scores[pick]["position"]
+                            - 1 : (live_scores[pick]["position"] - 1)
+                            + live_scores[pick]["freq"]
+                        ]
+                    )
+                    / (live_scores[pick]["freq"])
+                )
+            except Exception:
+                pot_earns.append(0)
+        pick_dict["pe"] = pot_earns
     except Exception as e:
         print("pe", e)
         pick_dict["pe"] = [0 for pick in pick_dict["pick"]]
@@ -119,6 +124,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
     missing_picks = all_users - curr_users
 
     # Format the score
+    print(df["tot"])
     df["tot"] = ["+{}".format(score) if score > 0 else score for score in df["tot"]]
     df["tot"] = ["E" if not score else score for score in df["tot"]]
 
