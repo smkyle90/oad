@@ -37,10 +37,12 @@
 
 <section>
 <div>
-  <h3 class="subtitle">League Leaders</h3>    
+  <h3 class="subtitle">League Leaders</h3>
 <div>{{ u_table | safe }}</div>
 </div>
 </section>
+
+{% if show_data %}
 <section>
 <div>
   <h3 class="subtitle">Pick History</h3>
@@ -66,4 +68,5 @@
     </div>
 </div>
 </section>
+{% endif %}
 {% endblock %}

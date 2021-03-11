@@ -71,17 +71,18 @@ def league():
             Pick.query.filter_by(season=SEASON).filter_by(event=curr_event).all()
         )
         pick_table = weekly_pick_table(users, week_picks, event_table, user_table)
-#        pick_history_table, bar, line = EMPTY_HTML, EMPTY_HTML, EMPTY_HTML
+    #        pick_history_table, bar, line = EMPTY_HTML, EMPTY_HTML, EMPTY_HTML
     else:
         show_picks = False
         pick_table = EMPTY_HTML
-#        pick_history_table, bar, line = league_page(users, SEASON)
+    #        pick_history_table, bar, line = league_page(users, SEASON)
 
     if tournament_state != "in":
+        show_historical_data = True
         pick_history_table, bar, line = league_page(users, SEASON)
     else:
+        show_historical_data = False
         pick_history_table, bar, line = EMPTY_HTML, EMPTY_HTML, EMPTY_HTML
-
 
     return render_template(
         "league.html",
@@ -89,6 +90,7 @@ def league():
         p_table=pick_table,
         ph_table=pick_history_table,
         show_picks=show_picks,
+        show_data=show_historical_data,
         event_name=curr_event,
         event_table=event_table.to_html(
             classes="data", border=0, index=False, header=False
