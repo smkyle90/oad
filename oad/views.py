@@ -124,7 +124,6 @@ def weekly_pick_table(users, picks, event_info, user_data):
     missing_picks = all_users - curr_users
 
     # Format the score
-    print(df["tot"])
     df["tot"] = ["+{}".format(score) if score > 0 else score for score in df["tot"]]
     df["tot"] = ["E" if not score else score for score in df["tot"]]
 

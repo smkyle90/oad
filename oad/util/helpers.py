@@ -195,11 +195,15 @@ def get_event_info():
         tournament_state = get_tourn_state_from_data(data)
         tournament_info = get_tournament_info(data)
 
-        if tournament_state == "post":
+        if tournament_state in ["in", "post"]:
             # check if the earnings are posteds
             earnings_posted = get_earnings_from_data(data)
-            if not earnings_posted:
+            print(earnings_posted)
+            if earnings_posted:
+                tournament_state = "post"
+            else:
                 tournament_state = "in"
+
         return event_name, avail_picks, tournament_state, tournament_info
     except Exception as e:
         print("Issue getting data from ESPN API. Message: {}".format(e))
