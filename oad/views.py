@@ -63,7 +63,9 @@ def weekly_pick_table(users, picks, event_info, user_data):
         "earnings": [],
     }
     # live scores from API for each pick.
-    live_scores = get_live_scores(set(pick_dict["pick"]) + set(pick_dict["alternate"]))
+    live_scores = get_live_scores(
+        set(pick_dict["pick"]).union(set(pick_dict["alternate"]))
+    )
 
     for idx, pick in enumerate(pick_dict["pick"]):
 
@@ -84,10 +86,10 @@ def weekly_pick_table(users, picks, event_info, user_data):
             pick_dict["pos"].append("--")
 
         try:
-            pick_dict["Earnings"].append(live_scores[pick]["earnings"])
+            pick_dict["earnings"].append(live_scores[pick]["earnings"])
         except Exception as e:
             print(e)
-            pick_dict["earnings"].append("--")
+            pick_dict["earnings"].append(0)
 
     # calculate projected earnings
     try:
