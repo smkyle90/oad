@@ -198,7 +198,6 @@ def get_event_info():
         if tournament_state in ["in", "post"]:
             # check if the earnings are posteds
             earnings_posted = get_earnings_from_data(data)
-            print(earnings_posted)
             if earnings_posted:
                 tournament_state = "post"
             else:

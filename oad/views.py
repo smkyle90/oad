@@ -57,31 +57,37 @@ def weekly_pick_table(users, picks, event_info, user_data):
         "team": [user_dict[p.name] for p in picks],
         "pick": [p.pick for p in picks],
         "pe": [0 for p in picks],
-        #        "alternate": [p.alternate for p in picks],
+        "alternate": [p.alternate for p in picks],
+        "tot": [],
+        "pos": [],
+        "earnings": [],
     }
     # live scores from API for each pick.
-    live_scores = get_live_scores(pick_dict["pick"])
+    live_scores = get_live_scores(set(pick_dict["pick"]) + set(pick_dict["alternate"]))
 
-    # add to to the pick dictionary
-    try:
-        pick_dict["tot"] = [live_scores[pick]["score"] for pick in pick_dict["pick"]]
-    except Exception as e:
-        print("to", e)
-        pick_dict["tot"] = ["--" for pick in pick_dict["pick"]]
+    for idx, pick in enumerate(pick_dict["pick"]):
 
-    try:
-        pick_dict["pos"] = [live_scores[pick]["position"] for pick in pick_dict["pick"]]
-    except Exception as e:
-        print("po", e)
-        pick_dict["pos"] = ["--" for pick in pick_dict["pick"]]
+        if pick not in live_scores:
+            pick = pick_dict["alternate"][idx]
+            pick_dict["pick"][idx] = pick
 
-    try:
-        pick_dict["earnings"] = [
-            live_scores[pick]["earnings"] for pick in pick_dict["pick"]
-        ]
-    except Exception as e:
-        print("ea", e)
-        pick_dict["earnings"] = ["--" for pick in pick_dict["pick"]]
+        try:
+            pick_dict["tot"].append(live_scores[pick]["score"])
+        except Exception as e:
+            print(e)
+            pick_dict["tot"].append("--")
+
+        try:
+            pick_dict["pos"].append(live_scores[pick]["position"])
+        except Exception as e:
+            print(e)
+            pick_dict["pos"].append("--")
+
+        try:
+            pick_dict["Earnings"].append(live_scores[pick]["earnings"])
+        except Exception as e:
+            print(e)
+            pick_dict["earnings"].append("--")
 
     # calculate projected earnings
     try:
