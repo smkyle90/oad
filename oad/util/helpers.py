@@ -119,10 +119,8 @@ def live_scores_from_data(data, current_players):
         player_score = 0
         player_pos = "--"
         for user_score_data in user["linescores"]:
-            if rank_data.get(user_score_data.get("currentPosition")):
-                rank_data[user_score_data.get("currentPosition")] += 1
-            else:
-                rank_data[user_score_data.get("currentPosition")] = 1
+            if user_score_data.get("value"):
+                player_pos = user_score_data.get("currentPosition")
 
             if user["athlete"]["displayName"] in current_players:
                 # print(user_score_data)
@@ -132,8 +130,6 @@ def live_scores_from_data(data, current_players):
                     except Exception as e:
                         player_score += 0
 
-                    player_pos = user_score_data.get("currentPosition")
-
                 score_data[user["athlete"]["displayName"]] = {
                     "score": player_score,
                     "position": player_pos,
@@ -141,15 +137,32 @@ def live_scores_from_data(data, current_players):
                     "freq": 1,
                 }
 
+        # Store the number of players at a particular score. This is just the last linescore for each user.
+        if rank_data.get(player_pos):
+            rank_data[player_pos] += 1
+        else:
+            rank_data[player_pos] = 1
+
     for user, vals in score_data.items():
-        vals["freq"] = rank_data[int(vals["position"])]
+        vals["freq"] = rank_data[vals["position"]]
 
     return score_data
 
 
-def get_earnings_from_data(data, player):
+def get_earnings_from_data(data, player=None):
     """Get earnings. Function to ensure modularity if API fails.
     """
+    if player is None:
+        return (
+            sum(
+                [
+                    int(user["earnings"])
+                    for user in data["events"][0]["competitions"][0]["competitors"]
+                ]
+            )
+            > 0
+        )
+
     for user in data["events"][0]["competitions"][0]["competitors"]:
         if user["athlete"]["displayName"] == player:
             return user["earnings"]
@@ -181,6 +194,15 @@ def get_event_info():
         avail_picks = get_avail_from_data(data)
         tournament_state = get_tourn_state_from_data(data)
         tournament_info = get_tournament_info(data)
+
+        if tournament_state in ["in", "post"]:
+            # check if the earnings are posteds
+            earnings_posted = get_earnings_from_data(data)
+            if earnings_posted:
+                tournament_state = "post"
+            else:
+                tournament_state = "in"
+
         return event_name, avail_picks, tournament_state, tournament_info
     except Exception as e:
         print("Issue getting data from ESPN API. Message: {}".format(e))

@@ -70,18 +70,29 @@
         border-collapse: collapse;
         width: 100%;
         font-size: small;
+        position: relative;
       }
 
-      td,
+      td {
+        border: 1px solid #303036;
+        text-align: center;
+        padding: 4px;
+        cursor: pointer;
+        font-size: small;
+      }
+
       th {
         border: 1px solid #303036;
         text-align: center;
-        padding: 8px;
+        padding: 4px;
         cursor: pointer;
+        font-size: x-small;
+        background-color: #CCCACE;
+
       }
 
       tr:nth-child(even) {
-        background-color: #98959b;
+        background-color: #CCCACE;
       }
 
       input[type="text"],
@@ -130,7 +141,7 @@
       font-size: 17px;
       }*/
       /*         .navbar a:hover {
-      background-color: #98959B;
+      background-color: #CCCACE;
       color: FFFAFF;
       }
       .navbar a.active {

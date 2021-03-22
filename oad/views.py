@@ -43,10 +43,11 @@ class UserPickTable(Table):
 
 
 def weekly_pick_table(users, picks, event_info, user_data):
-
+    # get purse value
     purse_value = event_info.loc[event_info.col1 == "Purse", "col2"].iloc[0][1:]
     purse_value = float(purse_value.replace(",", ""))
 
+    # construct user dict for display names
     user_dict = {
         user.name: user.display_name if user.display_name else user.name
         for user in users
@@ -55,48 +56,65 @@ def weekly_pick_table(users, picks, event_info, user_data):
     pick_dict = {
         "team": [user_dict[p.name] for p in picks],
         "pick": [p.pick for p in picks],
-        #        "alternate": [p.alternate for p in picks],
         "pe": [0 for p in picks],
+        "alternate": [p.alternate for p in picks],
+        "tot": [],
+        "pos": [],
+        "earnings": [],
     }
-    live_scores = get_live_scores(pick_dict["pick"])
+    # live scores from API for each pick.
+    live_scores = get_live_scores(
+        set(pick_dict["pick"]).union(set(pick_dict["alternate"]))
+    )
 
-    try:
-        pick_dict["score"] = [live_scores[pick]["score"] for pick in pick_dict["pick"]]
-    except Exception as e:
-        print(e)
-        pick_dict["score"] = ["--" for pick in pick_dict["pick"]]
+    for idx, pick in enumerate(pick_dict["pick"]):
 
-    try:
-        pick_dict["pos"] = [live_scores[pick]["position"] for pick in pick_dict["pick"]]
-    except Exception as e:
-        print(e)
-        pick_dict["pos"] = ["--" for pick in pick_dict["pick"]]
+        if pick not in live_scores:
+            pick = pick_dict["alternate"][idx]
+            pick_dict["pick"][idx] = pick
 
-    try:
-        pick_dict["earnings"] = [
-            live_scores[pick]["earnings"] for pick in pick_dict["pick"]
-        ]
-    except Exception as e:
-        print(e)
-        pick_dict["earnings"] = ["--" for pick in pick_dict["pick"]]
+        try:
+            pick_dict["tot"].append(live_scores[pick]["score"])
+        except Exception as e:
+            print(e)
+            pick_dict["tot"].append("--")
 
+        try:
+            pick_dict["pos"].append(live_scores[pick]["position"])
+        except Exception as e:
+            print(e)
+            pick_dict["pos"].append("--")
+
+        try:
+            pick_dict["earnings"].append(live_scores[pick]["earnings"])
+        except Exception as e:
+            print(e)
+            pick_dict["earnings"].append(0)
+
+    # calculate projected earnings
     try:
-        pick_dict["pe"] = [
-            (purse_value / 100)
-            * sum(
-                pos_payouts[
-                    live_scores[pick]["position"]
-                    - 1 : (live_scores[pick]["position"] - 1)
-                    + live_scores[pick]["freq"]
-                ]
-            )
-            / (live_scores[pick]["freq"])
-            for pick in pick_dict["pick"]
-        ]
+        pot_earns = []
+        for pick in pick_dict["pick"]:
+            try:
+                pot_earns.append(
+                    (purse_value / 100)
+                    * sum(
+                        pos_payouts[
+                            live_scores[pick]["position"]
+                            - 1 : (live_scores[pick]["position"] - 1)
+                            + live_scores[pick]["freq"]
+                        ]
+                    )
+                    / (live_scores[pick]["freq"])
+                )
+            except Exception:
+                pot_earns.append(0)
+        pick_dict["pe"] = pot_earns
     except Exception as e:
-        print(e)
+        print("pe", e)
         pick_dict["pe"] = [0 for pick in pick_dict["pick"]]
 
+    # extract the user data for use in the table
     current_earnings = {
         user: (float(earnings.replace("$", "").replace(",", "")), rank)
         for user, earnings, rank in zip(
@@ -104,27 +122,60 @@ def weekly_pick_table(users, picks, event_info, user_data):
         )
     }
 
+    # make pick dataframe
     df = pd.DataFrame(pick_dict)
     df.sort_values(["pos", "pick", "team"], inplace=True, ascending=True)
 
-    df["score"] = ["+{}".format(score) if score > 0 else score for score in df["score"]]
-    df["score"] = ["E" if not score else score for score in df["score"]]
+    # get missing picks
+    all_users = set(current_earnings.keys())
+    curr_users = set(df.team)
+    missing_picks = all_users - curr_users
 
+    # Format the score
+    df["tot"] = ["+{}".format(score) if score > 0 else score for score in df["tot"]]
+    df["tot"] = ["E" if not score else score for score in df["tot"]]
+
+    # current rank
+    df["pr"] = [int(current_earnings.get(row.team)[1]) for row in df.itertuples()]
+
+    # Display table based on if earnings are published
     if df["earnings"].sum():
-        df = df[["team", "pick", "score", "pos", "earnings"]]
         df["earnings"] = [format_earnings(earnings) for earnings in df["earnings"]]
-    else:
+
+        df = df[["team", "pick", "tot", "pos", "earnings"]]
+
+    else:  # In tournament display
+        # Future earning
         df["fe"] = [
             int(current_earnings.get(row.team)[0]) + row.pe for row in df.itertuples()
         ]
+        # Future rank
         df["fr"] = df["fe"].rank(ascending=False).astype(int)
-        # df["pr"]=[int(current_earnings.get(row.team)[1]) for row in df.itertuples()]
-        # df["dr"] = df.pr - df.fr
 
-        df["proj. earns"] = [format_earnings(earnings) for earnings in df["pe"]]
-        df["Δ"] = df["fr"]
+        # calculate projected earnings
+        df["proj. earns"] = [
+            "${}m".format(round(earnings / 1e6, 2))
+            if earnings > 1e6
+            else "${}k".format(round(earnings / 1e3))
+            for earnings in df["pe"]
+        ]
+        # Calculate the rank delta and display
+        df["dr"] = df.pr - df.fr
+        dr_res = []
+        for delta in df["dr"]:
+            if delta > 0:
+                dr_res.append("▲{}".format(delta))
+            elif not delta:
+                dr_res.append("--")
+            else:
+                dr_res.append("▼{}".format(-delta))
 
-        df = df[["team", "pick", "score", "pos", "proj. earns"]]
+        df["dr"] = dr_res
+        df["proj. rank"] = df[["fr", "dr"]].apply(
+            lambda x: "{} ({})".format(x[0], x[1]), axis=1
+        )
+
+        df = df[["team", "pick", "tot", "pos", "proj. earns", "proj. rank"]]
 
     df.columns = [x.upper() for x in df.columns]
 
@@ -141,14 +192,14 @@ def live_scores(picks):
     live_scores = {
         "user": [],
         "pick": [],
-        "score": [],
+        "tot": [],
         "position": [],
     }
 
     for k, v in user_scores.items():
         live_scores["pick"].append(k)
         live_scores["user"].append(v[0])
-        live_scores["score"].append(v[1])
+        live_scores["tot"].append(v[1])
         live_scores["position"].append(v[2])
 
     df = pd.DataFrame(live_scores)
@@ -156,7 +207,7 @@ def live_scores(picks):
     df.sort_values(["position"], inplace=True, ascending=True)
 
     # Reorder columns
-    df = df[["user", "pick", "score", "position"]]
+    df = df[["user", "pick", "tot", "position"]]
 
     return df.to_html(classes="data", border=0, index=False)
 
@@ -196,8 +247,15 @@ def pick_matrix(raw_picks):
         df
 
     """
-    df = pd.DataFrame(raw_picks)
 
+    tourn_dict = {}
+    t_no = 1
+    for tourn in raw_picks["tournament"]:
+        if tourn not in tourn_dict:
+            tourn_dict[tourn] = t_no
+            t_no += 1
+
+    df = pd.DataFrame(raw_picks)
     df = df[df.points >= 0]
 
     all_users = df.user.unique()
@@ -220,18 +278,20 @@ def pick_matrix(raw_picks):
                     data_dict[col].append(df_filt[col].iloc[0])
 
     df = pd.DataFrame(data_dict)
+
+    df["tour_no"] = [tourn_dict[tourn] for tourn in df.tournament]
+
     df_user = pd.pivot_table(
         df,
         values="player",
-        index=["tournament"],
+        index=["tour_no", "tournament"],
         columns=["user"],
         fill_value="--",
         aggfunc="first",
     )
 
     # df.columns = [col.upper() for col in df.columns]
-
-    df_user.index.name = None
+    df_user.index.names = None, None
 
     return df_user.to_html(classes="data", border=0, index=True)
 
