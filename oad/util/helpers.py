@@ -75,20 +75,22 @@ def get_tournament_info(data):
     data_dict = {}
 
     try:
-        data_dict["Purse"] = data["events"][0]["displayPurse"]
+        data_dict["Purse"] = "$10,500,000"  # data["events"][0]["displayPurse"]
     except Exception:
         data_dict["Purse"] = "Unavailable"
 
     try:
-        data_dict["Courses"] = courses_separator.join(
-            [course["name"] for course in data["events"][0]["courses"]]
-        )
+        # data_dict["Courses"] = courses_separator.join(
+        #     [course["name"] for course in data["events"][0]["courses"]]
+        # )
+        data_dict["Courses"] = "Austin Country Club"
     except Exception:
         data_dict["Courses"] = "Unavailable"
     try:
-        data_dict["Defending Champion"] = data["events"][0]["defendingChampion"][
-            "athlete"
-        ]["displayName"]
+        # data_dict["Defending Champion"] = data["events"][0]["defendingChampion"][
+        #     "athlete"
+        # ]["displayName"]
+        data_dict["Defending Champion"] = "Kevin Kisner"
     except Exception:
         data_dict["Defending Champion"] = "Unavailable"
 
@@ -190,10 +192,81 @@ def get_event_info():
         data = r.json()
         data = remove_canceled(data)
 
-        event_name = get_event_from_data(data)
-        avail_picks = get_avail_from_data(data)
+        # event_name = get_event_from_data(data)
+        # avail_picks = get_avail_from_data(data)
         tournament_state = get_tourn_state_from_data(data)
         tournament_info = get_tournament_info(data)
+
+        # DIRTY HACK FOR WGC
+        event_name = "WGC Dell Technologies Match Play"
+        avail_picks = [
+            "Justin Thomas",
+            "Bryson DeChambeau",
+            "Dustin Johnson",
+            "Jon Rahm",
+            "Rory McIlroy",
+            "Collin Morikawa",
+            "Patrick Reed",
+            "Jordan Spieth",
+            "Patrick Cantlay",
+            "Viktor Hovland",
+            "Xander Schauffele",
+            "Paul Casey",
+            "Tony Finau",
+            "Sungjae Im",
+            "Webb Simpson",
+            "Daniel Berger",
+            "Tyrrell Hatton",
+            "Sergio Garcia",
+            "Matt Fitzpatrick",
+            "Cameron Smith",
+            "Hideki Matsuyama",
+            "Louis Oosthuizen",
+            "Joaquin Niemann",
+            "Jason Day",
+            "Tommy Fleetwood",
+            "Will Zalatoris",
+            "Scottie Scheffler",
+            "Abraham Ancer",
+            "Lee Westwood",
+            "Corey Conners",
+            "Christiaan Bezuidenhout",
+            "Jason Kokrak",
+            "Kevin Kisner",
+            "Russell Henley",
+            "Max Homa",
+            "Harris English",
+            "Si Woo Kim",
+            "Brian Harman",
+            "Billy Horschel",
+            "Ryan Palmer",
+            "Kevin Na",
+            "Bubba Watson",
+            "Matt Wallace",
+            "Marc Leishman",
+            "Matthew Wolff",
+            "Ian Poulter",
+            "Brendon Todd",
+            "Lanto Griffin",
+            "Carlos Ortiz",
+            "Shane Lowry",
+            "Victor Perez",
+            "Matt Kuchar",
+            "Talor Gooch",
+            "Kevin Streelman",
+            "Robert MacIntyre",
+            "Erik van Rooyen",
+            "Dylan Frittelli",
+            "Antoine Rozner",
+            "Sebastian Munoz",
+            "Mackenzie Hughes",
+            "J.T. Poston",
+            "Bernd Wiesberger",
+            "Adam Long",
+            "Andy Sullivan",
+        ]
+
+        tournament_state = "pre"
 
         if tournament_state in ["in", "post"]:
             # check if the earnings are posteds
