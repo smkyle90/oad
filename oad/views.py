@@ -63,10 +63,14 @@ def weekly_pick_table(users, picks, event_info, user_data):
         "earnings": [],
     }
     # live scores from API for each pick.
-    live_scores = get_live_scores(
-        set(pick_dict["pick"]).union(set(pick_dict["alternate"]))
-    )
+    # live_scores = get_live_scores(
+    #     set(pick_dict["pick"]).union(set(pick_dict["alternate"]))
+    # )
 
+    live_scores = {
+        pick: {"score": 0, "position": 0, "earnings": 0} for pick in pick_dict["pick"]
+    }
+    print(live_scores)
     for idx, pick in enumerate(pick_dict["pick"]):
 
         if pick not in live_scores:

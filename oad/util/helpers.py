@@ -155,20 +155,29 @@ def get_earnings_from_data(data, player=None):
     """Get earnings. Function to ensure modularity if API fails.
     """
     if player is None:
-        return (
-            sum(
-                [
-                    int(user["earnings"])
-                    for user in data["events"][0]["competitions"][0]["competitors"]
-                ]
+        try:
+            return (
+                sum(
+                    [
+                        int(user["earnings"])
+                        for user in data["events"][0]["competitions"][0]["competitors"]
+                    ]
+                )
+                > 0
             )
-            > 0
-        )
+        except Exception as e:
+            print(e)
+            return False
 
-    for user in data["events"][0]["competitions"][0]["competitors"]:
-        if user["athlete"]["displayName"] == player:
-            return user["earnings"]
-    return -1
+    try:
+        for user in data["events"][0]["competitions"][0]["competitors"]:
+            if user["athlete"]["displayName"] == player:
+                return user["earnings"]
+    except Exception as e:
+        print(e)
+        return False
+
+    return False
 
 
 def remove_canceled(data):
@@ -266,7 +275,7 @@ def get_event_info():
             "Andy Sullivan",
         ]
 
-        tournament_state = "pre"
+        # tournament_state = "pre"
 
         if tournament_state in ["in", "post"]:
             # check if the earnings are posteds
