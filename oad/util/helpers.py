@@ -117,38 +117,62 @@ def live_scores_from_data(data, current_players):
     score_data = {}
     rank_data = {}
 
-    for user in data["events"][0]["competitions"][0]["competitors"]:
-        player_score = 0
-        player_pos = "--"
-        for user_score_data in user["linescores"]:
-            if user_score_data.get("value"):
-                player_pos = user_score_data.get("currentPosition")
+    for match in data["events"][0]["competitions"][-1]:
+        players = []
+        player_score = []
+        player_pos = 0
+        for player in match["competitors"]:
+            players.append(player["athlete"]["displayName"])
+            player_score.append(player["score"]["value"])
 
-            if user["athlete"]["displayName"] in current_players:
-                # print(user_score_data)
-                if user_score_data.get("value"):
-                    try:
-                        player_score += int(user_score_data["displayValue"])
-                    except Exception as e:
-                        player_score += 0
+        for idx, player in enumerate(players):
+            if player in current_players:
+                if not player_score[idx]:
+                    score = player_score[(idx + 1) % 2]
+                else:
+                    score = -player_score[idx]
 
-                score_data[user["athlete"]["displayName"]] = {
-                    "score": player_score,
+                score_data[player] = {
+                    "score": score,
                     "position": player_pos,
-                    "earnings": int(user.get("earnings", 0)),
+                    "earnings": 0,
                     "freq": 1,
+                    "opponent": players[(idx + 1) % 2],
                 }
 
-        # Store the number of players at a particular score. This is just the last linescore for each user.
-        if rank_data.get(player_pos):
-            rank_data[player_pos] += 1
-        else:
-            rank_data[player_pos] = 1
-
-    for user, vals in score_data.items():
-        vals["freq"] = rank_data[vals["position"]]
-
     return score_data
+    # for user in data["events"][0]["competitions"][0]["competitors"]:
+    #     player_score = 0
+    #     player_pos = "--"
+    #     for user_score_data in user["linescores"]:
+    #         if user_score_data.get("value"):
+    #             player_pos = user_score_data.get("currentPosition")
+
+    #         if user["athlete"]["displayName"] in current_players:
+    #             # print(user_score_data)
+    #             if user_score_data.get("value"):
+    #                 try:
+    #                     player_score += int(user_score_data["displayValue"])
+    #                 except Exception as e:
+    #                     player_score += 0
+
+    #             score_data[user["athlete"]["displayName"]] = {
+    #                 "score": player_score,
+    #                 "position": player_pos,
+    #                 "earnings": int(user.get("earnings", 0)),
+    #                 "freq": 1,
+    #             }
+
+    #     # Store the number of players at a particular score. This is just the last linescore for each user.
+    #     if rank_data.get(player_pos):
+    #         rank_data[player_pos] += 1
+    #     else:
+    #         rank_data[player_pos] = 1
+
+    # for user, vals in score_data.items():
+    #     vals["freq"] = rank_data[vals["position"]]
+
+    # return score_data
 
 
 def get_earnings_from_data(data, player=None):

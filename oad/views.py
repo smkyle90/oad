@@ -1,5 +1,6 @@
 import json
 
+import numpy as np
 import pandas as pd
 import plotly
 import plotly.graph_objs as go
@@ -61,16 +62,13 @@ def weekly_pick_table(users, picks, event_info, user_data):
         "tot": [],
         "pos": [],
         "earnings": [],
+        "opponent": [],
     }
     # live scores from API for each pick.
-    # live_scores = get_live_scores(
-    #     set(pick_dict["pick"]).union(set(pick_dict["alternate"]))
-    # )
+    live_scores = get_live_scores(
+        set(pick_dict["pick"]).union(set(pick_dict["alternate"]))
+    )
 
-    live_scores = {
-        pick: {"score": 0, "position": 0, "earnings": 0} for pick in pick_dict["pick"]
-    }
-    print(live_scores)
     for idx, pick in enumerate(pick_dict["pick"]):
 
         if pick not in live_scores:
@@ -94,6 +92,12 @@ def weekly_pick_table(users, picks, event_info, user_data):
         except Exception as e:
             print(e)
             pick_dict["earnings"].append(0)
+
+        try:
+            pick_dict["opponent"].append(live_scores[pick]["opponent"])
+        except Exception as e:
+            print(e)
+            pick_dict["opponent"].append("--")
 
     # calculate projected earnings
     try:
@@ -128,7 +132,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
 
     # make pick dataframe
     df = pd.DataFrame(pick_dict)
-    df.sort_values(["pos", "pick", "team"], inplace=True, ascending=True)
+    df.sort_values(["tot", "pick", "team"], inplace=True, ascending=True)
 
     # get missing picks
     all_users = set(current_earnings.keys())
@@ -136,8 +140,19 @@ def weekly_pick_table(users, picks, event_info, user_data):
     missing_picks = all_users - curr_users
 
     # Format the score
-    df["tot"] = ["+{}".format(score) if score > 0 else score for score in df["tot"]]
-    df["tot"] = ["E" if not score else score for score in df["tot"]]
+    # df["tot"] = ["+{}".format(score) if score > 0 else score for score in df["tot"]]
+    # df["tot"] = ["E" if not score else score for score in df["tot"]]
+    df["tot"] = df["tot"].astype(int)
+    df["tot"] = [
+        "{} Down".format(np.abs(score)) if score > 0 else score for score in df["tot"]
+    ]
+    df["tot"] = ["AS" if not score else score for score in df["tot"]]
+    df["tot"] = [
+        "{} Up".format(np.abs(score))
+        if (isinstance(score, int) and score < 0)
+        else score
+        for score in df["tot"]
+    ]
 
     # current rank
     df["pr"] = [int(current_earnings.get(row.team)[1]) for row in df.itertuples()]
@@ -149,38 +164,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
         df = df[["team", "pick", "tot", "pos", "earnings"]]
 
     else:  # In tournament display
-        # Future earning
-        df["fe"] = [
-            int(current_earnings.get(row.team)[0]) + row.pe for row in df.itertuples()
-        ]
-        # Future rank
-        df["fr"] = df["fe"].rank(ascending=False).astype(int)
-
-        # calculate projected earnings
-        df["proj. earns"] = [
-            "${}m".format(round(earnings / 1e6, 2))
-            if earnings > 1e6
-            else "${}k".format(round(earnings / 1e3))
-            for earnings in df["pe"]
-        ]
-        # Calculate the rank delta and display
-        df["dr"] = df.pr - df.fr
-        dr_res = []
-        for delta in df["dr"]:
-            if delta > 0:
-                dr_res.append("▲{}".format(delta))
-            elif not delta:
-                dr_res.append("--")
-            else:
-                dr_res.append("▼{}".format(-delta))
-
-        df["dr"] = dr_res
-        df["proj. rank"] = df[["fr", "dr"]].apply(
-            lambda x: "{} ({})".format(x[0], x[1]), axis=1
-        )
-
-        df = df[["team", "pick", "tot", "pos", "proj. earns", "proj. rank"]]
-
+        df = df[["team", "pick", "tot", "opponent"]]
     df.columns = [x.upper() for x in df.columns]
 
     return df.to_html(classes="data", border=0, index=False)
