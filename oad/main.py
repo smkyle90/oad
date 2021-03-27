@@ -40,12 +40,11 @@ def rules():
 @login_required
 def profile():
     picks = Pick.query.filter_by(season=SEASON).filter_by(name=current_user.name).all()
-    # pick_table = UserfPickTable(picks)
 
     pick_table = create_pick_table(picks)
 
     total_points = format_earnings(sum([int(x.points) for x in picks]))
-    # total_points = 1
+
     return render_template(
         "profile.html",
         user=current_user,

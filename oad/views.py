@@ -70,34 +70,38 @@ def weekly_pick_table(users, picks, event_info, user_data):
     )
 
     for idx, pick in enumerate(pick_dict["pick"]):
-
         if pick not in live_scores:
-            pick = pick_dict["alternate"][idx]
-            pick_dict["pick"][idx] = pick
-
-        try:
-            pick_dict["tot"].append(live_scores[pick]["score"])
-        except Exception as e:
-            print(e)
-            pick_dict["tot"].append("--")
-
-        try:
-            pick_dict["pos"].append(live_scores[pick]["position"])
-        except Exception as e:
-            print(e)
-            pick_dict["pos"].append("--")
-
-        try:
-            pick_dict["earnings"].append(live_scores[pick]["earnings"])
-        except Exception as e:
-            print(e)
+            pick_dict["tot"].append(0)
+            pick_dict["pos"].append("DNQ")
             pick_dict["earnings"].append(0)
+            pick_dict["opponent"].append("(⊙︿⊙)")
+            #     pick = pick_dict["alternate"][idx]
+            #     pick_dict["pick"][idx] = pick
+        else:
 
-        try:
-            pick_dict["opponent"].append(live_scores[pick]["opponent"])
-        except Exception as e:
-            print(e)
-            pick_dict["opponent"].append("--")
+            try:
+                pick_dict["tot"].append(live_scores[pick]["score"])
+            except Exception as e:
+                print(e)
+                pick_dict["tot"].append(0)
+
+            try:
+                pick_dict["pos"].append(live_scores[pick]["position"])
+            except Exception as e:
+                print(e)
+                pick_dict["pos"].append("DNQ")
+
+            try:
+                pick_dict["earnings"].append(live_scores[pick]["earnings"])
+            except Exception as e:
+                print(e)
+                pick_dict["earnings"].append(0)
+
+            try:
+                pick_dict["opponent"].append(live_scores[pick]["opponent"])
+            except Exception as e:
+                print(e)
+                pick_dict["opponent"].append("--")
 
     # calculate projected earnings
     try:
@@ -164,7 +168,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
         df = df[["team", "pick", "tot", "pos", "earnings"]]
 
     else:  # In tournament display
-        df = df[["team", "pick", "tot", "opponent"]]
+        df = df[["team", "pick", "tot", "opponent", "pos"]]
     df.columns = [x.upper() for x in df.columns]
 
     return df.to_html(classes="data", border=0, index=False)
