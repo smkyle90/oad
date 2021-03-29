@@ -299,8 +299,6 @@ def get_event_info():
             "Andy Sullivan",
         ]
 
-        # tournament_state = "pre"
-
         if tournament_state in ["in", "post"]:
             # check if the earnings are posteds
             earnings_posted = get_earnings_from_data(data)
@@ -309,6 +307,7 @@ def get_event_info():
             else:
                 tournament_state = "in"
 
+        tournament_state = "post"
         return event_name, avail_picks, tournament_state, tournament_info
     except Exception as e:
         print("Issue getting data from ESPN API. Message: {}".format(e))
@@ -353,25 +352,95 @@ def get_withdrawl_list():
 
 def get_earnings(player):
     """Get player earnings. Requires access to API.
-    """
-    try:
-        r = requests.get(EVENT_URL)
-        data = r.json()
-        data = remove_canceled(data)
-    except Exception as e:
-        print("Issue getting data from ESPN API. Message: {}".format(e))
-        send_email(
-            "scott.m.kyle@gmail.com", "User Earning Warning", "{}. {}".format(player, e)
-        )
-        return -1
+    # """
+    # try:
+    #     r = requests.get(EVENT_URL)
+    #     data = r.json()
+    #     data = remove_canceled(data)
+    # except Exception as e:
+    #     print("Issue getting data from ESPN API. Message: {}".format(e))
+    #     send_email(
+    #         "scott.m.kyle@gmail.com", "User Earning Warning", "{}. {}".format(player, e)
+    #     )
+    #     return -1
 
-    try:
-        earnings = get_earnings_from_data(data, player)
-    except Exception as e:
-        send_email(
-            "scott.m.kyle@gmail.com", "User Earning Warning", "{}. {}".format(player, e)
-        )
+    # try:
+    #     earnings = get_earnings_from_data(data, player)
+    # except Exception as e:
+    #     send_email(
+    #         "scott.m.kyle@gmail.com", "User Earning Warning", "{}. {}".format(player, e)
+    #     )
 
+    # WGC
+    tourn_earnings = {
+        "Billy Horschel": 1820000,
+        "Scottie Scheffler": 1150000,
+        "Matt Kuchar": 740000,
+        "Victor Perez": 600000,
+        "Tommy Fleetwood": 337000,
+        "Sergio Garcia": 337000,
+        "Jon Rahm": 337000,
+        "Brian Harman": 337000,
+        "Dylan Frittelli": 189000,
+        "Kevin Streelman": 189000,
+        "Mackenzie Hughes": 189000,
+        "Robert MacIntyre": 189000,
+        "Ian Poulter": 189000,
+        "Erik von Rooyen": 189000,
+        "Bubba Watson": 189000,
+        "Jordan Spieth": 189000,
+        "Ryan Palmer": 144000,
+        "Kevin Kisner": 113700,
+        "Max Homa": 113700,
+        "Antoine Rozner": 113700,
+        "Xander Schauffele": 113700,
+        "Joaquin Niemann": 113700,
+        "Lee Westwood": 113700,
+        "Patrick Cantlay": 113700,
+        "Abraham Ancer": 113700,
+        "Daniel Berger": 113700,
+        "Matt Fitzpatrick": 113700,
+        "Dustin Johnson": 75000,
+        "Adam Long": 75000,
+        "J.T. Poston": 75000,
+        "Patrick Reed": 75000,
+        "Matt Wallace": 75000,
+        "Webb Simpson": 75000,
+        "Paul Casey": 75000,
+        "Rory McIlroy": 75000,
+        "Cameron Smith": 75000,
+        "Tony Finau": 75000,
+        "Will Zalatoris": 75000,
+        "Matthew Wolff": 75000,
+        "Marc Leishman": 75000,
+        "Russell Henley": 75000,
+        "Kevin Na": 47571.43,
+        "Justin Thomas": 47571.43,
+        "Shane Lowry": 47571.43,
+        "Bryson DeChambeau": 47571.43,
+        "Jason Day": 47571.43,
+        "Andy Sullivan": 47571.42,
+        "Carlos Ortiz": 47571.43,
+        "Hideki Matsuyama": 47571.43,
+        "Jason Kokrak": 47571.43,
+        "Bernd Wiesberger": 47571.43,
+        "Viktor Hovland": 47571.43,
+        "Harris English": 47571.43,
+        "Brendon Todd": 47571.42,
+        "Sungjae Im": 47571.43,
+        "Collin Morikawa": 38000,
+        "Si Woo Kim": 38000,
+        "Christiaan Bezuidenhout": 38000,
+        "Tyrrell Hatton": 38000,
+        "Talor Gooch": 38000,
+        "Louis Oosthuizen": 35750,
+        "Sebastian Munoz": 35750,
+        "Lanto Griffin": 35750,
+        "Corey Conners": 35750,
+    }
+    earnings = tourn_earnings.get(player)
+
+    print(player, earnings)
     return earnings
 
 

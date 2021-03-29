@@ -70,11 +70,10 @@ def league():
             Pick.query.filter_by(season=SEASON).filter_by(event=curr_event).all()
         )
         pick_table = weekly_pick_table(users, week_picks, event_table, user_table)
-    #        pick_history_table, bar, line = EMPTY_HTML, EMPTY_HTML, EMPTY_HTML
+
     else:
         show_picks = False
         pick_table = EMPTY_HTML
-    #        pick_history_table, bar, line = league_page(users, SEASON)
 
     if tournament_state != "in":
         show_historical_data = True
