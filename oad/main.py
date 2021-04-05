@@ -354,12 +354,14 @@ def myconverter(o):
 
 
 @main.route("/api/picks/")
+@login_required
 def get_all_picks():
     picks = Pick.query.filter_by(season=SEASON).all()
     return json.dumps(Pick.serialize_list(picks), default=myconverter)
 
 
 @main.route("/api/picks/<name>/")
+@login_required
 def get_player_picks(name):
     picks = Pick.query.filter_by(season=SEASON).filter_by(name=name).all()
     return json.dumps(Pick.serialize_list(picks), default=myconverter)
