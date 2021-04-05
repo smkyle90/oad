@@ -2,18 +2,8 @@ import datetime
 import json
 import os
 
-from flask import (
-    Blueprint,
-    flash,
-    jsonify,
-    redirect,
-    render_template,
-    request,
-    session,
-    url_for,
-)
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
-from sqlalchemy.inspection import inspect
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from . import db
