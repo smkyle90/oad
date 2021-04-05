@@ -1,11 +1,21 @@
 from datetime import datetime
 
 from flask_login import UserMixin
+from sqlalchemy.inspection import inspect
 
 from . import db
 
 
-class User(UserMixin, db.Model):
+class Serializer(object):
+    def serialize(self):
+        return {c: getattr(self, c) for c in inspect(self).attrs.keys()}
+
+    @staticmethod
+    def serialize_list(lst):
+        return [item.serialize() for item in lst]
+
+
+class User(UserMixin, db.Model, Serializer):
     __table_args__ = {"extend_existing": True}
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True)
@@ -18,7 +28,7 @@ class User(UserMixin, db.Model):
     display_name = db.Column(db.Text, default="")
 
 
-class Pick(db.Model):
+class Pick(db.Model, Serializer):
     __table_args__ = {"extend_existing": True}
     id = db.Column(db.Integer, primary_key=True)
     event = db.Column(db.String(1000), index=True)
@@ -29,8 +39,12 @@ class Pick(db.Model):
     points = db.Column(db.Float(), default=-1e-9)
     season = db.Column(db.Integer)
 
+    def serialize(self):
+        d = Serializer.serialize(self)
+        return d
 
-class Player(db.Model):
+
+class Player(db.Model, Serializer):
     __table_args__ = {"extend_existing": True}
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(1000), unique=True)

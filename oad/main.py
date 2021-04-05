@@ -1,7 +1,19 @@
+import datetime
+import json
 import os
 
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import (
+    Blueprint,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from flask_login import current_user, login_required
+from sqlalchemy.inspection import inspect
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from . import db
@@ -344,3 +356,20 @@ def weekly_update():
             flash("Unable to send email to users. Message: {}".format(e))
     flash("Messages sent!")
     return redirect(url_for("main.update"))
+
+
+def myconverter(o):
+    if isinstance(o, datetime.datetime):
+        return o.__str__()
+
+
+@main.route("/api/picks/")
+def get_all_picks():
+    picks = Pick.query.filter_by(season=SEASON).all()
+    return json.dumps(Pick.serialize_list(picks), default=myconverter)
+
+
+@main.route("/api/picks/<name>/")
+def get_player_picks(name):
+    picks = Pick.query.filter_by(season=SEASON).filter_by(name=name).all()
+    return json.dumps(Pick.serialize_list(picks), default=myconverter)
