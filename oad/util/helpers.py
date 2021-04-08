@@ -372,8 +372,72 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
         return user_df
 
 
+# Major DRAFT POOL
+ALL_PICKS = [
+    ("Brock", "Dustin Johnson"),
+    ("Lucas", "Jon Rahm"),
+    ("Brady", "Justin Thomas"),
+    ("Scott", "Jordan Spieth"),
+    ("David", "Bryson DeChambeau"),
+    ("Sohale", "Xander Schauffele"),
+    ("Tom", "Rory McIlroy"),
+    ("Jamil", "Brooks Koepka"),
+    ("Jamil", "Patrick Reed"),
+    ("Tom", "Cameron Smith"),
+    ("Sohale", "Daniel Berger"),
+    ("David", "Patrick Cantlay"),
+    ("Scott", "Collin Morikawa"),
+    ("Brady", "Matthew Fitzpatrick"),
+    ("Lucas", "Webb Simpson"),
+    ("Brock", "Viktor Hovland"),
+    ("Brock", "Matthew Wolff"),
+    ("Lucas", "Tony Finau"),
+    ("Brady", "Sungjae Im"),
+    ("Scott", "Joaquin Niemann"),
+    ("David", "Scottie Scheffler"),
+    ("Sohale", "Hideki Matsuyama"),
+    ("Tom", "Sergio Garcia"),
+    ("Jamil", "Lee Westwood"),
+    ("Jamil", "Paul Casey"),
+    ("Tom", "Tommy Fleetwood"),
+    ("Sohale", "Tyrrell Hatton"),
+    ("David", "Jason Day"),
+    ("Scott", "Louis Oosthuizen"),
+    ("Brady", "Will Zalatoris"),
+    ("Lucas", "Adam Scott"),
+    ("Brock", "Gary Woodland"),
+    ("Brock", "Corey Conners"),
+    ("Lucas", "Abraham Ancer"),
+    ("Brady", "Si Woo Kim"),
+    ("Scott", "Matt Kuchar"),
+    ("David", "Max Homa"),
+    ("Sohale", "Harris English"),
+    ("Tom", "Shane Lowry"),
+    ("Jamil", "Bubba Watson"),
+    ("Jamil", "Billy Horschel"),
+    ("Tom", "Marc Leishman"),
+    ("Sohale", "Carlos Ortiz"),
+    ("David", "Dylan Frittelli"),
+    ("Scott", "Matt Wallace"),
+    ("Brady", "Ryan Palmer"),
+    ("Lucas", "Justin Rose"),
+    ("Brock", "Mackenzie Hughes"),
+]
+
+
 def major_draft_pool():
-    df = pd.read_csv("./oad/util/mdp.csv")
+    # df = pd.read_csv("./oad/util/mdp.csv")
+
+    data_dict = {
+        "User": [],
+        "Player": [],
+    }
+
+    for u, p in ALL_PICKS:
+        data_dict["User"].append(u)
+        data_dict["Player"].append(p)
+
+    df = pd.DataFrame(data_dict)
 
     # live scores from API for each pick.
     live_scores = get_live_scores(df.Player.to_list())

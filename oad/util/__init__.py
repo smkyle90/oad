@@ -7,8 +7,8 @@ from .helpers import (
     get_live_scores,
     get_random_password_string,
     get_withdrawl_list,
-    major_draft_pool,
     send_email,
 )
+from .mdp import major_draft_pool
 from .payouts import pos_payouts
 from .security import ts
