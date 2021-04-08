@@ -111,7 +111,6 @@ def get_tourn_state_from_data(data):
 def live_scores_from_data(data, current_players):
     """Get live scores. Function to ensure modularity if API fails.
     """
-
     score_data = {}
     rank_data = {}
 
@@ -371,3 +370,37 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
         return user_df.to_html(classes="data", border=0, index=False)
     else:
         return user_df
+
+
+def major_draft_pool():
+    df = pd.read_csv("./oad/util/mdp.csv")
+
+    # live scores from API for each pick.
+    live_scores = get_live_scores(df.Player.to_list())
+
+    df["Pick"] = [i // 8 + 1 for i in range(len(df))]
+    df["Total Score"] = [live_scores[player]["score"] for player in df.Player]
+    df["Position"] = [live_scores[player]["position"] for player in df.Player]
+    df["Scores"] = [
+        "{} ({})".format(row["Player"], row["Total Score"])
+        for idx, row in df.iterrows()
+    ]
+
+    count_df = df[df["Position"] != "--"]
+    count_df.sort_values(["Total Score"], inplace=True, ascending=True)
+    count_df = count_df.groupby("User").head(3)
+    count_df = count_df.groupby("User").agg(
+        {"Total Score": "sum", "Scores": lambda x: ", ".join(x),}
+    )
+    count_df.sort_values(["Total Score"], inplace=True, ascending=True)
+
+    score_df = pd.pivot_table(
+        df,
+        values=["Scores"],
+        index=["User"],
+        columns=["Pick"],
+        fill_value="--",
+        aggfunc="first",
+    )
+
+    return count_df, score_df

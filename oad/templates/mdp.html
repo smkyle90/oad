@@ -1,0 +1,44 @@
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+ -->
+{% extends "base.html" %} {% block content %}
+
+<style>
+  td:nth-child(3) {
+    border: 1px solid #000000;
+    text-align: center;
+    padding: 4px;
+    cursor: pointer;
+    font-size: x-small;
+    text-transform: uppercase;
+    font-weight: normal;
+    color: black;
+  }
+  td:nth-child(4) {
+    border: 1px solid #000000;
+    text-align: center;
+    padding: 4px;
+    cursor: pointer;
+    font-size: x-small;
+    text-transform: uppercase;
+    font-weight: normal;
+    color: black;
+
+  }
+</style>
+
+<h1>Major Draft Pool</h1>
+<section>
+<div>
+  <h3 class="subtitle">Top 3 Scorers</h3>
+<div>{{ u_table | safe }}</div>
+</div>
+</section>
+
+<section>
+<div>
+  <h3 class="subtitle">All Scores</h3>
+<div>{{ s_table | safe }}</div>
+</div>
+</section>
+{% endblock %}

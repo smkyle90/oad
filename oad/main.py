@@ -15,6 +15,7 @@ from .util import (
     format_earnings,
     get_earnings,
     get_event_info,
+    major_draft_pool,
     send_email,
 )
 from .util.admin import add_user_points
@@ -367,3 +368,22 @@ def get_player_picks(name):
     picks = Pick.query.filter_by(season=SEASON).filter_by(name=name).all()
     picks = [pick for pick in picks if pick.points >= 0]
     return json.dumps(Pick.serialize_list(picks), default=myconverter)
+
+
+@main.route("/mdp")
+@login_required
+def mdp():
+    # __, __, tournament_state, __ = get_event_info()
+
+    # update_button = False
+
+    # if tournament_state == "post":
+    #     update_button = True
+
+    agg_df, score_df = major_draft_pool()
+
+    agg_df = agg_df.to_html(classes="data", border=0, index=True, header=True)
+
+    score_df = score_df.to_html(classes="data", border=0, index=True, header=True)
+
+    return render_template("mdp.html", u_table=agg_df, s_table=score_df)
