@@ -96,5 +96,6 @@ def major_draft_pool():
         fill_value="--",
         aggfunc="first",
     )
-
+    count_df.index.names = [None]
+    score_df.index.names = [None]
     return count_df, score_df
