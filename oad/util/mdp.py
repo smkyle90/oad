@@ -72,9 +72,14 @@ def major_draft_pool():
     # live scores from API for each pick.
     live_scores = get_live_scores(df.Player.to_list())
 
+    curr_round = 0
+    for player, data in live_scores.items():
+        curr_round = max(curr_round, data["round"])
+
     df["Pick"] = [i // 8 + 1 for i in range(len(df))]
     df["Total Score"] = [live_scores[player]["score"] for player in df.Player]
     df["Position"] = [live_scores[player]["position"] for player in df.Player]
+    df["Round"] = [live_scores[player]["round"] for player in df.Player]
     df["Scores"] = [
         "{} ({})".format(row["Player"], row["Total Score"])
         for idx, row in df.iterrows()
@@ -82,11 +87,28 @@ def major_draft_pool():
 
     count_df = df[df["Position"] != "--"]
     count_df.sort_values(["Total Score"], inplace=True, ascending=True)
+    count_df = count_df[count_df.Round == curr_round]
     count_df = count_df.groupby("User").head(3)
+
+    freq_df = count_df.groupby("User").count()
+    N = 3
+    all_teams = set(df.User)
+    valid_teams = set(freq_df[freq_df.Pick == N].index)
+    invalid_teams = all_teams - valid_teams
+    count_df = count_df[count_df.User.isin(valid_teams)]
     count_df = count_df.groupby("User").agg(
         {"Total Score": "sum", "Scores": lambda x: ", ".join(x),}
     )
     count_df.sort_values(["Total Score"], inplace=True, ascending=True)
+
+    for user in invalid_teams:
+        count_df.loc[user] = ["CUT", None]
+
+    df.loc[df.Round != curr_round, "Total Score"] = "CUT"
+    df["Scores"] = [
+        "{} ({})".format(row["Player"], row["Total Score"])
+        for idx, row in df.iterrows()
+    ]
 
     score_df = pd.pivot_table(
         df,

@@ -117,7 +117,7 @@ def live_scores_from_data(data, current_players):
     for user in data["events"][0]["competitions"][0]["competitors"]:
         player_score = 0
         player_pos = "--"
-        for user_score_data in user["linescores"]:
+        for idx, user_score_data in enumerate(user["linescores"]):
             if user_score_data.get("value"):
                 player_pos = user_score_data.get("currentPosition")
 
@@ -134,6 +134,7 @@ def live_scores_from_data(data, current_players):
                     "position": player_pos,
                     "earnings": int(user.get("earnings", 0)),
                     "freq": 1,
+                    "round": idx + 1,
                 }
 
         # Store the number of players at a particular score. This is just the last linescore for each user.
