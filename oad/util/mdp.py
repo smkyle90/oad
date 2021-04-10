@@ -17,7 +17,7 @@ ALL_PICKS = [
     ("Sohale", "Daniel Berger"),
     ("David", "Patrick Cantlay"),
     ("Scott", "Collin Morikawa"),
-    ("Brady", "Matthew Fitzpatrick"),
+    ("Brady", "Matt Fitzpatrick"),
     ("Lucas", "Webb Simpson"),
     ("Brock", "Viktor Hovland"),
     ("Brock", "Matthew Wolff"),
