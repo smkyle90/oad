@@ -18,6 +18,7 @@ from .util import (
     send_email,
 )
 from .util.admin import add_user_points
+from .util.ZURICH import ZURICH_FIELD
 from .views import PickTable, league_page, weekly_pick_table
 
 SEASON = int(os.getenv("OADYR", 2021))
@@ -113,6 +114,8 @@ def league():
 @login_required
 def pick():
     curr_event, avail_picks, tournament_state, __ = get_event_info()
+
+    avail_picks = ZURICH_FIELD
 
     # Check if the user has made a previous pick for this event
     prev_pick = (
