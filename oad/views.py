@@ -189,8 +189,8 @@ def weekly_pick_table(users, picks, event_info, user_data):
             df = df[["team", "pick", "tot", "pos", "proj. earns", "proj. rank"]]
 
     else:
-        df = pd.DataFrame(pick_dict)
-        df = df[["team", "pick"]]
+        df = pd.DataFrame({"team": pick_dict["team"], "pick": pick_dict["pick"]})
+        # df = df[["team", "pick"]]
 
     df.columns = [x.upper() for x in df.columns]
 
