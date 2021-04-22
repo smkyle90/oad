@@ -1,3 +1,5 @@
+import datetime
+import json
 import os
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
@@ -82,6 +84,13 @@ def league():
         show_historical_data = False
         pick_history_table, bar, line = EMPTY_HTML, EMPTY_HTML, EMPTY_HTML
 
+    if event_table is None:
+        event_table = EMPTY_HTML
+    else:
+        event_table = event_table.to_html(
+            classes="data", border=0, index=False, header=False
+        )
+
     return render_template(
         "league.html",
         u_table=user_table.to_html(classes="data", border=0, index=False),
@@ -90,9 +99,7 @@ def league():
         show_picks=show_picks,
         show_data=show_historical_data,
         event_name=curr_event,
-        event_table=event_table.to_html(
-            classes="data", border=0, index=False, header=False
-        ),
+        event_table=event_table,
         plot=bar,
         points=line,
         season=SEASON,
@@ -123,8 +130,10 @@ def pick():
 
     # We can pick from the available picks, minus the players we've already picked.
     # TODO: set operations?
-    eligible_picks = [p for p in avail_picks if p not in all_players]
-
+    try:
+        eligible_picks = [p for p in avail_picks if p not in all_players]
+    except Exception as e:
+        eligible_picks = []
     button_state = True
     button_text = "Submit Pick"
 
@@ -335,3 +344,24 @@ def weekly_update():
             flash("Unable to send email to users. Message: {}".format(e))
     flash("Messages sent!")
     return redirect(url_for("main.update"))
+
+
+def myconverter(o):
+    if isinstance(o, datetime.datetime):
+        return o.__str__()
+
+
+@main.route("/api/picks/")
+@login_required
+def get_all_picks():
+    picks = Pick.query.filter_by(season=SEASON).all()
+    picks = [pick for pick in picks if pick.points >= 0]
+    return json.dumps(Pick.serialize_list(picks), default=myconverter)
+
+
+@main.route("/api/picks/<name>/")
+@login_required
+def get_player_picks(name):
+    picks = Pick.query.filter_by(season=SEASON).filter_by(name=name).all()
+    picks = [pick for pick in picks if pick.points >= 0]
+    return json.dumps(Pick.serialize_list(picks), default=myconverter)

@@ -163,6 +163,10 @@ def weekly_pick_table(users, picks, event_info, user_data):
 
     # Display table based on if earnings are published
     if df["earnings"].sum():
+        df["pos"] = df["pos"].fillna(-1)
+        df["pos"] = df["pos"].astype(int)
+        df["pos"] = df["pos"].replace(-1, "CUT")
+
         df["earnings"] = [format_earnings(earnings) for earnings in df["earnings"]]
 
         df = df[["team", "pick", "tot", "pos", "earnings"]]
