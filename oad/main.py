@@ -1,3 +1,5 @@
+import datetime
+import json
 import os
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
@@ -344,3 +346,24 @@ def weekly_update():
             flash("Unable to send email to users. Message: {}".format(e))
     flash("Messages sent!")
     return redirect(url_for("main.update"))
+
+
+def myconverter(o):
+    if isinstance(o, datetime.datetime):
+        return o.__str__()
+
+
+@main.route("/api/picks/")
+@login_required
+def get_all_picks():
+    picks = Pick.query.filter_by(season=SEASON).all()
+    picks = [pick for pick in picks if pick.points >= 0]
+    return json.dumps(Pick.serialize_list(picks), default=myconverter)
+
+
+@main.route("/api/picks/<name>/")
+@login_required
+def get_player_picks(name):
+    picks = Pick.query.filter_by(season=SEASON).filter_by(name=name).all()
+    picks = [pick for pick in picks if pick.points >= 0]
+    return json.dumps(Pick.serialize_list(picks), default=myconverter)
