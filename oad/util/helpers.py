@@ -165,6 +165,9 @@ def get_earnings_from_data(data, player=None):
     """Get earnings. Function to ensure modularity if API fails.
     """
     if player is None:
+        if sum(ZURICH_EARNINGS.values()):
+            return sum(ZURICH_EARNINGS.values())
+
         return (
             sum(
                 [
