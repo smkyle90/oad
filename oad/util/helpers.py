@@ -149,6 +149,18 @@ def live_scores_from_data(data, current_players):
     return score_data
 
 
+ZURICH_EARNINGS = {
+    "Patrick Cantlay": 62943,
+    "Jason Kokrak": 28120,
+    "Cameron Champ": 37463,
+    "Ryan Palmer": 149850,
+    "Bubba Watson": 116550,
+    "Xander Schauffele": 62943,
+    "Henrik Stenson": 62943,
+    "Marc Leishman": 1069300,
+}
+
+
 def get_earnings_from_data(data, player=None):
     """Get earnings. Function to ensure modularity if API fails.
     """
@@ -162,6 +174,10 @@ def get_earnings_from_data(data, player=None):
             )
             > 0
         )
+
+    if ZURICH_EARNINGS.get(player, False):
+        print(player, ZURICH_EARNINGS[player])
+        return ZURICH_EARNINGS[player]
 
     for user in data["events"][0]["competitions"][0]["competitors"]:
         if user["athlete"]["displayName"] == player:

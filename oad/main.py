@@ -251,7 +251,7 @@ def submit_pick():
 def update():
     __, __, tournament_state, __ = get_event_info()
 
-    update_button = False
+    update_button = True
 
     if tournament_state == "post":
         update_button = True
