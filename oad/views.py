@@ -42,6 +42,7 @@ class UserPickTable(Table):
     points = Earnings("points")
 
 
+# flake8: noqa: C901
 def weekly_pick_table(users, picks, event_info, user_data):
     # get purse value
     purse_value = event_info.loc[event_info.col1 == "Purse", "col2"].iloc[0][1:]
@@ -67,8 +68,26 @@ def weekly_pick_table(users, picks, event_info, user_data):
         set(pick_dict["pick"]).union(set(pick_dict["alternate"]))
     )
 
-    for idx, pick in enumerate(pick_dict["pick"]):
+    # extract the user data for use in the table
+    current_earnings = {
+        user: (float(earnings.replace("$", "").replace(",", "")), rank)
+        for user, earnings, rank in zip(
+            user_data["TEAM"], user_data["TOTAL EARNINGS"], user_data["RANK"]
+        )
+    }
 
+    # get missing picks
+    all_users = set(current_earnings.keys())
+    curr_users = set(pick_dict["team"])
+    missing_picks = all_users - curr_users
+
+    for missed in missing_picks:
+        pick_dict["team"].append(missed)
+        pick_dict["pick"].append("--")
+        pick_dict["pe"].append(0)
+        pick_dict["alternate"].append("--")
+
+    for idx, pick in enumerate(pick_dict["pick"]):
         if pick not in live_scores:
             pick = pick_dict["alternate"][idx]
             pick_dict["pick"][idx] = pick
@@ -77,13 +96,13 @@ def weekly_pick_table(users, picks, event_info, user_data):
             pick_dict["tot"].append(live_scores[pick]["score"])
         except Exception as e:
             print(e)
-            pick_dict["tot"].append("--")
+            pick_dict["tot"].append(1000)
 
         try:
             pick_dict["pos"].append(live_scores[pick]["position"])
         except Exception as e:
             print(e)
-            pick_dict["pos"].append("--")
+            pick_dict["pos"].append(1000)
 
         try:
             pick_dict["earnings"].append(live_scores[pick]["earnings"])
@@ -114,26 +133,14 @@ def weekly_pick_table(users, picks, event_info, user_data):
         print("pe", e)
         pick_dict["pe"] = [0 for pick in pick_dict["pick"]]
 
-    # extract the user data for use in the table
-    current_earnings = {
-        user: (float(earnings.replace("$", "").replace(",", "")), rank)
-        for user, earnings, rank in zip(
-            user_data["TEAM"], user_data["TOTAL EARNINGS"], user_data["RANK"]
-        )
-    }
-
     # make pick dataframe
     df = pd.DataFrame(pick_dict)
     df.sort_values(["pos", "pick", "team"], inplace=True, ascending=True)
 
-    # get missing picks
-    all_users = set(current_earnings.keys())
-    curr_users = set(df.team)
-    missing_picks = all_users - curr_users
-
     # Format the score
     df["tot"] = ["+{}".format(score) if score > 0 else score for score in df["tot"]]
     df["tot"] = ["E" if not score else score for score in df["tot"]]
+    df.replace({"tot": {"+1000": "--"}, "pos": {1000: "--"}}, inplace=True)
 
     # current rank
     df["pr"] = [int(current_earnings.get(row.team)[1]) for row in df.itertuples()]
