@@ -140,7 +140,11 @@ def weekly_pick_table(users, picks, event_info, user_data):
     # Format the score
     df["tot"] = ["+{}".format(score) if score > 0 else score for score in df["tot"]]
     df["tot"] = ["E" if not score else score for score in df["tot"]]
-    df.replace({"tot": {"+1000": "--"}, "pos": {1000: "--"}}, inplace=True)
+    # print(df)
+    try:
+        df.replace({"tot": {"+1000": "--"}, "pos": {1000: "--"}}, inplace=True)
+    except Exception as e:
+        print(e)
 
     # current rank
     df["pr"] = [int(current_earnings.get(row.team)[1]) for row in df.itertuples()]
