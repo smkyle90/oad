@@ -117,6 +117,11 @@ def live_scores_from_data(data, current_players):
     for user in data["events"][0]["competitions"][0]["competitors"]:
         player_score = 0
         player_pos = "--"
+
+        # Deal with players who have WD after starting
+        if user["status"].get("displayValue", False) == "WD":
+            continue
+
         for idx, user_score_data in enumerate(user["linescores"]):
             if user_score_data.get("value"):
                 player_pos = user_score_data.get("currentPosition")
