@@ -182,6 +182,7 @@ def pick():
         double_up_button_state = True
     else:
         double_up_button_state = False
+
     return render_template(
         "pick.html",
         avail=eligible_picks,
