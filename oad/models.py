@@ -26,6 +26,9 @@ class User(UserMixin, db.Model, Serializer):
     is_admin = db.Column(db.Boolean, default=False)
     email_confirmed = db.Column(db.Boolean, default=False)
     display_name = db.Column(db.Text, default="")
+    strike_event = db.Column(db.Text, default="")
+    substitute_event = db.Column(db.Text, default="")
+    double_up_event = db.Column(db.Text, default="")
 
 
 class Pick(db.Model, Serializer):

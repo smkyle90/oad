@@ -161,18 +161,6 @@ def pick():
                 pick_state = "the tourney has started and you have either made your pick, don't have a Breakfast Ball, or Round 2 has started... try your Tap In?"
                 strike_button_state = False
 
-            # Allow user to substitue their alternate in
-            if current_user.substitute_remaining and tournament_round < 3:
-                substitute_button_state = True
-            else:
-                substitute_button_state = False
-
-            # Allow user the double up their earnings for the week
-            if current_user.double_up_remaining and tournament_round < 4:
-                double_up_button_state = True
-            else:
-                double_up_button_state = False
-
     else:
         if tournament_state == "pre":
             pick_state = (
@@ -183,13 +171,24 @@ def pick():
 
         strike_button_state = False
 
+    # Allow user to substitue their alternate in
+    if (not current_user.subtitute_event) and tournament_round < 3:
+        substitute_button_state = True
+    else:
+        substitute_button_state = False
+
+    # Allow user the double up their earnings for the week
+    if (not current_user.double_up_event) and tournament_round < 4:
+        double_up_button_state = True
+    else:
+        double_up_button_state = False
     return render_template(
         "pick.html",
         avail=eligible_picks,
         event=curr_event,
         user=current_user.name,
         pick_text=pick_state,
-        button=strike_button_state,
+        strike_button_state=strike_button_state,
         submit_text=button_text,
     )
 
@@ -311,6 +310,18 @@ def user_password_change():
 @login_required
 def update_password():
     return render_template("update_password.html")
+
+
+@main.route("/use_tap_in")
+@login_required
+def use_tap_in():
+    return render_template("tap_in.html")
+
+
+@main.route("/use_double_up")
+@login_required
+def use_double_up():
+    return render_template("double_up.html")
 
 
 @main.route("/user_display_name_change", methods=["POST"])
