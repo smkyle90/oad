@@ -8,17 +8,17 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from . import db
 from .models import Pick, Player, User
-from .scheduled import set_state
 from .util import (
     construct_user_table,
     create_pick_table,
     format_earnings,
     get_earnings,
     get_event_info,
+    major_draft_pool,
     send_email,
 )
 from .util.admin import add_user_points
-from .views import PickTable, league_page, weekly_pick_table
+from .views import league_page, weekly_pick_table
 
 SEASON = int(os.getenv("OADYR", 2021))
 
@@ -134,7 +134,7 @@ def pick():
     # TODO: set operations?
     try:
         eligible_picks = [p for p in avail_picks if p not in all_players]
-    except Exception as e:
+    except Exception:
         eligible_picks = []
     button_state = True
     button_text = "Submit Pick"
@@ -367,3 +367,22 @@ def get_player_picks(name):
     picks = Pick.query.filter_by(season=SEASON).filter_by(name=name).all()
     picks = [pick for pick in picks if pick.points >= 0]
     return json.dumps(Pick.serialize_list(picks), default=myconverter)
+
+
+@main.route("/mdp")
+@login_required
+def mdp():
+    # __, __, tournament_state, __ = get_event_info()
+
+    # update_button = False
+
+    # if tournament_state == "post":
+    #     update_button = True
+
+    agg_df, score_df = major_draft_pool()
+
+    agg_df = agg_df.to_html(classes="data", border=0, index=True, header=True)
+
+    score_df = score_df.to_html(classes="data", border=0, index=True, header=True)
+
+    return render_template("mdp.html", u_table=agg_df, s_table=score_df)

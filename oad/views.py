@@ -63,11 +63,11 @@ def weekly_pick_table(users, picks, event_info, user_data):
         "pos": [],
         "earnings": [],
     }
+
     # live scores from API for each pick.
     live_scores = get_live_scores(
         set(pick_dict["pick"]).union(set(pick_dict["alternate"]))
     )
-
     # extract the user data for use in the table
     current_earnings = {
         user: (float(earnings.replace("$", "").replace(",", "")), rank)

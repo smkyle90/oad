@@ -9,5 +9,6 @@ from .helpers import (
     get_withdrawl_list,
     send_email,
 )
+from .mdp import major_draft_pool
 from .payouts import pos_payouts
 from .security import ts

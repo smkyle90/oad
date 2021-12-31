@@ -111,14 +111,18 @@ def get_tourn_state_from_data(data):
 def live_scores_from_data(data, current_players):
     """Get live scores. Function to ensure modularity if API fails.
     """
-
     score_data = {}
     rank_data = {}
 
     for user in data["events"][0]["competitions"][0]["competitors"]:
         player_score = 0
         player_pos = "--"
-        for user_score_data in user["linescores"]:
+
+        # Deal with players who have WD after starting
+        if user["status"].get("displayValue", False) == "WD":
+            continue
+
+        for idx, user_score_data in enumerate(user["linescores"]):
             if user_score_data.get("value"):
                 player_pos = user_score_data.get("currentPosition")
 
@@ -127,7 +131,7 @@ def live_scores_from_data(data, current_players):
                 if user_score_data.get("value"):
                     try:
                         player_score += int(user_score_data["displayValue"])
-                    except Exception as e:
+                    except Exception:
                         player_score += 0
 
                 score_data[user["athlete"]["displayName"]] = {
@@ -135,6 +139,7 @@ def live_scores_from_data(data, current_players):
                     "position": player_pos,
                     "earnings": int(user.get("earnings", 0)),
                     "freq": 1,
+                    "round": idx + 1,
                 }
 
         # Store the number of players at a particular score. This is just the last linescore for each user.
