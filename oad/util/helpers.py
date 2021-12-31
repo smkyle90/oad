@@ -131,7 +131,7 @@ def live_scores_from_data(data, current_players):
                 if user_score_data.get("value"):
                     try:
                         player_score += int(user_score_data["displayValue"])
-                    except Exception as e:
+                    except Exception:
                         player_score += 0
 
                 score_data[user["athlete"]["displayName"]] = {

@@ -8,7 +8,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from . import db
 from .models import Pick, Player, User
-from .scheduled import set_state
 from .util import (
     construct_user_table,
     create_pick_table,
@@ -19,7 +18,7 @@ from .util import (
     send_email,
 )
 from .util.admin import add_user_points
-from .views import PickTable, league_page, weekly_pick_table
+from .views import league_page, weekly_pick_table
 
 SEASON = int(os.getenv("OADYR", 2021))
 
@@ -135,7 +134,7 @@ def pick():
     # TODO: set operations?
     try:
         eligible_picks = [p for p in avail_picks if p not in all_players]
-    except Exception as e:
+    except Exception:
         eligible_picks = []
     button_state = True
     button_text = "Submit Pick"
