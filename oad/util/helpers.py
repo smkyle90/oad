@@ -49,6 +49,10 @@ def send_email(receiver_email, subject, html):
     server.quit()
 
 
+def get_tournament_round(data):
+    return 1
+
+
 def get_event_from_data(data):
     """Get event info. Function to ensure modularity if API fails.
     """
@@ -199,6 +203,7 @@ def get_event_info():
         avail_picks = get_avail_from_data(data)
         tournament_state = get_tourn_state_from_data(data)
         tournament_info = get_tournament_info(data)
+        tournament_round = get_tournament_round(data)
 
         if tournament_state in ["in", "post"]:
             # check if the earnings are posteds
@@ -208,10 +213,16 @@ def get_event_info():
             else:
                 tournament_state = "in"
 
-        return event_name, avail_picks, tournament_state, tournament_info
+        return (
+            event_name,
+            avail_picks,
+            tournament_state,
+            tournament_info,
+            tournament_round,
+        )
     except Exception as e:
         print("Issue getting data from ESPN API. Message: {}".format(e))
-        return None, None, None, None
+        return None, None, None, None, None
 
 
 def get_live_scores(current_players):

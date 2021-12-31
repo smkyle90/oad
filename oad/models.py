@@ -22,7 +22,7 @@ class User(UserMixin, db.Model, Serializer):
     password = db.Column(db.String(100))
     name = db.Column(db.String(1000), unique=True)
     picks = db.relationship("Pick", backref="user", lazy=True)
-    strikes_remaining = db.Column(db.Integer, default=1)
+    strikes_remaining = db.Column(db.Integer, default=1)  # breakfast_ball
     is_admin = db.Column(db.Boolean, default=False)
     email_confirmed = db.Column(db.Boolean, default=False)
     display_name = db.Column(db.Text, default="")

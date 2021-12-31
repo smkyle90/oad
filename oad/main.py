@@ -60,7 +60,7 @@ def profile():
 @main.route("/league")
 @login_required
 def league():
-    curr_event, __, tournament_state, event_table = get_event_info()
+    curr_event, __, tournament_state, event_table, __ = get_event_info()
 
     users = User.query.all()
     all_picks = Pick.query.filter_by(season=SEASON).all()
@@ -112,7 +112,7 @@ def league():
 @main.route("/pick")
 @login_required
 def pick():
-    curr_event, avail_picks, tournament_state, __ = get_event_info()
+    curr_event, avail_picks, tournament_state, __, tournament_round = get_event_info()
 
     # Check if the user has made a previous pick for this event
     prev_pick = (
@@ -136,7 +136,7 @@ def pick():
         eligible_picks = [p for p in avail_picks if p not in all_players]
     except Exception:
         eligible_picks = []
-    button_state = True
+    strike_button_state = True
     button_text = "Submit Pick"
 
     if eligible_picks:
@@ -149,12 +149,30 @@ def pick():
             else:
                 pick_state = "you have already picked, but can modify your pick free of charge. Pick any other golfer in the field."
         else:
-            if (prev_pick is None) and (current_user.strikes_remaining):
-                pick_state = "the tourney has started and you have not picked, but you have a strike. Picking now will use this up. You can pick a player who has yet to tee off."
-                button_text = "Pick and Use Strike"
+            # Allow user to use strike
+            if current_user.strikes_remaining and tournament_round < 2:
+                if prev_pick is None:
+                    pick_state = "the tourney has started and you have not picked, but you have a Breakfast Ball (strike). Picking now will use this up. Prior to the start of Round 2, you can pick a player who has yet to tee off."
+                else:
+                    pick_state = "the tourney has started and you've made a pick, but you have a Breakfast Ball (strike). Picking now will use this up. Prior to the start of Round 2, you can pick a player who has yet to tee off."
+
+                button_text = "Pick and Use Breakfast Ball"
             else:
-                pick_state = "mate, the tourney has started and you have either made your pick, or don't have any strikes left... better luck next week."
-                button_state = False
+                pick_state = "the tourney has started and you have either made your pick, don't have a Breakfast Ball, or Round 2 has started... try your Tap In?"
+                strike_button_state = False
+
+            # Allow user to substitue their alternate in
+            if current_user.substitute_remaining and tournament_round < 3:
+                substitute_button_state = True
+            else:
+                substitute_button_state = False
+
+            # Allow user the double up their earnings for the week
+            if current_user.double_up_remaining and tournament_round < 4:
+                double_up_button_state = True
+            else:
+                double_up_button_state = False
+
     else:
         if tournament_state == "pre":
             pick_state = (
@@ -163,7 +181,7 @@ def pick():
         else:
             pick_state = "no players left to pick from."
 
-        button_state = False
+        strike_button_state = False
 
     return render_template(
         "pick.html",
@@ -171,7 +189,7 @@ def pick():
         event=curr_event,
         user=current_user.name,
         pick_text=pick_state,
-        button=button_state,
+        button=strike_button_state,
         submit_text=button_text,
     )
 
@@ -180,7 +198,7 @@ def pick():
 @login_required
 def submit_pick():
     # Get current event from the session
-    curr_event, __, tournament_state, __ = get_event_info()
+    curr_event, __, tournament_state, __, __ = get_event_info()
 
     # Get the selection
     selection = request.form.get("main")
@@ -246,7 +264,7 @@ def submit_pick():
 @main.route("/update")
 @login_required
 def update():
-    __, __, tournament_state, __ = get_event_info()
+    __, __, tournament_state, __, __ = get_event_info()
 
     update_button = False
 
@@ -329,7 +347,7 @@ def update_display_name():
 @main.route("/weekly_update", methods=["POST"])
 @login_required
 def weekly_update():
-    curr_event, __, __, __ = get_event_info()
+    curr_event, __, __, __, __ = get_event_info()
 
     users = User.query.all()
     picks = Pick.query.filter_by(season=SEASON).all()
@@ -372,7 +390,7 @@ def get_player_picks(name):
 @main.route("/mdp")
 @login_required
 def mdp():
-    # __, __, tournament_state, __ = get_event_info()
+    # __, __, tournament_state, __, __ = get_event_info()
 
     # update_button = False
 

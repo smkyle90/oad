@@ -3,7 +3,7 @@
 
 <section>
   <h2 class="title">{{ user }}, {{ pick_text }}</h2>
-  {% if button %}
+  {% if strike_button_state %}
   <form name="Select" action="{{ url_for('main.submit_pick') }}" method="POST">
   <h3>Main Pick</h3>
     <select
@@ -35,5 +35,14 @@
       {{ submit_text }}
     </button>
   </form>
+
+    <button class="button" onclick="window.location.href='/use_tap_in';">
+      Use Tap-In
+    </button>
+
+    <button class="button" onclick="window.location.href='/use_double_up';">
+      Use Double-Up
+    </button>
 </section>
-{% endif %} {% endblock %}
+{% endif %}
+{% endblock %}
