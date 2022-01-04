@@ -1,3 +1,10 @@
 {% extends "base.html" %} {% block content %}
 <h1 class="title">Use Tap-In</h1>
+
+<p>Confirm you want to use your Tap-In. This will replace your primary selection with your alternate.</p>
+<form method="POST" action="{{ url_for('main.confirm_tap_in') }}">
+<button class="button">
+Confirm Tap-In
+</button>
+</form>
 {% endblock %}

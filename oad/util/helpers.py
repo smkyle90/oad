@@ -23,6 +23,28 @@ PGA_URL = "https://www.pgatour.com/stats/stat.109.html"
 NON_PGA_URL = "https://www.pgatour.com/stats/stat.02677.html"
 
 
+def check_rule_status(user, current_event):
+    # Check the user has not used their rules.
+
+    strike_used = bool(user.strike_event)
+    tap_in_used = bool(user.substitute_event)
+    double_up_used = bool(user.double_up_event)
+
+    if user.strike_event == current_event:
+        tap_in_used = True
+        double_up_used = True
+
+    if user.substitute_event == current_event:
+        strike_used = True
+        double_up_used = True
+
+    if user.double_up_event == current_event:
+        strike_used = True
+        tap_in_used = True
+
+    return strike_used, tap_in_used, double_up_used
+
+
 def get_random_password_string(length):
     password_characters = string.ascii_letters + string.digits + string.punctuation[2:6]
     password = "".join(random.choice(password_characters) for i in range(length))
@@ -142,6 +164,7 @@ def live_scores_from_data(data, current_players):
                     "score": player_score,
                     "position": player_pos,
                     "earnings": int(user.get("earnings", 0)),
+                    "points": int(user.get("earnings", 0)),
                     "freq": 1,
                     "round": idx + 1,
                 }
@@ -315,7 +338,11 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
         "weekly pick": [],
         "weekly earnings": [],
         "total earnings": [],
+        "total points": [],
+        "weekly points": [],
         "strikes left": [],
+        "tap-ins left": [],
+        "double-ups left": [],
     }
 
     for usr in users:
@@ -343,8 +370,22 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
                 ]
             )
         )
+        user_dict["weekly points"].append(
+            sum(
+                [
+                    int(x.points)
+                    for x in picks
+                    if (x.event == curr_event) and (x.name == usr.name)
+                ]
+            )
+        )
         user_dict["strikes left"].append(int(usr.strikes_remaining))
+        user_dict["tap-ins left"].append(int(usr.substitutes_remaining))
+        user_dict["double-ups left"].append(int(usr.double_up_remaining))
         user_dict["total earnings"].append(
+            sum([int(x.points) for x in picks if x.name == usr.name])
+        )
+        user_dict["total points"].append(
             sum([int(x.points) for x in picks if x.name == usr.name])
         )
 
@@ -353,8 +394,13 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
     user_df.sort_values(["total earnings"], inplace=True, ascending=False)
     user_df["rank"] = user_df["total earnings"].rank(ascending=False).astype(int)
 
-    max_points = user_df["total earnings"].max()
-    user_df["dollars back"] = [x - max_points for x in user_df["total earnings"]]
+    max_earnings_delta = user_df["total earnings"].max()
+    user_df["dollars back"] = [
+        x - max_earnings_delta for x in user_df["total earnings"]
+    ]
+
+    max_points_delta = user_df["total points"].max()
+    user_df["points back"] = [x - max_points_delta for x in user_df["total points"]]
 
     # Reorder columns
     user_df = user_df[
@@ -365,7 +411,12 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
             "weekly earnings",
             "total earnings",
             "dollars back",
+            "weekly points",
+            "total points",
+            "points back",
             "strikes left",
+            "tap-ins left",
+            "double-ups left",
         ]
     ]
 

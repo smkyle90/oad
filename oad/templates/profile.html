@@ -10,6 +10,19 @@
     {{ pick_table | safe }}
   </div>
 </section>
+
+<p class="title" style="text-align: center">
+  Breakfast Ball: {{ user.strikes_remaining }} ({{ user.strike_event }})
+</p>
+
+<p class="title" style="text-align: center">
+  Tap-In: {{ user.substitutes_remaining }} ({{ user.substitute_event }})
+</p>
+
+<p class="title" style="text-align: center">
+  Double-Up: {{ user.double_up_remaining }} ({{ user.double_up_event }})
+</p>
+
 <section>
   <div>
     <h2 class="title">User Admin</h2>

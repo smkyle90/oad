@@ -9,6 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from . import db
 from .models import Pick, Player, User
 from .util import (
+    check_rule_status,
     construct_user_table,
     create_pick_table,
     format_earnings,
@@ -20,7 +21,7 @@ from .util import (
 from .util.admin import add_user_points
 from .views import league_page, weekly_pick_table
 
-SEASON = int(os.getenv("OADYR", 2021))
+SEASON = int(os.getenv("OADYR", 2022))
 
 EMPTY_HTML = "<div></div>"
 
@@ -136,52 +137,68 @@ def pick():
         eligible_picks = [p for p in avail_picks if p not in all_players]
     except Exception:
         eligible_picks = []
-    strike_button_state = True
-    button_text = "Submit Pick"
+
+    eligible_picks = [f"{i}" for i in range(40)]
+
+    strike_used, tap_in_used, double_up_used = check_rule_status(
+        current_user, curr_event
+    )
+
+    strike_button_state = False
+    substitute_button_state = False
+    double_up_button_state = False
+    button_text = ""
 
     if eligible_picks:
         eligible_picks.sort()
 
         # Warn the user about the picking state
-        if tournament_state == "pre":
+        if tournament_round < 1:
             if prev_pick is None:
                 pick_state = "you have yet to pick. Pick any golfer in the field."
             else:
                 pick_state = "you have already picked, but can modify your pick free of charge. Pick any other golfer in the field."
-        else:
+
+            strike_button_state = True
+            button_text = "Submit Pick"
+
+        elif tournament_round < 2:
             # Allow user to use strike
-            if current_user.strikes_remaining and tournament_round < 2:
+            if not strike_used:
                 if prev_pick is None:
                     pick_state = "the tourney has started and you have not picked, but you have a Breakfast Ball (strike). Picking now will use this up. Prior to the start of Round 2, you can pick a player who has yet to tee off."
+                    button_text = "Pick and Use Breakfast Ball"
                 else:
                     pick_state = "the tourney has started and you've made a pick, but you have a Breakfast Ball (strike). Picking now will use this up. Prior to the start of Round 2, you can pick a player who has yet to tee off."
+                    button_text = "Re-pick and Use Breakfast Ball"
 
-                button_text = "Pick and Use Breakfast Ball"
+                strike_button_state = True
+                button_text = "Use Breakfast Ball (strike)"
+
             else:
-                pick_state = "the tourney has started and you have either made your pick, don't have a Breakfast Ball, or Round 2 has started... try your Tap In?"
-                strike_button_state = False
-
+                pick_state = "the tourney has started and you have either made your pick, Round 2 has started, or don't have a Breakfast Ball... try your Tap In?"
+        else:
+            pick_state = "you are out of options for this week."
     else:
-        if tournament_state == "pre":
+        if tournament_round < 1:
             pick_state = (
                 "our friends at ESPN have not released the field for this week."
             )
         else:
             pick_state = "no players left to pick from."
 
-        strike_button_state = False
-
     # Allow user to substitue their alternate in
-    if (not current_user.subtitute_event) and tournament_round < 3:
+    if (prev_pick) and (not tap_in_used) and (1 < tournament_round < 3):
         substitute_button_state = True
-    else:
-        substitute_button_state = False
+        pick_state = "you can use your Tap-In. Replace your Primary selection with your Alternate."
 
     # Allow user the double up their earnings for the week
-    if (not current_user.double_up_event) and tournament_round < 4:
+    if (prev_pick) and (not double_up_used) and (1 < tournament_round < 4):
         double_up_button_state = True
-    else:
-        double_up_button_state = False
+        if substitute_button_state:
+            pick_state += " Or, you can use your Double-Up. Double your Primary golfer's points for this week."
+        else:
+            pick_state = "you can use your Double-Up. Double your Primary golfer's points for this week."
 
     return render_template(
         "pick.html",
@@ -191,6 +208,8 @@ def pick():
         pick_text=pick_state,
         strike_button_state=strike_button_state,
         submit_text=button_text,
+        substitute_button_state=substitute_button_state,
+        double_up_button_state=double_up_button_state,
     )
 
 
@@ -198,7 +217,7 @@ def pick():
 @login_required
 def submit_pick():
     # Get current event from the session
-    curr_event, __, tournament_state, __, __ = get_event_info()
+    curr_event, __, tournament_state, __, tournament_round = get_event_info()
 
     # Get the selection
     selection = request.form.get("main")
@@ -225,7 +244,7 @@ def submit_pick():
     # Ensure a player does not pick before the tournament has started.
     # If they do not pick before it starts, and have a strike, they can make
     # a pick and use it.
-    if tournament_state == "pre":
+    if tournament_round < 1:
         if prev_pick is None:
             user_pick = Pick(
                 event=curr_event,
@@ -238,8 +257,9 @@ def submit_pick():
         else:
             prev_pick.pick = selection
             prev_pick.alternate = alternate
-    else:
-        if (prev_pick is None) and (current_user.strikes_remaining):
+
+    elif (tournament_round < 2) and (current_user.strikes_remaining):
+        if prev_pick is None:
             user_pick = Pick(
                 event=curr_event,
                 pick=selection,
@@ -249,11 +269,13 @@ def submit_pick():
             )
             db.session.add(user_pick)
 
-            # Need to issue a strike to user.
-            current_user.strikes_remaining = 0
-
         else:
-            print("Already made pick. Cannot change pick once tournament has begun.")
+            prev_pick.pick = selection
+            prev_pick.alternate = alternate
+
+        # Need to issue a strike to user.
+        current_user.strikes_remaining = 0
+        current_user.strike_event = curr_event
 
     # The user is able to make a pick
     db.session.commit()
@@ -313,6 +335,59 @@ def update_password():
     return render_template("update_password.html")
 
 
+@main.route("/confirm_tap_in", methods=["POST"])
+@login_required
+def confirm_tap_in():
+    curr_event, _, _, _, _ = get_event_info()
+
+    # See if pick has been made
+    prev_pick = (
+        Pick.query.filter_by(season=SEASON)
+        .filter_by(event=curr_event)
+        .filter_by(name=current_user.name)
+        .first()
+    )
+
+    prev_pick.point_multiplier = 0
+
+    new_pick = Pick(
+        event=curr_event,
+        pick=prev_pick.alternate,
+        alternate=prev_pick.alternate,
+        name=current_user.name,
+        season=SEASON,
+    )
+
+    current_user.substitute_event = curr_event
+    current_user.substitutes_remaining = 0
+
+    db.session.add(new_pick)
+    db.session.commit()
+
+    return redirect(url_for("main.profile"))
+
+
+@main.route("/confirm_double_up", methods=["POST"])
+@login_required
+def confirm_double_up():
+    curr_event, _, _, _, _ = get_event_info()
+
+    # See if pick has been made
+    curr_pick = (
+        Pick.query.filter_by(season=SEASON)
+        .filter_by(event=curr_event)
+        .filter_by(name=current_user.name)
+        .first()
+    )
+
+    curr_pick.point_multiplier = 2
+    current_user.double_up_event = curr_event
+    current_user.double_up_remaining = 0
+    db.session.commit()
+
+    return redirect(url_for("main.profile"))
+
+
 @main.route("/use_tap_in")
 @login_required
 def use_tap_in():
@@ -336,7 +411,7 @@ def user_display_name_change():
     user.display_name = new_name
 
     db.session.commit()
-    print("new name", new_name)
+
     return render_template("update_display_name.html", team_name=new_name)
 
 

@@ -38,6 +38,9 @@ def add_user_points():
             pick.points = 0
 
             weekly_earnings = get_earnings(pick.alternate)
+
+            # Multiply by the pick point multiplier -- defines if a rule was used.
+            weekly_earnings = pick.point_multiplier * weekly_earnings
             # We need to add the alternate as the main pick.
             updated_pick = Pick(
                 event=pick.event,
@@ -51,6 +54,8 @@ def add_user_points():
         else:
             # Get the earnings
             weekly_earnings = get_earnings(player_name)
+            weekly_earnings = pick.point_multiplier * weekly_earnings
+
             # Update the pick with this value
             pick.points = weekly_earnings
 

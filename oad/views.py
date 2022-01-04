@@ -1,4 +1,5 @@
 import json
+import os
 
 import pandas as pd
 import plotly
@@ -7,6 +8,12 @@ from flask_table import Col, Table
 
 from .models import Pick
 from .util import format_earnings, get_live_scores, pos_payouts
+
+EVENT_TYPE = "regular"
+
+dirname = os.path.dirname(__file__)
+filename = os.path.join(dirname, "util/points.csv")
+POINTS_DF = pd.read_csv(filename)
 
 
 class Earnings(Col):
@@ -57,11 +64,11 @@ def weekly_pick_table(users, picks, event_info, user_data):
     pick_dict = {
         "team": [user_dict[p.name] for p in picks],
         "pick": [p.pick for p in picks],
-        "pe": [0 for p in picks],
+        "pp": [0 for p in picks],
         "alternate": [p.alternate for p in picks],
         "tot": [],
         "pos": [],
-        "earnings": [],
+        "points": [],
     }
 
     # live scores from API for each pick.
@@ -69,22 +76,22 @@ def weekly_pick_table(users, picks, event_info, user_data):
         set(pick_dict["pick"]).union(set(pick_dict["alternate"]))
     )
     # extract the user data for use in the table
-    current_earnings = {
-        user: (float(earnings.replace("$", "").replace(",", "")), rank)
-        for user, earnings, rank in zip(
-            user_data["TEAM"], user_data["TOTAL EARNINGS"], user_data["RANK"]
+    current_points = {
+        user: (points, rank)
+        for user, points, rank in zip(
+            user_data["TEAM"], user_data["TOTAL POINTS"], user_data["RANK"]
         )
     }
 
     # get missing picks
-    all_users = set(current_earnings.keys())
+    all_users = set(current_points.keys())
     curr_users = set(pick_dict["team"])
     missing_picks = all_users - curr_users
 
     for missed in missing_picks:
         pick_dict["team"].append(missed)
         pick_dict["pick"].append("--")
-        pick_dict["pe"].append(0)
+        pick_dict["pp"].append(0)
         pick_dict["alternate"].append("--")
 
     for idx, pick in enumerate(pick_dict["pick"]):
@@ -105,33 +112,30 @@ def weekly_pick_table(users, picks, event_info, user_data):
             pick_dict["pos"].append(1000)
 
         try:
-            pick_dict["earnings"].append(live_scores[pick]["earnings"])
+            pick_dict["points"].append(live_scores[pick]["points"])
         except Exception as e:
             print(e)
-            pick_dict["earnings"].append(0)
+            pick_dict["points"].append(0)
 
-    # calculate projected earnings
+    # calculate projected points
     try:
         pot_earns = []
         for pick in pick_dict["pick"]:
             try:
                 pot_earns.append(
-                    (purse_value / 100)
-                    * sum(
-                        pos_payouts[
-                            live_scores[pick]["position"]
-                            - 1 : (live_scores[pick]["position"] - 1)
-                            + live_scores[pick]["freq"]
-                        ]
-                    )
+                    POINTS_DF.loc[
+                        live_scores[pick]["position"]
+                        - 1 : (live_scores[pick]["position"] - 1)
+                        + live_scores[pick]["freq"]
+                    ].sum()
                     / (live_scores[pick]["freq"])
                 )
             except Exception:
                 pot_earns.append(0)
-        pick_dict["pe"] = pot_earns
+        pick_dict["pp"] = pot_earns
     except Exception as e:
-        print("pe", e)
-        pick_dict["pe"] = [0 for pick in pick_dict["pick"]]
+        print("pp", e)
+        pick_dict["pp"] = [0 for pick in pick_dict["pick"]]
 
     # make pick dataframe
     df = pd.DataFrame(pick_dict)
@@ -147,10 +151,10 @@ def weekly_pick_table(users, picks, event_info, user_data):
         print(e)
 
     # current rank
-    df["pr"] = [int(current_earnings.get(row.team)[1]) for row in df.itertuples()]
+    df["pr"] = [int(current_points.get(row.team)[1]) for row in df.itertuples()]
 
-    # Display table based on if earnings are published
-    if df["earnings"].sum():
+    # Display table based on if points are published
+    if df["points"].sum():
         df["pos"] = df["pos"].fillna(-1)
         try:
             df.replace({"pos": {"--": -1}}, inplace=True)
@@ -160,25 +164,21 @@ def weekly_pick_table(users, picks, event_info, user_data):
         df["pos"] = df["pos"].astype(int)
         df["pos"] = df["pos"].replace(-1, "CUT/NO PICK")
 
-        df["earnings"] = [format_earnings(earnings) for earnings in df["earnings"]]
+        df["points"] = [format_points(points) for points in df["points"]]
 
-        df = df[["team", "pick", "tot", "pos", "earnings"]]
+        df = df[["team", "pick", "tot", "pos", "points"]]
 
     else:  # In tournament display
         # Future earning
-        df["fe"] = [
-            int(current_earnings.get(row.team)[0]) + row.pe for row in df.itertuples()
+        df["fp"] = [
+            int(current_points.get(row.team)[0]) + row.pe for row in df.itertuples()
         ]
         # Future rank
-        df["fr"] = df["fe"].rank(ascending=False).astype(int)
+        df["fr"] = df["fp"].rank(ascending=False).astype(int)
 
-        # calculate projected earnings
-        df["proj. earns"] = [
-            "${}m".format(round(earnings / 1e6, 2))
-            if earnings > 1e6
-            else "${}k".format(round(earnings / 1e3))
-            for earnings in df["pe"]
-        ]
+        # calculate projected points
+        df["proj. points"] = ["{}k".format(round(points / 1e3)) for points in df["pp"]]
+
         # Calculate the rank delta and display
         df["dr"] = df.pr - df.fr
         dr_res = []
@@ -195,7 +195,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
             lambda x: "{} ({})".format(x[0], x[1]), axis=1
         )
 
-        df = df[["team", "pick", "tot", "pos", "proj. earns", "proj. rank"]]
+        df = df[["team", "pick", "tot", "pos", "proj. points", "proj. rank"]]
 
     df.columns = [x.upper() for x in df.columns]
 
@@ -342,7 +342,7 @@ def create_plots(raw_picks):
 
     line_data = [
         go.Scatter(
-            mode="lines+markers", x=tournaments[-3:], y=user_pts[-3:], name=str(user),
+            mode="lines+markers", x=tournaments[-5:], y=user_pts[-5:], name=str(user),
         )
         for user, user_pts in cum_points.items()
     ]
@@ -355,8 +355,8 @@ def create_plots(raw_picks):
 
     br_fig.update_xaxes(showgrid=False, title_text="tourney")
     ln_fig.update_xaxes(showgrid=False, title_text="tourney")
-    br_fig.update_yaxes(showgrid=True, title_text="tournament earnings [$]")
-    ln_fig.update_yaxes(showgrid=True, title_text="cumulative earnings [$]")
+    br_fig.update_yaxes(showgrid=True, title_text="tournament points")
+    ln_fig.update_yaxes(showgrid=True, title_text="cumulative points")
 
     br_json = json.dumps(br_fig, cls=plotly.utils.PlotlyJSONEncoder)
     ln_json = json.dumps(ln_fig, cls=plotly.utils.PlotlyJSONEncoder)

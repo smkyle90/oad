@@ -29,6 +29,8 @@ class User(UserMixin, db.Model, Serializer):
     strike_event = db.Column(db.Text, default="")
     substitute_event = db.Column(db.Text, default="")
     double_up_event = db.Column(db.Text, default="")
+    substitutes_remaining = db.Column(db.Integer, default=1)  # tap_in
+    double_up_remaining = db.Column(db.Integer, default=1)  # double_up
 
 
 class Pick(db.Model, Serializer):
@@ -41,6 +43,7 @@ class Pick(db.Model, Serializer):
     name = db.Column(db.String(1000), db.ForeignKey("user.name"), nullable=False)
     points = db.Column(db.Float(), default=-1e-9)
     season = db.Column(db.Integer)
+    point_multiplier = db.Column(db.Integer, default=1)
 
     def serialize(self):
         d = Serializer.serialize(self)
