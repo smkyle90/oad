@@ -138,8 +138,6 @@ def pick():
     except Exception:
         eligible_picks = []
 
-    eligible_picks = [f"{i}" for i in range(40)]
-
     strike_used, tap_in_used, double_up_used = check_rule_status(
         current_user, curr_event
     )
@@ -200,6 +198,11 @@ def pick():
         else:
             pick_state = "you can use your Double-Up. Double your Primary golfer's points for this week."
 
+    if tournament_round:
+        tournament_round = str(tournament_round)
+    else:
+        tournament_round = "Pre-tournament"
+
     return render_template(
         "pick.html",
         avail=eligible_picks,
@@ -210,6 +213,7 @@ def pick():
         submit_text=button_text,
         substitute_button_state=substitute_button_state,
         double_up_button_state=double_up_button_state,
+        current_round=tournament_round,
     )
 
 

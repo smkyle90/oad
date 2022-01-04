@@ -72,7 +72,12 @@ def send_email(receiver_email, subject, html):
 
 
 def get_tournament_round(data):
-    return 1
+    try:
+        tournament_round = int(data["events"][0]["competitions"][0]["status"]["period"])
+    except Exception:
+        tournament_round = 0
+
+    return tournament_round
 
 
 def get_event_from_data(data):
