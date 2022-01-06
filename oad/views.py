@@ -171,7 +171,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
     else:  # In tournament display
         # Future earning
         df["fp"] = [
-            int(current_points.get(row.team)[0]) + row.pe for row in df.itertuples()
+            int(current_points.get(row.team)[0]) + row.pp for row in df.itertuples()
         ]
         # Future rank
         df["fr"] = df["fp"].rank(ascending=False).astype(int)
