@@ -173,29 +173,31 @@ def weekly_pick_table(users, picks, event_info, user_data):
         df["fp"] = [
             int(current_points.get(row.team)[0]) + row.pp for row in df.itertuples()
         ]
-        # Future rank
-        df["fr"] = df["fp"].rank(ascending=False).astype(int)
 
-        # calculate projected points
-        df["proj. points"] = ["{}k".format(round(points / 1e3)) for points in df["pp"]]
+        # print(df.head())
+        # # Future rank
+        # # df["fr"] = df["fp"] #.rank(ascending=False).astype(int)
 
-        # Calculate the rank delta and display
-        df["dr"] = df.pr - df.fr
-        dr_res = []
-        for delta in df["dr"]:
-            if delta > 0:
-                dr_res.append("▲{}".format(delta))
-            elif not delta:
-                dr_res.append("--")
-            else:
-                dr_res.append("▼{}".format(-delta))
+        # # calculate projected points
+        # df["proj. points"] = ["{}k".format(round(points / 1e3)) for points in df["pp"]]
 
-        df["dr"] = dr_res
-        df["proj. rank"] = df[["fr", "dr"]].apply(
-            lambda x: "{} ({})".format(x[0], x[1]), axis=1
-        )
+        # # Calculate the rank delta and display
+        # df["dr"] = df.pr - df.fr
+        # dr_res = []
+        # for delta in df["dr"]:
+        #     if delta > 0:
+        #         dr_res.append("▲{}".format(delta))
+        #     elif not delta:
+        #         dr_res.append("--")
+        #     else:
+        #         dr_res.append("▼{}".format(-delta))
 
-        df = df[["team", "pick", "tot", "pos", "proj. points", "proj. rank"]]
+        # df["dr"] = dr_res
+        # df["proj. rank"] = df[["fr", "dr"]].apply(
+        #     lambda x: "{} ({})".format(x[0], x[1]), axis=1
+        # )
+
+        # df = df[["team", "pick", "tot", "pos", "proj. points", "proj. rank"]]
 
     df.columns = [x.upper() for x in df.columns]
 
