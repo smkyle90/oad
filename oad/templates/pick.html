@@ -1,6 +1,7 @@
 {% extends "base.html" %} {% block content %}
 <h1 class="title">{{ event }} pick</h1>
-<h2 class="title">Current Round: {{ current_round }}</h2>
+<h3 class="title">Current Round: {{ current_round }}</h3>
+<h2 class="title">Pick</h2>
 
 <section>
   <p class="title">{{ user }}, {{ pick_text }}</p>
@@ -36,11 +37,16 @@
       {{ submit_text }}
     </button>
   </form>
+  {% else %}
+    <button class="button disabled" diabled>
+      Unable to Pick
+    </button>
+
+{% endif %}
 
 </section>
 
 
-{% endif %}
 
 <h2 class="title">Modify Your Pick</h2>
     <p>Tap-In. Replace your Primary selection with your Alternate.</p>
@@ -53,7 +59,7 @@
   </button>
   {% else %}
     <button class="button disabled" diabled>
-      Ineligible to Use Tap-In
+      Unable to Use Tap-In
     </button>
   {% endif %}
 
@@ -66,7 +72,7 @@
     </button>
   {% else %}
     <button class="button disabled" diabled>
-      Ineligible to Use Double-Up
+      Unable to Use Double-Up
     </button>
   {% endif %}
 
