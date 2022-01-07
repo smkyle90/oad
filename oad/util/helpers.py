@@ -94,7 +94,7 @@ def get_avail_from_data(data):
     return [
         a["athlete"]["displayName"]
         for a in data["events"][0]["competitions"][0]["competitors"]
-        if (a["status"]["period"] <= 1) and (a["status"]["type"]["state"] == "pre")
+        if (a["status"]["period"] <= 2) and (a["status"]["type"]["state"] == "pre")
     ]
 
 
