@@ -263,7 +263,7 @@ def submit_pick():
             prev_pick.pick = selection
             prev_pick.alternate = alternate
 
-    elif (tournament_round < 2) and (current_user.strikes_remaining):
+    elif (tournament_round <= 2) and (current_user.strikes_remaining):
         if prev_pick is None:
             user_pick = Pick(
                 event=curr_event,
