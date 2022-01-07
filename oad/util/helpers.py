@@ -345,7 +345,7 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
         "total earnings": [],
         "total points": [],
         "weekly points": [],
-        "strikes left": [],
+        "breakfast balls left": [],
         "tap-ins left": [],
         "double-ups left": [],
     }
@@ -384,7 +384,7 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
                 ]
             )
         )
-        user_dict["strikes left"].append(int(usr.strikes_remaining))
+        user_dict["breakfast balls left"].append(int(usr.strikes_remaining))
         user_dict["tap-ins left"].append(int(usr.substitutes_remaining))
         user_dict["double-ups left"].append(int(usr.double_up_remaining))
         user_dict["total earnings"].append(
@@ -419,7 +419,7 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
             "weekly points",
             "total points",
             "points back",
-            "strikes left",
+            "breakfast balls left",
             "tap-ins left",
             "double-ups left",
         ]
@@ -435,7 +435,16 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
         user_df[col] = new_col
 
     if curr_event is None:
-        user_df.drop(columns=["weekly earnings", "weekly pick"], inplace=True)
+        user_df.drop(
+            columns=[
+                "weekly earnings",
+                "weekly pick",
+                "weekly points",
+                "total earnings",
+                "dollars back",
+            ],
+            inplace=True,
+        )
 
     user_df.columns = [x.upper() for x in user_df.columns]
 
