@@ -142,6 +142,7 @@ def pick():
         current_user, curr_event
     )
 
+    print(eligible_picks)
     strike_button_state = False
     substitute_button_state = False
     double_up_button_state = False
@@ -160,7 +161,7 @@ def pick():
             strike_button_state = True
             button_text = "Submit Pick"
 
-        elif tournament_round < 2:
+        elif tournament_round <= 2:
             # Allow user to use strike
             if not strike_used:
                 if prev_pick is None:
