@@ -42,7 +42,6 @@
 
 {% endif %}
 
-{% if ( substitute_button_state or double_up_button_state ) %}
 <h2 class="title">Modify this pick!</h2>
 
   {% if substitute_button_state %}
@@ -50,16 +49,23 @@
   <button class="button" onclick="window.location.href='/use_tap_in';">
     Use Tap-In
   </button>
+  {% else %}
+    <button class="button disabled" diabled>
+      Ineligible to Use Tap-In
+    </button>
   {% endif %}
+
 
   {% if double_up_button_state %}
 
-  <button class="button" onclick="window.location.href='/use_double_up';">
-    Use Double-Up
-  </button>
+    <button class="button" onclick="window.location.href='/use_double_up';">
+      Use Double-Up
+    </button>
+  {% else %}
+    <button class="button disabled" diabled>
+      Ineligible to Use Double-Up
+    </button>
   {% endif %}
-{% endif %}
-
 
 
 {% endblock %}
