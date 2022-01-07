@@ -264,19 +264,14 @@ def submit_pick():
             prev_pick.alternate = alternate
 
     elif (tournament_round <= 2) and (current_user.strikes_remaining):
-        if prev_pick is None:
-            user_pick = Pick(
-                event=curr_event,
-                pick=selection,
-                alternate=alternate,
-                name=current_user.name,
-                season=SEASON,
-            )
-            db.session.add(user_pick)
-
-        else:
-            prev_pick.pick = selection
-            prev_pick.alternate = alternate
+        user_pick = Pick(
+            event=curr_event,
+            pick=selection,
+            alternate=alternate,
+            name=current_user.name,
+            season=SEASON,
+        )
+        db.session.add(user_pick)
 
         # Need to issue a strike to user.
         current_user.strikes_remaining = 0

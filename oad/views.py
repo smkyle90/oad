@@ -132,7 +132,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
                         ]
                         .sum()
                         / (live_scores[pick]["freq"]),
-                        2,
+                        0,
                     )
                 )
             except Exception:
@@ -183,7 +183,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
         df["fr"] = df["fp"].rank(ascending=False).astype(int)
 
         # calculate projected points
-        df["proj. points"] = ["{}".format(round(points, 1)) for points in df["pp"]]
+        df["proj. points"] = ["{}".format(round(points, 0)) for points in df["pp"]]
 
         # Calculate the rank delta and display
         df["dr"] = df.pr - df.fr
@@ -251,7 +251,9 @@ def league_page(users, season):
         user_dict[pick.name] for pick in all_picks if pick.season == season
     ]
     raw_picks["player"] = [pick.pick for pick in all_picks if pick.season == season]
-    raw_picks["points"] = [pick.points for pick in all_picks if pick.season == season]
+    raw_picks["points"] = [
+        int(pick.points) for pick in all_picks if pick.season == season
+    ]
     raw_picks["tournament"] = [
         pick.event for pick in all_picks if pick.season == season
     ]
