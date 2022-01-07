@@ -1,9 +1,9 @@
 {% extends "base.html" %} {% block content %}
 <h1 class="title">{{ event }} pick</h1>
-<h3 class="title">Current Round: {{ current_round }}</h3>
+<h2 class="title">Current Round: {{ current_round }}</h2>
 
 <section>
-  <h2 class="title">{{ user }}, {{ pick_text }}</h2>
+  <p class="title">{{ user }}, {{ pick_text }}</p>
   {% if strike_button_state %}
   <form name="Select" action="{{ url_for('main.submit_pick') }}" method="POST">
   <h3>Main Pick</h3>
@@ -42,7 +42,9 @@
 
 {% endif %}
 
-<h2 class="title">Modify this pick!</h2>
+<h2 class="title">Modify Your Pick</h2>
+    <p>Tap-In. Replace your Primary selection with your Alternate.</p>
+
 
   {% if substitute_button_state %}
 
@@ -55,6 +57,7 @@
     </button>
   {% endif %}
 
+  <p> Double-Up. Double your Primary golfer's points for this week.</p>
 
   {% if double_up_button_state %}
 

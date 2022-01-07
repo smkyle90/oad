@@ -165,17 +165,17 @@ def pick():
             # Allow user to use strike
             if not strike_used:
                 if prev_pick is None:
-                    pick_state = "the tourney has started and you have not picked, but you have a Breakfast Ball (strike). Picking now will use this up. Prior to the start of Round 2, you can pick a player who has yet to tee off."
+                    pick_state = "the tourney has started and you have not picked, but you have a Breakfast Ball. Picking now will use this up. Prior to the start of Round 2, you can pick a player who has yet to tee off."
                     button_text = "Pick and Use Breakfast Ball"
                 else:
-                    pick_state = "the tourney has started and you've made a pick, but you have a Breakfast Ball (strike). Picking now will use this up. Prior to the start of Round 2, you can pick a player who has yet to tee off."
+                    pick_state = "the tourney has started and you've made a pick, but you have a Breakfast Ball. Picking now will use this up. Prior to the start of Round 2, you can pick a player who has yet to tee off."
                     button_text = "Re-pick and Use Breakfast Ball"
 
                 strike_button_state = True
-                button_text = "Use Breakfast Ball (strike)"
+                button_text = "Use Breakfast Ball"
 
             else:
-                pick_state = "the tourney has started and you have either made your pick, Round 2 has started, or don't have a Breakfast Ball... try your Tap In?"
+                pick_state = "the tourney has started and you have either made your pick, Round 2 has started, or don't have a Breakfast Ball."
         else:
             pick_state = "you are out of options for this week."
     else:
@@ -189,15 +189,10 @@ def pick():
     # Allow user to substitue their alternate in
     if (prev_pick) and (not tap_in_used) and (1 < tournament_round < 3):
         substitute_button_state = True
-        pick_state = "you can use your Tap-In. Replace your Primary selection with your Alternate."
 
     # Allow user the double up their earnings for the week
     if (prev_pick) and (not double_up_used) and (1 < tournament_round < 4):
         double_up_button_state = True
-        if substitute_button_state:
-            pick_state += " Or, you can use your Double-Up. Double your Primary golfer's points for this week."
-        else:
-            pick_state = "you can use your Double-Up. Double your Primary golfer's points for this week."
 
     if tournament_round:
         tournament_round = str(tournament_round)
