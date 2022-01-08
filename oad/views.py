@@ -61,14 +61,30 @@ def weekly_pick_table(users, picks, event_info, user_data):
         for user in users
     }
 
+    rules_dict = {
+        user_dict[user.name]: (
+            user.strike_event,
+            user.substitute_event,
+            user.double_up_event,
+        )
+        for user in users
+    }
+
+    rules = {
+        0: "brekky ball",
+        1: "tap-in",
+        2: "double_up",
+    }
+
     pick_dict = {
-        "team": [user_dict[p.name] for p in picks],
-        "pick": [p.pick for p in picks],
-        "pp": [0 for p in picks],
-        "alternate": [p.alternate for p in picks],
+        "team": [user_dict[p.name] for p in picks if p.point_multiplier],
+        "pick": [p.pick for p in picks if p.point_multiplier],
+        "pp": [0 for p in picks if p.point_multiplier],
+        "alternate": [p.alternate for p in picks if p.point_multiplier],
         "tot": [],
         "pos": [],
         "points": [],
+        "helpers": [],
     }
 
     # live scores from API for each pick.
@@ -116,6 +132,20 @@ def weekly_pick_table(users, picks, event_info, user_data):
         except Exception as e:
             print(e)
             pick_dict["points"].append(0)
+    print(rules)
+    for team in pick_dict["team"]:
+        print(team)
+        rule_used = False
+        for idx, x in enumerate(rules_dict.get(team, ())):
+            if x:
+                print(rules.get(idx))
+                pick_dict["helpers"].append(rules.get(idx))
+                rule_used = True
+
+        if not rule_used:
+            pick_dict["helpers"].append("--")
+
+    print(pick_dict)
 
     # calculate projected points
     try:
@@ -201,7 +231,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
             lambda x: "{} ({})".format(x[0], x[1]), axis=1
         )
 
-        df = df[["team", "pick", "tot", "pos", "proj. points", "proj. rank"]]
+        df = df[["team", "pick", "tot", "pos", "proj. points", "proj. rank", "helpers"]]
 
     df.columns = [x.upper() for x in df.columns]
 
