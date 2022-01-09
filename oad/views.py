@@ -77,14 +77,15 @@ def weekly_pick_table(users, picks, event_info, user_data):
     }
 
     pick_dict = {
-        "team": [user_dict[p.name] for p in picks if p.point_multiplier],
-        "pick": [p.pick for p in picks if p.point_multiplier],
-        "pp": [0 for p in picks if p.point_multiplier],
-        "alternate": [p.alternate for p in picks if p.point_multiplier],
+        "team": [user_dict[p.name] for p in picks],
+        "pick": [p.pick for p in picks],
+        "pp": [0 for p in picks],
+        "alternate": [p.alternate for p in picks],
         "tot": [],
         "pos": [],
         "points": [],
         "helpers": [],
+        "mult": [p.point_multiplier for p in picks],
     }
 
     # live scores from API for each pick.
@@ -109,6 +110,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
         pick_dict["pick"].append("--")
         pick_dict["pp"].append(0)
         pick_dict["alternate"].append("--")
+        pick_dict["mult"].append(0)
 
     for idx, pick in enumerate(pick_dict["pick"]):
         if pick not in live_scores:
@@ -143,6 +145,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
         if not rule_used:
             pick_dict["helpers"].append("--")
 
+    print(pick_dict)
     # calculate projected points
     try:
         pot_earns = []
@@ -211,11 +214,10 @@ def weekly_pick_table(users, picks, event_info, user_data):
         # Future rank
         df["fr"] = df["fp"].rank(ascending=False).astype(int)
 
+        df.pp *= df.mult
+
         # calculate projected points
         df["proj. points"] = ["{}".format(round(points, 0)) for points in df["pp"]]
-
-        doubles = (df["helpers"] == "double-up") + 1
-        df["proj. points"] = df["proj. points"].astype(float) * doubles
 
         # Calculate the rank delta and display
         df["dr"] = df.pr - df.fr
