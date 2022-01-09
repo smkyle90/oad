@@ -73,7 +73,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
     rules = {
         0: "brekky ball",
         1: "tap-in",
-        2: "double_up",
+        2: "double-up",
     }
 
     pick_dict = {
@@ -132,20 +132,16 @@ def weekly_pick_table(users, picks, event_info, user_data):
         except Exception as e:
             print(e)
             pick_dict["points"].append(0)
-    print(rules)
+
     for team in pick_dict["team"]:
-        print(team)
         rule_used = False
         for idx, x in enumerate(rules_dict.get(team, ())):
             if x:
-                print(rules.get(idx))
                 pick_dict["helpers"].append(rules.get(idx))
                 rule_used = True
 
         if not rule_used:
             pick_dict["helpers"].append("--")
-
-    print(pick_dict)
 
     # calculate projected points
     try:
@@ -156,17 +152,20 @@ def weekly_pick_table(users, picks, event_info, user_data):
                     round(
                         POINTS_DF[EVENT_TYPE]
                         .loc[
-                            live_scores[pick]["position"]
-                            - 1 : (live_scores[pick]["position"] - 1)
-                            + live_scores[pick]["freq"]
+                            (live_scores[pick]["position"] - 1) : (
+                                live_scores[pick]["position"] - 1
+                            )
+                            + (live_scores[pick]["freq"] - 1)
                         ]
                         .sum()
                         / (live_scores[pick]["freq"]),
                         0,
                     )
                 )
-            except Exception:
+            except Exception as e:
+                print("here", e)
                 pot_earns.append(0)
+
         pick_dict["pp"] = pot_earns
     except Exception as e:
         print("pp", e)
@@ -232,6 +231,9 @@ def weekly_pick_table(users, picks, event_info, user_data):
         )
 
         df = df[["team", "pick", "tot", "pos", "proj. points", "proj. rank", "helpers"]]
+
+    doubles = (df["helpers"] == "double-up") + 1
+    df["proj. points"] *= doubles
 
     df.columns = [x.upper() for x in df.columns]
 
