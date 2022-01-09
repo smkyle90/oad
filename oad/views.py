@@ -77,15 +77,15 @@ def weekly_pick_table(users, picks, event_info, user_data):
     }
 
     pick_dict = {
-        "team": [user_dict[p.name] for p in picks],
-        "pick": [p.pick for p in picks],
-        "pp": [0 for p in picks],
-        "alternate": [p.alternate for p in picks],
+        "team": [user_dict[p.name] for p in picks if p.point_multiplier],
+        "pick": [p.pick for p in picks if p.point_multiplier],
+        "pp": [0 for p in picks if p.point_multiplier],
+        "alternate": [p.alternate for p in picks if p.point_multiplier],
         "tot": [],
         "pos": [],
         "points": [],
         "helpers": [],
-        "mult": [p.point_multiplier for p in picks],
+        "mult": [p.point_multiplier for p in picks if p.point_multiplier],
     }
 
     # live scores from API for each pick.
