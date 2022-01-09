@@ -214,6 +214,9 @@ def weekly_pick_table(users, picks, event_info, user_data):
         # calculate projected points
         df["proj. points"] = ["{}".format(round(points, 0)) for points in df["pp"]]
 
+        doubles = (df["helpers"] == "double-up") + 1
+        df["proj. points"] = df["proj. points"].astype(float) * doubles
+
         # Calculate the rank delta and display
         df["dr"] = df.pr - df.fr
         dr_res = []
@@ -231,11 +234,6 @@ def weekly_pick_table(users, picks, event_info, user_data):
         )
 
         df = df[["team", "pick", "tot", "pos", "proj. points", "proj. rank", "helpers"]]
-
-    doubles = (df["helpers"] == "double-up") + 1
-    print(doubles)
-    df["proj. points"] = df["proj. points"].astype(float) * doubles
-    print(df["proj. points"])
 
     df.columns = [x.upper() for x in df.columns]
 
