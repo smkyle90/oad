@@ -233,7 +233,9 @@ def weekly_pick_table(users, picks, event_info, user_data):
         df = df[["team", "pick", "tot", "pos", "proj. points", "proj. rank", "helpers"]]
 
     doubles = (df["helpers"] == "double-up") + 1
-    df["proj. points"] *= doubles
+    print(doubles)
+    df["proj. points"] = df["proj. points"].astype(float) * doubles
+    print(df["proj. points"])
 
     df.columns = [x.upper() for x in df.columns]
 
