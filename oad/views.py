@@ -206,6 +206,8 @@ def weekly_pick_table(users, picks, event_info, user_data):
         df = df[["team", "pick", "tot", "pos", "points"]]
 
     else:  # In tournament display
+        df.pp *= df.mult
+
         # Future earning
         df["fp"] = [
             int(current_points.get(row.team)[0]) + row.pp for row in df.itertuples()
@@ -213,8 +215,6 @@ def weekly_pick_table(users, picks, event_info, user_data):
 
         # Future rank
         df["fr"] = df["fp"].rank(ascending=False).astype(int)
-
-        df.pp *= df.mult
 
         # calculate projected points
         df["proj. points"] = ["{}".format(round(points, 0)) for points in df["pp"]]
