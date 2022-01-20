@@ -188,11 +188,11 @@ def pick():
             pick_state = "no players left to pick from."
 
     # Allow user to substitue their alternate in
-    if (prev_pick) and (not tap_in_used) and (1 < tournament_round < 3):
+    if (prev_pick) and (not tap_in_used) and (1 <= tournament_round < 3):
         substitute_button_state = True
 
     # Allow user the double up their earnings for the week
-    if (prev_pick) and (not double_up_used) and (1 < tournament_round < 4):
+    if (prev_pick) and (not double_up_used) and (1 <= tournament_round < 4):
         double_up_button_state = True
 
     if tournament_round:

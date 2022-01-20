@@ -145,7 +145,6 @@ def weekly_pick_table(users, picks, event_info, user_data):
         if not rule_used:
             pick_dict["helpers"].append("--")
 
-    print(pick_dict)
     # calculate projected points
     try:
         pot_earns = []
