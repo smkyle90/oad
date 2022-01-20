@@ -287,9 +287,7 @@ def league_page(users, season):
         user_dict[pick.name] for pick in all_picks if pick.season == season
     ]
     raw_picks["player"] = [pick.pick for pick in all_picks if pick.season == season]
-    raw_picks["points"] = [
-        int(pick.points) for pick in all_picks if pick.season == season
-    ]
+    raw_picks["points"] = [pick.points for pick in all_picks if pick.season == season]
     raw_picks["tournament"] = [
         pick.event for pick in all_picks if pick.season == season
     ]
@@ -311,7 +309,7 @@ def pick_matrix(raw_picks):
         df
 
     """
-
+    print(raw_picks)
     tourn_dict = {}
     t_no = 1
     for tourn in raw_picks["tournament"]:

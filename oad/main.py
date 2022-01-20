@@ -63,6 +63,7 @@ def profile():
 def league():
     curr_event, __, tournament_state, event_table, __ = get_event_info()
 
+    print(tournament_state)
     users = User.query.all()
     all_picks = Pick.query.filter_by(season=SEASON).all()
     user_table = construct_user_table(users, all_picks, as_html=False)
