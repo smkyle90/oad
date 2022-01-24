@@ -84,7 +84,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
         "tot": [],
         "pos": [],
         "points": [],
-        "helpers": [],
+        # "helpers": [],
         "mult": [p.point_multiplier for p in picks if p.point_multiplier],
     }
 
@@ -135,15 +135,15 @@ def weekly_pick_table(users, picks, event_info, user_data):
             print(e)
             pick_dict["points"].append(0)
 
-    for team in pick_dict["team"]:
-        rule_used = False
-        for idx, x in enumerate(rules_dict.get(team, ())):
-            if x:
-                pick_dict["helpers"].append(rules.get(idx))
-                rule_used = True
+    # for team in pick_dict["team"]:
+    #     rule_used = False
+    #     for idx, x in enumerate(rules_dict.get(team, ())):
+    #         if x:
+    #             pick_dict["helpers"].append(rules.get(idx))
+    #             rule_used = True
 
-        if not rule_used:
-            pick_dict["helpers"].append("--")
+    #     if not rule_used:
+    #         pick_dict["helpers"].append("--")
 
     # calculate projected points
     try:
@@ -174,6 +174,10 @@ def weekly_pick_table(users, picks, event_info, user_data):
         pick_dict["pp"] = [0 for pick in pick_dict["pick"]]
 
     # make pick dataframe
+    print(pick_dict)
+
+    for k, v in pick_dict.items():
+        print(k, len(v))
     df = pd.DataFrame(pick_dict)
     df.sort_values(["pos", "pick", "team"], inplace=True, ascending=True)
 
@@ -236,7 +240,9 @@ def weekly_pick_table(users, picks, event_info, user_data):
             lambda x: "{} ({})".format(x[0], x[1]), axis=1
         )
 
-        df = df[["team", "pick", "tot", "pos", "proj. points", "proj. rank", "helpers"]]
+        df = df[
+            ["team", "pick", "tot", "pos", "proj. points", "proj. rank"]
+        ]  # , "helpers"]]
 
     df.columns = [x.upper() for x in df.columns]
 
