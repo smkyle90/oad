@@ -200,7 +200,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
         df["pos"] = df["pos"].astype(int)
         df["pos"] = df["pos"].replace(-1, "CUT/NO PICK")
 
-        df["points"] = [format_points(points) for points in df["points"]]
+        df["points"] = [int(points) for points in df["points"]]
 
         df = df[["team", "pick", "tot", "pos", "points"]]
 
