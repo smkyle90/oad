@@ -84,7 +84,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
         "tot": [],
         "pos": [],
         "points": [],
-        # "helpers": [],
+        "helpers": [],
         "mult": [p.point_multiplier for p in picks if p.point_multiplier],
     }
 
@@ -135,15 +135,19 @@ def weekly_pick_table(users, picks, event_info, user_data):
             print(e)
             pick_dict["points"].append(0)
 
-    # for team in pick_dict["team"]:
-    #     rule_used = False
-    #     for idx, x in enumerate(rules_dict.get(team, ())):
-    #         if x:
-    #             pick_dict["helpers"].append(rules.get(idx))
-    #             rule_used = True
+    print(rules_dict)
+    for team in pick_dict["team"]:
+        rule_used = False
+        for idx, x in enumerate(rules_dict.get(team, ())):
+            if x:
+                pick_dict["helpers"].append(rules.get(idx))
+                rule_used = True
 
-    #     if not rule_used:
-    #         pick_dict["helpers"].append("--")
+        if not rule_used:
+            pick_dict["helpers"].append("--")
+
+    if len(pick_dict["helpers"]) != len(pick_dict["team"]):
+        pick_dict["helpers"] = ["--" for _ in pick_dict["team"]]
 
     # calculate projected points
     try:
@@ -219,7 +223,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
         ]
 
         # Future rank
-        df["fr"] = df["fp"].rank(ascending=False).astype(int)
+        df["fr"] = df["fp"].rank(ascending=False, method="first").astype(int)
 
         # calculate projected points
         df["proj. points"] = ["{}".format(round(points, 0)) for points in df["pp"]]
@@ -240,9 +244,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
             lambda x: "{} ({})".format(x[0], x[1]), axis=1
         )
 
-        df = df[
-            ["team", "pick", "tot", "pos", "proj. points", "proj. rank"]
-        ]  # , "helpers"]]
+        df = df[["team", "pick", "tot", "pos", "proj. points", "proj. rank", "helpers"]]
 
     df.columns = [x.upper() for x in df.columns]
 
