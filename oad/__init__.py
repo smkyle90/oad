@@ -1,6 +1,7 @@
 import datetime
 import time
 
+import redis
 from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
@@ -14,6 +15,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 # init the scheduler to run the DB updates.
 # sched = BackgroundScheduler(daemon=True)
+redis_cache = redis.Redis(host="localhost", port=6379, db=0)
 
 
 def create_app():

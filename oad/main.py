@@ -15,11 +15,14 @@ from .util import (
     format_earnings,
     get_earnings,
     get_event_info,
+    get_weekly_pick_table,
     major_draft_pool,
     send_email,
+    update_cache_from_api,
+    update_weekly_pick_table,
 )
 from .util.admin import add_user_points
-from .views import league_page, weekly_pick_table
+from .views import league_page
 
 SEASON = int(os.getenv("OADYR", 2022))
 
@@ -61,25 +64,28 @@ def profile():
 @main.route("/league")
 @login_required
 def league():
+    update_cache_from_api()
+
     curr_event, __, tournament_state, event_table, __ = get_event_info()
 
-    print(tournament_state)
     users = User.query.all()
     all_picks = Pick.query.filter_by(season=SEASON).all()
     user_table = construct_user_table(users, all_picks, as_html=False)
 
+    week_picks = Pick.query.filter_by(season=SEASON).filter_by(event=curr_event).all()
+
+    update_weekly_pick_table(users, week_picks, event_table, user_table)
+
     # Determine if we are going to show the picks for the week
     if tournament_state in ["in", "post"]:
         show_picks = True
-        week_picks = (
-            Pick.query.filter_by(season=SEASON).filter_by(event=curr_event).all()
-        )
-        pick_table = weekly_pick_table(users, week_picks, event_table, user_table)
-    #        pick_history_table, bar, line = EMPTY_HTML, EMPTY_HTML, EMPTY_HTML
+        pick_table = get_weekly_pick_table()
+        if pick_table is None:
+            pick_table = EMPTY_HTML
     else:
         show_picks = False
+        week_picks = []
         pick_table = EMPTY_HTML
-    #        pick_history_table, bar, line = league_page(users, SEASON)
 
     if tournament_state != "in":
         show_historical_data = True
@@ -143,7 +149,6 @@ def pick():
         current_user, curr_event
     )
 
-    print(eligible_picks)
     strike_button_state = False
     substitute_button_state = False
     double_up_button_state = False
@@ -419,10 +424,8 @@ def update_display_name():
 
     team_name = user.display_name
 
-    print("team name", team_name)
     if not team_name:
         team_name = user.name
-    print("team name", team_name)
 
     return render_template("update_display_name.html", team_name=team_name)
 
