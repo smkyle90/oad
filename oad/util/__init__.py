@@ -5,6 +5,7 @@ from .helpers import (
     format_earnings,
     get_earnings,
     get_event_info,
+    get_fedex_points,
     get_live_scores,
     get_random_password_string,
     get_weekly_pick_table,

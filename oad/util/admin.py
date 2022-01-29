@@ -3,7 +3,7 @@
 
 from .. import db
 from ..models import Pick, Player
-from . import get_earnings, get_withdrawl_list
+from . import get_earnings, get_fedex_points, get_withdrawl_list
 
 
 def update_player_earnings():
@@ -36,11 +36,15 @@ def add_user_points():
 
             # They have withdrawn and thus earn 0 dollars
             pick.points = 0
+            pick.fedex = 0
 
             weekly_earnings = get_earnings(pick.alternate)
+            weekly_fedex = get_fedex_points(pick.alternate)
 
             # Multiply by the pick point multiplier -- defines if a rule was used.
             weekly_earnings = pick.point_multiplier * weekly_earnings
+            weekly_fedex = pick.point_multiplier * weekly_fedex
+
             # We need to add the alternate as the main pick.
             updated_pick = Pick(
                 event=pick.event,
@@ -49,6 +53,7 @@ def add_user_points():
                 name=pick.name,
                 points=weekly_earnings,
                 season=pick.season,
+                fedex=weekly_fedex,
             )
             db.session.add(updated_pick)
         else:
@@ -56,8 +61,12 @@ def add_user_points():
             weekly_earnings = get_earnings(player_name)
             weekly_earnings = pick.point_multiplier * weekly_earnings
 
+            weekly_fedex = get_fedex_points(player_name)
+            weekly_fedex = pick.point_multiplier * weekly_fedex
+
             # Update the pick with this value
             pick.points = weekly_earnings
+            pick.fedex = weekly_fedex
 
         # Commit the changes
         db.session.commit()

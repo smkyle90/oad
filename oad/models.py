@@ -44,6 +44,7 @@ class Pick(db.Model, Serializer):
     points = db.Column(db.Float(), default=-1e-9)
     season = db.Column(db.Integer)
     point_multiplier = db.Column(db.Integer, default=1)
+    fedex = db.Column(db.Float(), default=-1e-9)
 
     def serialize(self):
         d = Serializer.serialize(self)

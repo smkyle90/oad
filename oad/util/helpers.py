@@ -237,8 +237,18 @@ def update_weekly_pick_table(users, week_picks, event_table, user_table):
 
     if time.time() - picks_last_update > UPDATE_TIME:
         pick_table = weekly_pick_table(users, week_picks, event_table, user_table)
-        redis_cache.set("pick_table", pick_table)
+        redis_cache.set(
+            "pick_table", pick_table.to_html(classes="data", border=0, index=False)
+        )
         redis_cache.set("picks_last_update", time.time())
+
+        fedex_pts = {}
+        for pick, pts in zip(
+            pick_table["PICK"].tolist(), pick_table["PROJ. POINTS"].tolist()
+        ):
+            fedex_pts[pick] = pts
+
+        redis_cache.set("pick_points", json.dumps(fedex_pts))
 
 
 def get_weekly_pick_table():
@@ -353,6 +363,17 @@ def get_earnings(player):
     return earnings
 
 
+def get_fedex_points(player):
+    fedex_pts = redis_cache.get("pick_points")
+
+    if fedex_pts is None:
+        fedex_pts = {}
+
+    fedex_pts = json.loads(fedex_pts)
+
+    return fedex_pts.get(player, 0)
+
+
 def format_earnings(val):
     return "${}".format("{:,}".format(int(val)))
 
@@ -418,7 +439,7 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
         user_dict["weekly points"].append(
             sum(
                 [
-                    int(x.points)
+                    int(x.fedex)
                     for x in picks
                     if (x.event == curr_event) and (x.name == usr.name)
                 ]
@@ -431,7 +452,7 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
             sum([int(x.points) for x in picks if x.name == usr.name])
         )
         user_dict["total points"].append(
-            sum([int(x.points) for x in picks if x.name == usr.name])
+            sum([int(x.fedex) for x in picks if x.name == usr.name])
         )
 
     user_df = pd.DataFrame(user_dict)
@@ -687,4 +708,4 @@ def weekly_pick_table(users, picks, event_info, user_data):
 
     df.columns = [x.upper() for x in df.columns]
 
-    return df.to_html(classes="data", border=0, index=False)
+    return df
