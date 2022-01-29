@@ -1,19 +1,29 @@
 """App helper functions
 """
+import json
 import os
 import random
 import smtplib
 import ssl
 import string
+import time
 from email.mime.text import MIMEText
 
 import pandas as pd
 import requests
 
+from .. import redis_cache
+
 """
 https://pthree.org/2012/01/07/encrypted-mutt-imap-smtp-passwords/
 https://gist.github.com/bnagy/8914f712f689cc01c267
 """
+
+EVENT_TYPE = "regular"
+
+dirname = os.path.dirname(__file__)
+filename = os.path.join(dirname, "points.csv")
+POINTS_DF = pd.read_csv(filename)
 
 EVENT_URL = (
     "https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga"
@@ -21,6 +31,31 @@ EVENT_URL = (
 
 PGA_URL = "https://www.pgatour.com/stats/stat.109.html"
 NON_PGA_URL = "https://www.pgatour.com/stats/stat.02677.html"
+
+# Ping API at most every UDPATE_TIME seconds
+UPDATE_TIME = 60
+
+
+def check_rule_status(user, current_event):
+    # Check the user has not used their rules.
+
+    strike_used = bool(user.strike_event)
+    tap_in_used = bool(user.substitute_event)
+    double_up_used = bool(user.double_up_event)
+
+    if user.strike_event == current_event:
+        tap_in_used = True
+        double_up_used = True
+
+    if user.substitute_event == current_event:
+        strike_used = True
+        double_up_used = True
+
+    if user.double_up_event == current_event:
+        strike_used = True
+        tap_in_used = True
+
+    return strike_used, tap_in_used, double_up_used
 
 
 def get_random_password_string(length):
@@ -35,7 +70,6 @@ def send_email(receiver_email, subject, html):
     sender_email = "1993oad@gmail.com"
     password = os.getenv("OADPW")
 
-    # print (password)
     message = "{}".format(html)
     msg = MIMEText(message, "html")
     msg["Subject"] = subject
@@ -47,6 +81,15 @@ def send_email(receiver_email, subject, html):
     server.login(sender_email, password)
     server.sendmail(sender_email, receiver_email, msg.as_string())
     server.quit()
+
+
+def get_tournament_round(data):
+    try:
+        tournament_round = int(data["events"][0]["competitions"][0]["status"]["period"])
+    except Exception:
+        tournament_round = 0
+
+    return tournament_round
 
 
 def get_event_from_data(data):
@@ -63,7 +106,7 @@ def get_avail_from_data(data):
     return [
         a["athlete"]["displayName"]
         for a in data["events"][0]["competitions"][0]["competitors"]
-        if (a["status"]["period"] <= 1) and (a["status"]["type"]["state"] == "pre")
+        if (a["status"]["period"] <= 2) and (a["status"]["type"]["state"] == "pre")
     ]
 
 
@@ -127,7 +170,6 @@ def live_scores_from_data(data, current_players):
                 player_pos = user_score_data.get("currentPosition")
 
             if user["athlete"]["displayName"] in current_players:
-                # print(user_score_data)
                 if user_score_data.get("value"):
                     try:
                         player_score += int(user_score_data["displayValue"])
@@ -138,6 +180,7 @@ def live_scores_from_data(data, current_players):
                     "score": player_score,
                     "position": player_pos,
                     "earnings": int(user.get("earnings", 0)),
+                    "points": int(user.get("earnings", 0)),
                     "freq": 1,
                     "round": idx + 1,
                 }
@@ -186,19 +229,55 @@ def remove_canceled(data):
     }
 
 
+def update_weekly_pick_table(users, week_picks, event_table, user_table):
+    picks_last_update = redis_cache.get("picks_last_update")
+    if picks_last_update is None:
+        picks_last_update = 0
+    picks_last_update = float(picks_last_update)
+
+    if time.time() - picks_last_update > UPDATE_TIME:
+        pick_table = weekly_pick_table(users, week_picks, event_table, user_table)
+        redis_cache.set("pick_table", pick_table)
+        redis_cache.set("picks_last_update", time.time())
+
+
+def get_weekly_pick_table():
+    return redis_cache.get("pick_table").decode()
+
+
+def update_cache_from_api():
+    """
+    Make a single API call and update the cache. We use this info to do our
+    calculations
+    """
+    api_last_update = redis_cache.get("api_last_update")
+
+    if api_last_update is None:
+        api_last_update = 0
+
+    api_last_update = float(api_last_update)
+
+    if time.time() - api_last_update > UPDATE_TIME:
+        r = requests.get(EVENT_URL)
+        data = r.json()
+        data = remove_canceled(data)
+        data = json.dumps(data)
+        redis_cache.set("data", data)
+        redis_cache.set("api_last_update", time.time())
+
+
 def get_event_info():
     """Get event info. Requires access to API.
     """
     try:
-        r = requests.get(EVENT_URL)
-
-        data = r.json()
-        data = remove_canceled(data)
+        data = redis_cache.get("data")
+        data = json.loads(data)
 
         event_name = get_event_from_data(data)
         avail_picks = get_avail_from_data(data)
         tournament_state = get_tourn_state_from_data(data)
         tournament_info = get_tournament_info(data)
+        tournament_round = get_tournament_round(data)
 
         if tournament_state in ["in", "post"]:
             # check if the earnings are posteds
@@ -208,21 +287,24 @@ def get_event_info():
             else:
                 tournament_state = "in"
 
-        return event_name, avail_picks, tournament_state, tournament_info
+        return (
+            event_name,
+            avail_picks,
+            tournament_state,
+            tournament_info,
+            tournament_round,
+        )
     except Exception as e:
         print("Issue getting data from ESPN API. Message: {}".format(e))
-        return None, None, None, None
+        return None, None, None, None, None
 
 
 def get_live_scores(current_players):
     """Get live scores. Requires access to API.
     """
     try:
-        r = requests.get(EVENT_URL)
-
-        data = r.json()
-        data = remove_canceled(data)
-
+        data = redis_cache.get("data")
+        data = json.loads(data)
         live_scores = live_scores_from_data(data, current_players)
         return live_scores
     except Exception as e:
@@ -232,10 +314,8 @@ def get_live_scores(current_players):
 
 def get_withdrawl_list():
     try:
-        r = requests.get(EVENT_URL)
-
-        data = r.json()
-        data = remove_canceled(data)
+        data = redis_cache.get("data")
+        data = json.loads(data)
 
         all_users = data["events"][0]["competitions"][0]["competitors"]
 
@@ -254,9 +334,8 @@ def get_earnings(player):
     """Get player earnings. Requires access to API.
     """
     try:
-        r = requests.get(EVENT_URL)
-        data = r.json()
-        data = remove_canceled(data)
+        data = redis_cache.get("data")
+        data = json.loads(data)
     except Exception as e:
         print("Issue getting data from ESPN API. Message: {}".format(e))
         send_email(
@@ -304,7 +383,11 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
         "weekly pick": [],
         "weekly earnings": [],
         "total earnings": [],
-        "strikes left": [],
+        "total points": [],
+        "weekly points": [],
+        "breakfast balls left": [],
+        "tap-ins left": [],
+        "double-ups left": [],
     }
 
     for usr in users:
@@ -332,8 +415,22 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
                 ]
             )
         )
-        user_dict["strikes left"].append(int(usr.strikes_remaining))
+        user_dict["weekly points"].append(
+            sum(
+                [
+                    int(x.points)
+                    for x in picks
+                    if (x.event == curr_event) and (x.name == usr.name)
+                ]
+            )
+        )
+        user_dict["breakfast balls left"].append(int(usr.strikes_remaining))
+        user_dict["tap-ins left"].append(int(usr.substitutes_remaining))
+        user_dict["double-ups left"].append(int(usr.double_up_remaining))
         user_dict["total earnings"].append(
+            sum([int(x.points) for x in picks if x.name == usr.name])
+        )
+        user_dict["total points"].append(
             sum([int(x.points) for x in picks if x.name == usr.name])
         )
 
@@ -342,8 +439,13 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
     user_df.sort_values(["total earnings"], inplace=True, ascending=False)
     user_df["rank"] = user_df["total earnings"].rank(ascending=False).astype(int)
 
-    max_points = user_df["total earnings"].max()
-    user_df["dollars back"] = [x - max_points for x in user_df["total earnings"]]
+    max_earnings_delta = user_df["total earnings"].max()
+    user_df["dollars back"] = [
+        x - max_earnings_delta for x in user_df["total earnings"]
+    ]
+
+    max_points_delta = user_df["total points"].max()
+    user_df["points back"] = [x - max_points_delta for x in user_df["total points"]]
 
     # Reorder columns
     user_df = user_df[
@@ -354,7 +456,12 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
             "weekly earnings",
             "total earnings",
             "dollars back",
-            "strikes left",
+            "weekly points",
+            "total points",
+            "points back",
+            "breakfast balls left",
+            "tap-ins left",
+            "double-ups left",
         ]
     ]
 
@@ -368,7 +475,16 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
         user_df[col] = new_col
 
     if curr_event is None:
-        user_df.drop(columns=["weekly earnings", "weekly pick"], inplace=True)
+        user_df.drop(
+            columns=[
+                "weekly earnings",
+                "weekly pick",
+                "weekly points",
+                "total earnings",
+                "dollars back",
+            ],
+            inplace=True,
+        )
 
     user_df.columns = [x.upper() for x in user_df.columns]
 
@@ -376,3 +492,199 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
         return user_df.to_html(classes="data", border=0, index=False)
     else:
         return user_df
+
+
+# flake8: noqa: C901
+def weekly_pick_table(users, picks, event_info, user_data):
+    # get purse value
+    purse_value = event_info.loc[event_info.col1 == "Purse", "col2"].iloc[0][1:]
+    purse_value = float(purse_value.replace(",", ""))
+
+    # construct user dict for display names
+    user_dict = {
+        user.name: user.display_name if user.display_name else user.name
+        for user in users
+    }
+
+    rules_dict = {
+        user_dict[user.name]: (
+            user.strike_event,
+            user.substitute_event,
+            user.double_up_event,
+        )
+        for user in users
+    }
+
+    rules = {
+        0: "brekky ball",
+        1: "tap-in",
+        2: "double-up",
+    }
+
+    pick_dict = {
+        "team": [user_dict[p.name] for p in picks if p.point_multiplier],
+        "pick": [p.pick for p in picks if p.point_multiplier],
+        "pp": [0 for p in picks if p.point_multiplier],
+        "alternate": [p.alternate for p in picks if p.point_multiplier],
+        "tot": [],
+        "pos": [],
+        "points": [],
+        "helpers": [],
+        "mult": [p.point_multiplier for p in picks if p.point_multiplier],
+    }
+
+    # live scores from API for each pick.
+    live_scores = get_live_scores(
+        set(pick_dict["pick"]).union(set(pick_dict["alternate"]))
+    )
+    # extract the user data for use in the table
+    current_points = {
+        user: (points, rank)
+        for user, points, rank in zip(
+            user_data["TEAM"], user_data["TOTAL POINTS"], user_data["RANK"]
+        )
+    }
+
+    # get missing picks
+    all_users = set(current_points.keys())
+    curr_users = set(pick_dict["team"])
+    missing_picks = all_users - curr_users
+
+    for missed in missing_picks:
+        pick_dict["team"].append(missed)
+        pick_dict["pick"].append("--")
+        pick_dict["pp"].append(0)
+        pick_dict["alternate"].append("--")
+        pick_dict["mult"].append(0)
+
+    for idx, pick in enumerate(pick_dict["pick"]):
+        if pick not in live_scores:
+            pick = pick_dict["alternate"][idx]
+            pick_dict["pick"][idx] = pick
+
+        try:
+            pick_dict["tot"].append(live_scores[pick]["score"])
+        except Exception as e:
+            print(e)
+            pick_dict["tot"].append(1000)
+
+        try:
+            pick_dict["pos"].append(live_scores[pick]["position"])
+        except Exception as e:
+            print(e)
+            pick_dict["pos"].append(1000)
+
+        try:
+            pick_dict["points"].append(live_scores[pick]["points"])
+        except Exception as e:
+            print(e)
+            pick_dict["points"].append(0)
+
+    for team in pick_dict["team"]:
+        rule_used = False
+        for idx, x in enumerate(rules_dict.get(team, ())):
+            if x:
+                pick_dict["helpers"].append(rules.get(idx))
+                rule_used = True
+
+        if not rule_used:
+            pick_dict["helpers"].append("--")
+
+    if len(pick_dict["helpers"]) != len(pick_dict["team"]):
+        pick_dict["helpers"] = ["--" for _ in pick_dict["team"]]
+
+    # calculate projected points
+    try:
+        pot_earns = []
+        for pick in pick_dict["pick"]:
+            try:
+                pot_earns.append(
+                    round(
+                        POINTS_DF[EVENT_TYPE]
+                        .loc[
+                            (live_scores[pick]["position"] - 1) : (
+                                live_scores[pick]["position"] - 1
+                            )
+                            + (live_scores[pick]["freq"] - 1)
+                        ]
+                        .sum()
+                        / (live_scores[pick]["freq"]),
+                        0,
+                    )
+                )
+            except Exception as e:
+                print(e)
+                pot_earns.append(0)
+
+        pick_dict["pp"] = pot_earns
+    except Exception as e:
+        print("pp", e)
+        pick_dict["pp"] = [0 for pick in pick_dict["pick"]]
+
+    df = pd.DataFrame(pick_dict)
+    df.sort_values(["pos", "pick", "team"], inplace=True, ascending=True)
+
+    # Format the score
+    df["tot"] = ["+{}".format(score) if score > 0 else score for score in df["tot"]]
+    df["tot"] = ["E" if not score else score for score in df["tot"]]
+    # print(df)
+    try:
+        df.replace({"tot": {"+1000": "--"}, "pos": {1000: "--"}}, inplace=True)
+    except Exception as e:
+        print(e)
+
+    # current rank
+    df["pr"] = [int(current_points.get(row.team)[1]) for row in df.itertuples()]
+
+    # Display table based on if points are published
+    if df["points"].sum():
+        df["pos"] = df["pos"].fillna(-1)
+        try:
+            df.replace({"pos": {"--": -1}}, inplace=True)
+        except Exception as e:
+            print(e)
+
+        df["pos"] = df["pos"].astype(int)
+        df["pos"] = df["pos"].replace(-1, "CUT/NO PICK")
+
+        df["points"] = [int(points) for points in df["points"]]
+
+        df = df[["team", "pick", "tot", "pos", "points"]]
+
+    else:  # In tournament display
+        df.pp *= df.mult
+
+        df.pp = df.pp.astype(int)
+
+        # Future earning
+        df["fp"] = [
+            int(current_points.get(row.team)[0]) + row.pp for row in df.itertuples()
+        ]
+
+        # Future rank
+        df["fr"] = df["fp"].rank(ascending=False).astype(int)
+
+        # calculate projected points
+        df["proj. points"] = ["{}".format(round(points, 0)) for points in df["pp"]]
+
+        # Calculate the rank delta and display
+        df["dr"] = df.pr - df.fr
+        dr_res = []
+        for delta in df["dr"]:
+            if delta > 0:
+                dr_res.append("▲{}".format(delta))
+            elif not delta:
+                dr_res.append("--")
+            else:
+                dr_res.append("▼{}".format(-delta))
+
+        df["dr"] = dr_res
+        df["proj. rank"] = df[["fr", "dr"]].apply(
+            lambda x: "{} ({})".format(x[0], x[1]), axis=1
+        )
+
+        df = df[["team", "pick", "tot", "pos", "proj. points", "proj. rank", "helpers"]]
+
+    df.columns = [x.upper() for x in df.columns]
+
+    return df.to_html(classes="data", border=0, index=False)

@@ -22,10 +22,15 @@ class User(UserMixin, db.Model, Serializer):
     password = db.Column(db.String(100))
     name = db.Column(db.String(1000), unique=True)
     picks = db.relationship("Pick", backref="user", lazy=True)
-    strikes_remaining = db.Column(db.Integer, default=1)
+    strikes_remaining = db.Column(db.Integer, default=1)  # breakfast_ball
     is_admin = db.Column(db.Boolean, default=False)
     email_confirmed = db.Column(db.Boolean, default=False)
     display_name = db.Column(db.Text, default="")
+    strike_event = db.Column(db.Text, default="")
+    substitute_event = db.Column(db.Text, default="")
+    double_up_event = db.Column(db.Text, default="")
+    substitutes_remaining = db.Column(db.Integer, default=1)  # tap_in
+    double_up_remaining = db.Column(db.Integer, default=1)  # double_up
 
 
 class Pick(db.Model, Serializer):
@@ -38,6 +43,7 @@ class Pick(db.Model, Serializer):
     name = db.Column(db.String(1000), db.ForeignKey("user.name"), nullable=False)
     points = db.Column(db.Float(), default=-1e-9)
     season = db.Column(db.Integer)
+    point_multiplier = db.Column(db.Integer, default=1)
 
     def serialize(self):
         d = Serializer.serialize(self)
