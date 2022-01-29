@@ -1,0 +1,10 @@
+{% extends "base.html" %} {% block content %}
+<h1 class="title">Use Double-Up</h1>
+
+<p>Confirm you want to use your Double-Up. This double your points for the week.</p>
+<form method="POST" action="{{ url_for('main.confirm_double_up') }}">
+<button class="button">
+Confirm Double-Up
+</button>
+</form>
+{% endblock %}

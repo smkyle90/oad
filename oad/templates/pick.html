@@ -1,9 +1,11 @@
 {% extends "base.html" %} {% block content %}
 <h1 class="title">{{ event }} pick</h1>
+<h3 class="title">Current Round: {{ current_round }}</h3>
+<h2 class="title">Pick</h2>
 
 <section>
-  <h2 class="title">{{ user }}, {{ pick_text }}</h2>
-  {% if button %}
+  <p class="title">{{ user }}, {{ pick_text }}</p>
+  {% if strike_button_state %}
   <form name="Select" action="{{ url_for('main.submit_pick') }}" method="POST">
   <h3>Main Pick</h3>
     <select
@@ -35,5 +37,44 @@
       {{ submit_text }}
     </button>
   </form>
+  {% else %}
+    <button class="button disabled" diabled>
+      Unable to Pick
+    </button>
+
+{% endif %}
+
 </section>
-{% endif %} {% endblock %}
+
+
+
+<h2 class="title">Modify Your Pick</h2>
+    <p>Tap-In. Replace your Primary selection with your Alternate. Use before the start of the third round.</p>
+
+
+  {% if substitute_button_state %}
+
+  <button class="button" onclick="window.location.href='/use_tap_in';">
+    Use Tap-In
+  </button>
+  {% else %}
+    <button class="button disabled" diabled>
+      Unable to Use Tap-In
+    </button>
+  {% endif %}
+
+  <p> Double-Up. Double your Primary golfer's points for this week. Use before the start of the fourth round.</p>
+
+  {% if double_up_button_state %}
+
+    <button class="button" onclick="window.location.href='/use_double_up';">
+      Use Double-Up
+    </button>
+  {% else %}
+    <button class="button disabled" diabled>
+      Unable to Use Double-Up
+    </button>
+  {% endif %}
+
+
+{% endblock %}
