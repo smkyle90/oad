@@ -87,6 +87,8 @@ def league_page(users, season):
     ]
     raw_picks["player"] = [pick.pick for pick in all_picks if pick.season == season]
     raw_picks["points"] = [pick.points for pick in all_picks if pick.season == season]
+    raw_picks["fedex"] = [pick.fedex for pick in all_picks if pick.season == season]
+
     raw_picks["tournament"] = [
         pick.event for pick in all_picks if pick.season == season
     ]
@@ -164,7 +166,7 @@ def create_plots(raw_picks):
     bar_data = []
     cum_points = {}
     for user in users:
-        user_points = df[df.user == user].points
+        user_points = df[df.user == user].fedex
         user_tourns = df[df.user == user].tournament
         bar_data.append(go.Bar(x=user_tourns[-5:], y=user_points[-5:], name=str(user)))
         user_cum = 0
@@ -173,7 +175,7 @@ def create_plots(raw_picks):
             try:
                 tour_pts = df[
                     (df.user == user) & (df.tournament == tour)
-                ].points.tolist()[0]
+                ].fedex.tolist()[0]
                 user_cum += tour_pts
             except Exception:
                 pass

@@ -180,7 +180,7 @@ def live_scores_from_data(data, current_players):
                     "score": player_score,
                     "position": player_pos,
                     "earnings": int(user.get("earnings", 0)),
-                    "points": int(user.get("earnings", 0)),
+                    "points": -1,
                     "freq": 1,
                     "round": idx + 1,
                 }
@@ -242,10 +242,14 @@ def update_weekly_pick_table(users, week_picks, event_table, user_table):
         )
         redis_cache.set("picks_last_update", time.time())
 
+        pick_list = pick_table["PICK"].tolist()
+        try:
+            points_list = pick_table["PROJ. POINTS"].tolist()
+        except Exception:
+            points_list = pick_table["POINTS"].tolist()
+
         fedex_pts = {}
-        for pick, pts in zip(
-            pick_table["PICK"].tolist(), pick_table["PROJ. POINTS"].tolist()
-        ):
+        for pick, pts in zip(pick_list, points_list):
             fedex_pts[pick] = pts
 
         redis_cache.set("pick_points", json.dumps(fedex_pts))
@@ -379,11 +383,19 @@ def format_earnings(val):
 
 
 def create_pick_table(picks):
-    pick_table = {"event": [], "pick": [], "earnings": []}
+    pick_table = {
+        "event": [],
+        "pick": [],
+        "points": [],
+        "earnings": [],
+        "multiplier": [],
+    }
     for pick in picks:
         pick_table["event"].append(pick.event)
         pick_table["pick"].append(pick.pick)
+        pick_table["points"].append(round(pick.fedex))
         pick_table["earnings"].append(pick.points)
+        pick_table["multiplier"].append(pick.point_multiplier)
 
     pick_table = pd.DataFrame(pick_table)
 
@@ -545,11 +557,12 @@ def weekly_pick_table(users, picks, event_info, user_data):
     pick_dict = {
         "team": [user_dict[p.name] for p in picks if p.point_multiplier],
         "pick": [p.pick for p in picks if p.point_multiplier],
-        "pp": [0 for p in picks if p.point_multiplier],
+        "points": [0 for p in picks if p.point_multiplier],
         "alternate": [p.alternate for p in picks if p.point_multiplier],
         "tot": [],
         "pos": [],
         "points": [],
+        "earnings": [],
         "helpers": [],
         "mult": [p.point_multiplier for p in picks if p.point_multiplier],
     }
@@ -558,6 +571,28 @@ def weekly_pick_table(users, picks, event_info, user_data):
     live_scores = get_live_scores(
         set(pick_dict["pick"]).union(set(pick_dict["alternate"]))
     )
+
+    # Add the projected fedex points for this event
+    for pick in live_scores:
+        try:
+            fedex_pts = round(
+                POINTS_DF[EVENT_TYPE]
+                .loc[
+                    (live_scores[pick]["position"] - 1) : (
+                        live_scores[pick]["position"] - 1
+                    )
+                    + (live_scores[pick]["freq"] - 1)
+                ]
+                .sum()
+                / (live_scores[pick]["freq"]),
+                0,
+            )
+        except Exception as e:
+            print(e)
+            fedex_pts = 0
+
+        live_scores[pick]["points"] = fedex_pts
+
     # extract the user data for use in the table
     current_points = {
         user: (points, rank)
@@ -574,7 +609,8 @@ def weekly_pick_table(users, picks, event_info, user_data):
     for missed in missing_picks:
         pick_dict["team"].append(missed)
         pick_dict["pick"].append("--")
-        pick_dict["pp"].append(0)
+        pick_dict["points"].append(0)
+        pick_dict["earnings"].append(0)
         pick_dict["alternate"].append("--")
         pick_dict["mult"].append(0)
 
@@ -601,6 +637,12 @@ def weekly_pick_table(users, picks, event_info, user_data):
             print(e)
             pick_dict["points"].append(0)
 
+        try:
+            pick_dict["earnings"].append(live_scores[pick]["earnings"])
+        except Exception as e:
+            print(e)
+            pick_dict["earnings"].append(0)
+
     for team in pick_dict["team"]:
         rule_used = False
         for idx, x in enumerate(rules_dict.get(team, ())):
@@ -613,34 +655,6 @@ def weekly_pick_table(users, picks, event_info, user_data):
 
     if len(pick_dict["helpers"]) != len(pick_dict["team"]):
         pick_dict["helpers"] = ["--" for _ in pick_dict["team"]]
-
-    # calculate projected points
-    try:
-        pot_earns = []
-        for pick in pick_dict["pick"]:
-            try:
-                pot_earns.append(
-                    round(
-                        POINTS_DF[EVENT_TYPE]
-                        .loc[
-                            (live_scores[pick]["position"] - 1) : (
-                                live_scores[pick]["position"] - 1
-                            )
-                            + (live_scores[pick]["freq"] - 1)
-                        ]
-                        .sum()
-                        / (live_scores[pick]["freq"]),
-                        0,
-                    )
-                )
-            except Exception as e:
-                print(e)
-                pot_earns.append(0)
-
-        pick_dict["pp"] = pot_earns
-    except Exception as e:
-        print("pp", e)
-        pick_dict["pp"] = [0 for pick in pick_dict["pick"]]
 
     df = pd.DataFrame(pick_dict)
     df.sort_values(["pos", "pick", "team"], inplace=True, ascending=True)
@@ -658,7 +672,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
     df["pr"] = [int(current_points.get(row.team)[1]) for row in df.itertuples()]
 
     # Display table based on if points are published
-    if df["points"].sum():
+    if df["earnings"].sum():
         df["pos"] = df["pos"].fillna(-1)
         try:
             df.replace({"pos": {"--": -1}}, inplace=True)
@@ -668,25 +682,25 @@ def weekly_pick_table(users, picks, event_info, user_data):
         df["pos"] = df["pos"].astype(int)
         df["pos"] = df["pos"].replace(-1, "CUT/NO PICK")
 
-        df["points"] = [int(points) for points in df["points"]]
+        df["points"] = [round(points) for points in df["points"]]
+        df["earnings"] = [format_earnings(earnings) for earnings in df["earnings"]]
 
-        df = df[["team", "pick", "tot", "pos", "points"]]
+        df = df[["team", "pick", "tot", "pos", "points", "earnings", "helpers"]]
 
     else:  # In tournament display
-        df.pp *= df.mult
-
-        df.pp = df.pp.astype(int)
+        df.points *= df.mult
+        df.points = df.points.astype(int)
 
         # Future earning
         df["fp"] = [
-            int(current_points.get(row.team)[0]) + row.pp for row in df.itertuples()
+            int(current_points.get(row.team)[0]) + row.points for row in df.itertuples()
         ]
 
         # Future rank
         df["fr"] = df["fp"].rank(ascending=False).astype(int)
 
         # calculate projected points
-        df["proj. points"] = ["{}".format(round(points, 0)) for points in df["pp"]]
+        df["proj. points"] = ["{}".format(round(points, 0)) for points in df["points"]]
 
         # Calculate the rank delta and display
         df["dr"] = df.pr - df.fr
