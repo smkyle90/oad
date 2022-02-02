@@ -434,7 +434,7 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
         ]
 
         if weekly_pick:
-            weekly_pick = weekly_pick[0]
+            weekly_pick = " ".join(weekly_pick)
         else:
             weekly_pick = "--"
 
@@ -609,8 +609,6 @@ def weekly_pick_table(users, picks, event_info, user_data):
     for missed in missing_picks:
         pick_dict["team"].append(missed)
         pick_dict["pick"].append("--")
-        pick_dict["points"].append(0)
-        pick_dict["earnings"].append(0)
         pick_dict["alternate"].append("--")
         pick_dict["mult"].append(0)
 
@@ -655,6 +653,11 @@ def weekly_pick_table(users, picks, event_info, user_data):
 
     if len(pick_dict["helpers"]) != len(pick_dict["team"]):
         pick_dict["helpers"] = ["--" for _ in pick_dict["team"]]
+
+    print(pick_dict)
+
+    for k, v in pick_dict.items():
+        print(k, len(v))
 
     df = pd.DataFrame(pick_dict)
     df.sort_values(["pos", "pick", "team"], inplace=True, ascending=True)
