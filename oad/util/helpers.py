@@ -641,10 +641,12 @@ def weekly_pick_table(users, picks, event_info, user_data):
             print(e)
             pick_dict["earnings"].append(0)
 
+    curr_event, _, _, _, _ = get_event_info()
+
     for team in pick_dict["team"]:
         rule_used = False
         for idx, x in enumerate(rules_dict.get(team, ())):
-            if x:
+            if x == curr_event:
                 pick_dict["helpers"].append(rules.get(idx))
                 rule_used = True
 
@@ -653,11 +655,6 @@ def weekly_pick_table(users, picks, event_info, user_data):
 
     if len(pick_dict["helpers"]) != len(pick_dict["team"]):
         pick_dict["helpers"] = ["--" for _ in pick_dict["team"]]
-
-    print(pick_dict)
-
-    for k, v in pick_dict.items():
-        print(k, len(v))
 
     df = pd.DataFrame(pick_dict)
     df.sort_values(["pos", "pick", "team"], inplace=True, ascending=True)
