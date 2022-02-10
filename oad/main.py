@@ -205,6 +205,13 @@ def pick():
     else:
         tournament_round = "Pre-tournament"
 
+    if prev_pick is None:
+        prev_pick_show = ""
+        prev_alt_show = ""
+    else:
+        prev_pick_show = (prev_pick.pick,)
+        prev_alt_show = prev_pick.alternate
+
     return render_template(
         "pick.html",
         avail=eligible_picks,
@@ -216,6 +223,8 @@ def pick():
         substitute_button_state=substitute_button_state,
         double_up_button_state=double_up_button_state,
         current_round=tournament_round,
+        prev_pick_show=prev_pick_show,
+        prev_alt_show=prev_alt_show,
     )
 
 

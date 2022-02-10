@@ -5,6 +5,7 @@
 
 <section>
   <p class="title">{{ user }}, {{ pick_text }}</p>
+  <p> {{ prev_pick_show }} </p>
   {% if strike_button_state %}
   <form name="Select" action="{{ url_for('main.submit_pick') }}" method="POST">
   <h3>Main Pick</h3>
@@ -49,6 +50,7 @@
 
 
 <h2 class="title">Modify Your Pick</h2>
+    <p> {{ prev_alt_show }} </p>
     <p>Tap-In. Replace your Primary selection with your Alternate. Use before the start of the third round.</p>
 
 
