@@ -556,6 +556,11 @@ def weekly_pick_table(users, picks, event_info, user_data):
 
     pick_dict = {
         "team": [user_dict[p.name] for p in picks if p.point_multiplier],
+        "initials": [
+            "".join([w[0] for w in p.name.split(" ") if w])
+            for p in picks
+            if p.point_multiplier
+        ],
         "pick": [p.pick for p in picks if p.point_multiplier],
         "points": [0 for p in picks if p.point_multiplier],
         "alternate": [p.alternate for p in picks if p.point_multiplier],
@@ -718,7 +723,18 @@ def weekly_pick_table(users, picks, event_info, user_data):
             lambda x: "{} ({})".format(x[0], x[1]), axis=1
         )
 
-        df = df[["team", "pick", "tot", "pos", "proj. points", "proj. rank", "helpers"]]
+        df = df[
+            [
+                "team",
+                "pick",
+                "tot",
+                "pos",
+                "proj. points",
+                "proj. rank",
+                "helpers",
+                "initials",
+            ]
+        ]
 
     df.columns = [x.upper() for x in df.columns]
 
