@@ -616,7 +616,10 @@ def weekly_pick_table(users, picks, event_info, user_data):
         pick_dict["pick"].append("--")
         pick_dict["alternate"].append("--")
         pick_dict["mult"].append(0)
+        pick_dict["initials"].append("--")
 
+    print(pick_dict)
+    print(live_scores)
     for idx, pick in enumerate(pick_dict["pick"]):
         if pick not in live_scores:
             pick = pick_dict["alternate"][idx]
@@ -660,7 +663,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
 
     if len(pick_dict["helpers"]) != len(pick_dict["team"]):
         pick_dict["helpers"] = ["--" for _ in pick_dict["team"]]
-
+    print(pick_dict)
     df = pd.DataFrame(pick_dict)
     df.sort_values(["pos", "pick", "team"], inplace=True, ascending=True)
 
