@@ -375,7 +375,7 @@ def get_fedex_points(player):
 
     fedex_pts = json.loads(fedex_pts)
 
-    return fedex_pts.get(player, 0)
+    return fedex_pts.get(player, -1)
 
 
 def format_earnings(val):
@@ -618,38 +618,28 @@ def weekly_pick_table(users, picks, event_info, user_data):
         pick_dict["mult"].append(0)
         pick_dict["initials"].append("--")
 
-    print(pick_dict)
-    print(live_scores)
+    curr_event, _, _, _, curr_round = get_event_info()
+
     for idx, pick in enumerate(pick_dict["pick"]):
         if pick not in live_scores:
             pick = pick_dict["alternate"][idx]
             pick_dict["pick"][idx] = pick
 
         try:
+            in_play = live_scores.get(pick, {}).get("round", 0) == curr_round
+        except Exception as e:
+            in_play = False
+
+        if in_play:
             pick_dict["tot"].append(live_scores[pick]["score"])
-        except Exception as e:
-            print(e)
-            pick_dict["tot"].append(1000)
-
-        try:
             pick_dict["pos"].append(live_scores[pick]["position"])
-        except Exception as e:
-            print(e)
-            pick_dict["pos"].append(1000)
-
-        try:
             pick_dict["points"].append(live_scores[pick]["points"])
-        except Exception as e:
-            print(e)
-            pick_dict["points"].append(0)
-
-        try:
             pick_dict["earnings"].append(live_scores[pick]["earnings"])
-        except Exception as e:
-            print(e)
+        else:
+            pick_dict["tot"].append(1000)
+            pick_dict["pos"].append(1000)
+            pick_dict["points"].append(0)
             pick_dict["earnings"].append(0)
-
-    curr_event, _, _, _, _ = get_event_info()
 
     for team in pick_dict["team"]:
         rule_used = False
@@ -663,14 +653,14 @@ def weekly_pick_table(users, picks, event_info, user_data):
 
     if len(pick_dict["helpers"]) != len(pick_dict["team"]):
         pick_dict["helpers"] = ["--" for _ in pick_dict["team"]]
-    print(pick_dict)
+
     df = pd.DataFrame(pick_dict)
     df.sort_values(["pos", "pick", "team"], inplace=True, ascending=True)
 
     # Format the score
     df["tot"] = ["+{}".format(score) if score > 0 else score for score in df["tot"]]
     df["tot"] = ["E" if not score else score for score in df["tot"]]
-    # print(df)
+
     try:
         df.replace({"tot": {"+1000": "--"}, "pos": {1000: "--"}}, inplace=True)
     except Exception as e:
