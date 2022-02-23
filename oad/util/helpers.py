@@ -630,12 +630,12 @@ def weekly_pick_table(users, picks, event_info, user_data):
         except Exception as e:
             in_play = False
 
-        if in_play:
+        try:
             pick_dict["tot"].append(live_scores[pick]["score"])
             pick_dict["pos"].append(live_scores[pick]["position"])
             pick_dict["points"].append(live_scores[pick]["points"])
             pick_dict["earnings"].append(live_scores[pick]["earnings"])
-        else:
+        except Exception as e:
             pick_dict["tot"].append(1000)
             pick_dict["pos"].append(1000)
             pick_dict["points"].append(0)
