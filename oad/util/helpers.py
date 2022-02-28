@@ -235,14 +235,17 @@ def update_weekly_pick_table(users, week_picks, event_table, user_table):
         picks_last_update = 0
     picks_last_update = float(picks_last_update)
 
-    if time.time() - picks_last_update > UPDATE_TIME:
+    if True:
+        # if time.time() - picks_last_update > UPDATE_TIME:
         pick_table = weekly_pick_table(users, week_picks, event_table, user_table)
+
         redis_cache.set(
             "pick_table", pick_table.to_html(classes="data", border=0, index=False)
         )
         redis_cache.set("picks_last_update", time.time())
 
         pick_list = pick_table["PICK"].tolist()
+
         try:
             points_list = pick_table["PROJ. POINTS"].tolist()
         except Exception:
@@ -577,6 +580,8 @@ def weekly_pick_table(users, picks, event_info, user_data):
         set(pick_dict["pick"]).union(set(pick_dict["alternate"]))
     )
 
+    curr_event, _, _, _, curr_round = get_event_info()
+
     # Add the projected fedex points for this event
     for pick in live_scores:
         try:
@@ -596,7 +601,11 @@ def weekly_pick_table(users, picks, event_info, user_data):
             print(e)
             fedex_pts = 0
 
-        live_scores[pick]["points"] = fedex_pts
+        in_play = live_scores.get(pick, {}).get("round", 0) == curr_round
+        if in_play:
+            live_scores[pick]["points"] = fedex_pts
+        else:
+            live_scores[pick]["points"] = 0
 
     # extract the user data for use in the table
     current_points = {
@@ -617,8 +626,6 @@ def weekly_pick_table(users, picks, event_info, user_data):
         pick_dict["alternate"].append("--")
         pick_dict["mult"].append(0)
         pick_dict["initials"].append("--")
-
-    curr_event, _, _, _, curr_round = get_event_info()
 
     for idx, pick in enumerate(pick_dict["pick"]):
         if pick not in live_scores:
@@ -679,6 +686,9 @@ def weekly_pick_table(users, picks, event_info, user_data):
 
         df["pos"] = df["pos"].astype(int)
         df["pos"] = df["pos"].replace(-1, "CUT/NO PICK")
+
+        df.points *= df.mult
+        df.points = df.points.astype(int)
 
         df["points"] = [round(points) for points in df["points"]]
         df["earnings"] = [format_earnings(earnings) for earnings in df["earnings"]]

@@ -77,7 +77,6 @@ def add_user_points():
             weekly_earnings = pick.point_multiplier * weekly_earnings
 
             weekly_fedex = get_fedex_points(player_name)
-            weekly_fedex = pick.point_multiplier * weekly_fedex
 
             # Update the pick with this value
             pick.points = weekly_earnings
