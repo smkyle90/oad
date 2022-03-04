@@ -600,8 +600,11 @@ def weekly_pick_table(users, picks, event_info, user_data):
         except Exception as e:
             print(e)
             fedex_pts = 0
+        if curr_round <= 2:
+            in_play = True
+        else:
+            in_play = live_scores.get(pick, {}).get("round", 0) == curr_round
 
-        in_play = live_scores.get(pick, {}).get("round", 0) == curr_round
         if in_play:
             live_scores[pick]["points"] = fedex_pts
         else:
