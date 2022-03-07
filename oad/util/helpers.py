@@ -254,7 +254,7 @@ def update_weekly_pick_table(users, week_picks, event_table, user_table):
         normalised_points_list = pick_table["POINTS"] / pick_table["MULT"]
 
         fedex_pts = {}
-        for pick, pts in zip(pick_list, points_list):
+        for pick, pts in zip(pick_list, normalised_points_list):
             fedex_pts[pick] = pts
 
         redis_cache.set("pick_points", json.dumps(fedex_pts))
@@ -474,8 +474,8 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
 
     user_df = pd.DataFrame(user_dict)
 
-    user_df.sort_values(["total earnings"], inplace=True, ascending=False)
-    user_df["rank"] = user_df["total earnings"].rank(ascending=False).astype(int)
+    user_df.sort_values(["total points"], inplace=True, ascending=False)
+    user_df["rank"] = user_df["total points"].rank(ascending=False).astype(int)
 
     max_earnings_delta = user_df["total earnings"].max()
     user_df["dollars back"] = [
