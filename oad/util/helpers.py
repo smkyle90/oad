@@ -247,9 +247,11 @@ def update_weekly_pick_table(users, week_picks, event_table, user_table):
         pick_list = pick_table["PICK"].tolist()
 
         try:
-            points_list = pick_table["PROJ. POINTS"].tolist()
+            points_list = pick_table["PROJ. POINTS"]
         except Exception:
-            points_list = pick_table["POINTS"].tolist()
+            points_list = pick_table["POINTS"]
+
+        normalised_points_list = pick_table["POINTS"] / pick_table["MULT"]
 
         fedex_pts = {}
         for pick, pts in zip(pick_list, points_list):
@@ -696,7 +698,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
         df["points"] = [round(points) for points in df["points"]]
         df["earnings"] = [format_earnings(earnings) for earnings in df["earnings"]]
 
-        df = df[["team", "pick", "tot", "pos", "points", "earnings", "helpers"]]
+        df = df[["team", "pick", "tot", "pos", "points", "earnings", "helpers", "mult"]]
 
     else:  # In tournament display
         df.points *= df.mult
@@ -738,7 +740,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
                 "proj. points",
                 "proj. rank",
                 "helpers",
-                "initials",
+                "mult" "initials",
             ]
         ]
 
