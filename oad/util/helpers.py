@@ -251,7 +251,10 @@ def update_weekly_pick_table(users, week_picks, event_table, user_table):
         except Exception:
             points_list = pick_table["POINTS"]
 
-        normalised_points_list = pick_table["POINTS"] / pick_table["MULT"]
+        normalised_points_list = [
+            p / m if m else 0
+            for p, m in zip(points_list.to_list(), pick_table["MULT"].to_list())
+        ]
 
         fedex_pts = {}
         for pick, pts in zip(pick_list, normalised_points_list):
@@ -740,7 +743,8 @@ def weekly_pick_table(users, picks, event_info, user_data):
                 "proj. points",
                 "proj. rank",
                 "helpers",
-                "mult" "initials",
+                "mult",
+                "initials",
             ]
         ]
 
