@@ -252,7 +252,7 @@ def update_weekly_pick_table(users, week_picks, event_table, user_table):
             points_list = pick_table["POINTS"]
 
         normalised_points_list = [
-            p / m if m else 0
+            float(p) / float(m) if m else 0
             for p, m in zip(points_list.to_list(), pick_table["MULT"].to_list())
         ]
 
