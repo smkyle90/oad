@@ -607,8 +607,10 @@ def weekly_pick_table(users, picks, event_info, user_data):
             fedex_pts = 0
         if curr_round <= 2:
             in_play = True
-        else:
+        elif curr_round <= 4:
             in_play = live_scores.get(pick, {}).get("round", 0) == curr_round
+        else:
+            in_play = live_scores.get(pick, {}).get("round", 0) >= curr_round - 1
 
         if in_play:
             live_scores[pick]["points"] = fedex_pts
