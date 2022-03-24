@@ -19,7 +19,7 @@ https://pthree.org/2012/01/07/encrypted-mutt-imap-smtp-passwords/
 https://gist.github.com/bnagy/8914f712f689cc01c267
 """
 
-EVENT_TYPE = "regular"
+EVENT_TYPE = "flagship"
 
 dirname = os.path.dirname(__file__)
 filename = os.path.join(dirname, "points.csv")
@@ -256,7 +256,7 @@ def update_weekly_pick_table(users, week_picks, event_table, user_table):
             points_list = pick_table["POINTS"]
 
         normalised_points_list = [
-            float(p) / float(m) if m else 0
+            0 if m else 0
             for p, m in zip(points_list.to_list(), pick_table["MULT"].to_list())
         ]
 
@@ -283,7 +283,8 @@ def update_cache_from_api():
 
     api_last_update = float(api_last_update)
 
-    if time.time() - api_last_update > UPDATE_TIME:
+    # if time.time() - api_last_update > UPDATE_TIME:
+    if True:
         r = requests.get(EVENT_URL)
         data = r.json()
         data = remove_canceled(data)
@@ -300,18 +301,20 @@ def get_event_info():
         data = json.loads(data)
 
         event_name = get_event_from_data(data)
-        avail_picks = get_avail_from_data(data)
-        tournament_state = get_tourn_state_from_data(data)
-        tournament_info = get_tournament_info(data)
-        tournament_round = get_tournament_round(data)
+        avail_picks = []  # , "Thomas Pieters", "Max Homa"] #get_avail_from_data(data)
+        tournament_state = "in"  # get_tourn_state_from_data(data)
+        tournament_info = None
+        tournament_round = 2
+        # tournament_info = get_tournament_info(data)
+        # tournament_round = get_tournament_round(data)
 
-        if tournament_state in ["in", "post"]:
-            # check if the earnings are posteds
-            earnings_posted = get_earnings_from_data(data)
-            if earnings_posted:
-                tournament_state = "post"
-            else:
-                tournament_state = "in"
+        # if tournament_state in ["in", "post"]:
+        #     # check if the earnings are posteds
+        #     earnings_posted = get_earnings_from_data(data)
+        #     if earnings_posted:
+        #         tournament_state = "post"
+        #     else:
+        #         tournament_state = "in"
 
         return (
             event_name,
@@ -546,8 +549,8 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
 # flake8: noqa: C901
 def weekly_pick_table(users, picks, event_info, user_data):
     # get purse value
-    purse_value = event_info.loc[event_info.col1 == "Purse", "col2"].iloc[0][1:]
-    purse_value = float(purse_value.replace(",", ""))
+    purse_value = 0  # event_info.loc[event_info.col1 == "Purse", "col2"].iloc[0][1:]
+    # purse_value = float(purse_value.replace(",", ""))
 
     # construct user dict for display names
     user_dict = {
@@ -588,42 +591,47 @@ def weekly_pick_table(users, picks, event_info, user_data):
         "mult": [p.point_multiplier for p in picks if p.point_multiplier],
     }
 
+    print(pick_dict)
+
     # live scores from API for each pick.
     live_scores = get_live_scores(
         set(pick_dict["pick"]).union(set(pick_dict["alternate"]))
     )
+    print(live_scores)
 
     curr_event, _, _, _, curr_round = get_event_info()
 
     # Add the projected fedex points for this event
     for pick in live_scores:
-        try:
-            fedex_pts = round(
-                POINTS_DF[EVENT_TYPE]
-                .loc[
-                    (live_scores[pick]["position"] - 1) : (
-                        live_scores[pick]["position"] - 1
-                    )
-                    + (live_scores[pick]["freq"] - 1)
-                ]
-                .sum()
-                / (live_scores[pick]["freq"]),
-                0,
-            )
-        except Exception as e:
-            print(e)
-            fedex_pts = 0
-        if curr_round <= 2:
-            in_play = True
-        elif curr_round <= 4:
-            in_play = live_scores.get(pick, {}).get("round", 0) == curr_round
-        else:
-            in_play = live_scores.get(pick, {}).get("round", 0) >= curr_round - 1
+        live_scores[pick]["points"] = 0
 
-        if in_play:
-            live_scores[pick]["points"] = fedex_pts
-        else:
-            live_scores[pick]["points"] = 0
+        # try:
+        #     fedex_pts = round(
+        #         POINTS_DF[EVENT_TYPE]
+        #         .loc[
+        #             (live_scores[pick]["position"] - 1) : (
+        #                 live_scores[pick]["position"] - 1
+        #             )
+        #             + (live_scores[pick]["freq"] - 1)
+        #         ]
+        #         .sum()
+        #         / (live_scores[pick]["freq"]),
+        #         0,
+        #     )
+        # except Exception as e:
+        #     print(e)
+        #     fedex_pts = 0
+        # if curr_round <= 2:
+        #     in_play = True
+        # elif curr_round <= 4:
+        #     in_play = live_scores.get(pick, {}).get("round", 0) == curr_round
+        # else:
+        #     in_play = live_scores.get(pick, {}).get("round", 0) >= curr_round - 1
+
+        # if in_play:
+        #     live_scores[pick]["points"] = fedex_pts
+        # else:
+        #     live_scores[pick]["points"] = 0
 
     # extract the user data for use in the table
     current_points = {

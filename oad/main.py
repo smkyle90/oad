@@ -67,13 +67,14 @@ def league():
     update_cache_from_api()
 
     curr_event, __, tournament_state, event_table, __ = get_event_info()
-
+    print(curr_event)
     users = User.query.all()
     all_picks = Pick.query.filter_by(season=SEASON).all()
     user_table = construct_user_table(users, all_picks, as_html=False)
 
     week_picks = Pick.query.filter_by(season=SEASON).filter_by(event=curr_event).all()
 
+    print(week_picks)
     update_weekly_pick_table(users, week_picks, event_table, user_table)
 
     # Determine if we are going to show the picks for the week
