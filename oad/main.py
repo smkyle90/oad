@@ -158,7 +158,7 @@ def pick():
         eligible_picks.sort()
 
         # Warn the user about the picking state
-        if tournament_round < 1:
+        if tournament_round < 1 or tournament_state == "pre":
             if prev_pick is None:
                 pick_state = "you have yet to pick. Pick any golfer in the field."
             else:

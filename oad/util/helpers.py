@@ -538,8 +538,12 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
 # flake8: noqa: C901
 def weekly_pick_table(users, picks, event_info, user_data):
     # get purse value
-    purse_value = event_info.loc[event_info.col1 == "Purse", "col2"].iloc[0][1:]
-    purse_value = float(purse_value.replace(",", ""))
+    try:
+        purse_value = event_info.loc[event_info.col1 == "Purse", "col2"].iloc[0][1:]
+        purse_value = float(purse_value.replace(",", ""))
+    except Exception as e:
+        print(e)
+        purse_value = 11, 500, 000
 
     # construct user dict for display names
     user_dict = {
