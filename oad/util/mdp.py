@@ -26,7 +26,7 @@ ALL_PICKS = [
     ("Sohale", "Matt Fitzpatrick"),
     ("David", "Sam Burns"),
     ("Jamil", "Adam Scott"),
-    ("Brock", "Paul Casey"),
+    ("Brock", "Danny Willett"),
     ("Brady", "Sungjae Im"),
     ("Brady", "Patrick Reed"),
     ("Brock", "Tyrrell Hatton"),
@@ -71,7 +71,7 @@ def major_draft_pool():
 
     # live scores from API for each pick.
     live_scores = get_live_scores(df.Player.to_list())
-
+    print(live_scores)
     curr_round = 0
     for player, data in live_scores.items():
         curr_round = max(curr_round, data["round"])
