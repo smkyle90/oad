@@ -209,7 +209,7 @@ def pick():
         prev_pick_show = ""
         prev_alt_show = ""
     else:
-        prev_pick_show = (prev_pick.pick,)
+        prev_pick_show = prev_pick.pick
         prev_alt_show = prev_pick.alternate
 
     return render_template(
@@ -296,14 +296,19 @@ def submit_pick():
 @main.route("/update")
 @login_required
 def update():
-    __, __, tournament_state, __, __ = get_event_info()
+    __, avail_picks, tournament_state, __, __ = get_event_info()
+
+    users = User.query.all()
+    users = [user.name for user in users]
 
     update_button = False
 
     if tournament_state == "post":
         update_button = True
 
-    return render_template("update.html", update_button=update_button)
+    return render_template(
+        "update.html", update_button=update_button, avail_picks=avail_picks, users=users
+    )
 
 
 @main.route("/end_week")
@@ -312,6 +317,43 @@ def end_week():
     add_user_points()
     # update_player_earnings()
     flash("Update complete!")
+    return redirect(url_for("main.update"))
+
+
+@main.route("/manual_pick", methods=["POST"])
+@login_required
+def manual_pick():
+    # Get current event from the session
+    curr_event, _, _, _, _ = get_event_info()
+
+    # Get the selection
+    user = request.form.get("user")
+    selection = request.form.get("main")
+    alternate = request.form.get("alternate")
+
+    prev_pick = (
+        Pick.query.filter_by(season=SEASON)
+        .filter_by(event=curr_event)
+        .filter_by(name=user)
+        .first()
+    )
+
+    if prev_pick is None:
+        manual_pick = Pick(
+            event=curr_event,
+            pick=selection,
+            alternate=alternate,
+            name=user,
+            season=SEASON,
+        )
+        db.session.add(manual_pick)
+    else:
+        prev_pick.pick = selection
+        prev_pick.alternate = alternate
+
+    # The user is able to make a pick
+    db.session.commit()
+
     return redirect(url_for("main.update"))
 
 

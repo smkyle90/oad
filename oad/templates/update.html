@@ -35,4 +35,59 @@
     </button>
   </form>
 </section>
+
+
+
+<section>
+  <h3 class="subtitle">Manual Pick</h3>
+
+
+  <form name="Select" action="{{ url_for('main.manual_pick') }}" method="POST">
+  <h3>User</h3>
+    <select
+      class="dropbtn is-block ids-fullwidth"
+      id="user"
+      name="user"
+      type="text"
+      placeholder="Select your golfer."
+      style="width: 100%"
+    >
+      {% for user in users %}
+      <option>{{ user }}</option>
+      {% endfor %}
+    </select>
+
+  <h3>Main Pick</h3>
+    <select
+      class="dropbtn is-block ids-fullwidth"
+      id="main"
+      name="main"
+      type="text"
+      placeholder="Select your golfer."
+      style="width: 100%"
+    >
+      {% for pick in avail_picks %}
+      <option>{{ pick }}</option>
+      {% endfor %}
+    </select>
+  <h3>Alternate Pick</h3>
+    <select
+      class="dropbtn is-block ids-fullwidth"
+      id="alternate"
+      name="alternate"
+      type="text"
+      placeholder="Select your alternate."
+      style="width: 100%"
+    >
+      {% for pick in avail_picks %}
+      <option>{{ pick }}</option>
+      {% endfor %}
+    </select>
+    <button class="button is-block is-info is-large is-fullwidth">
+      Pick
+    </button>
+
+</section>
+
+
 {% endblock %}
