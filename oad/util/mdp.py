@@ -22,7 +22,7 @@ ALL_PICKS = [
     ("Scott", "Shane Lowry"),
     ("Scott", "Corey Conners"),
     ("Lucas", "Hideki Matsuyama"),
-    ("Tom", "Louis Oosthuizen"),
+    ("Tom", "Cam Davis"),
     ("Sohale", "Matt Fitzpatrick"),
     ("David", "Sam Burns"),
     ("Jamil", "Adam Scott"),
