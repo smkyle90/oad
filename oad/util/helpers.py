@@ -19,7 +19,7 @@ https://pthree.org/2012/01/07/encrypted-mutt-imap-smtp-passwords/
 https://gist.github.com/bnagy/8914f712f689cc01c267
 """
 
-EVENT_TYPE = "regular"
+EVENT_TYPE = "major"
 
 dirname = os.path.dirname(__file__)
 filename = os.path.join(dirname, "points.csv")
@@ -235,8 +235,7 @@ def update_weekly_pick_table(users, week_picks, event_table, user_table):
         picks_last_update = 0
     picks_last_update = float(picks_last_update)
 
-    if True:
-        # if time.time() - picks_last_update > UPDATE_TIME:
+    if time.time() - picks_last_update > UPDATE_TIME:
         pick_table = weekly_pick_table(users, week_picks, event_table, user_table)
 
         redis_cache.set(
@@ -457,12 +456,14 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
             )
         )
         user_dict["weekly points"].append(
-            sum(
-                [
-                    int(x.fedex)
-                    for x in picks
-                    if (x.event == curr_event) and (x.name == usr.name)
-                ]
+            int(
+                sum(
+                    [
+                        x.fedex * x.point_multiplier
+                        for x in picks
+                        if (x.event == curr_event) and (x.name == usr.name)
+                    ]
+                )
             )
         )
         user_dict["breakfast balls left"].append(int(usr.strikes_remaining))
@@ -472,7 +473,9 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
             sum([int(x.points) for x in picks if x.name == usr.name])
         )
         user_dict["total points"].append(
-            sum([int(x.fedex) for x in picks if x.name == usr.name])
+            int(
+                sum([x.fedex * x.point_multiplier for x in picks if x.name == usr.name])
+            )
         )
 
     user_df = pd.DataFrame(user_dict)
