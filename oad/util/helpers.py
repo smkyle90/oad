@@ -104,8 +104,9 @@ def get_avail_from_data(data):
     """
     # Get the players in the field, who have yet to tee off
     return [
-        a["athlete"]["displayName"]
+        b["athlete"]["displayName"]
         for a in data["events"][0]["competitions"][0]["competitors"]
+        for b in a["roster"]
         if (a["status"]["period"] <= 2) and (a["status"]["type"]["state"] == "pre")
     ]
 
@@ -157,39 +158,40 @@ def live_scores_from_data(data, current_players):
     score_data = {}
     rank_data = {}
 
-    for user in data["events"][0]["competitions"][0]["competitors"]:
-        player_score = 0
-        player_pos = "--"
+    for team in data["events"][0]["competitions"][0]["competitors"]:
+        for user in team["roster"]:
+            player_score = 0
+            player_pos = "--"
 
-        # Deal with players who have WD after starting
-        if user["status"].get("displayValue", False) == "WD":
-            continue
+            # Deal with players who have WD after starting
+            if team["status"].get("displayValue", False) == "WD":
+                continue
 
-        for idx, user_score_data in enumerate(user["linescores"]):
-            if user_score_data.get("value"):
-                player_pos = user_score_data.get("currentPosition")
-
-            if user["athlete"]["displayName"] in current_players:
+            for idx, user_score_data in enumerate(team["linescores"]):
                 if user_score_data.get("value"):
-                    try:
-                        player_score += int(user_score_data["displayValue"])
-                    except Exception:
-                        player_score += 0
+                    player_pos = user_score_data.get("currentPosition")
 
-                score_data[user["athlete"]["displayName"]] = {
-                    "score": player_score,
-                    "position": player_pos,
-                    "earnings": int(user.get("earnings", 0)),
-                    "points": -1,
-                    "freq": 1,
-                    "round": idx + 1,
-                }
+                if user["athlete"]["displayName"] in current_players:
+                    if user_score_data.get("value"):
+                        try:
+                            player_score += int(user_score_data["displayValue"])
+                        except Exception:
+                            player_score += 0
 
-        # Store the number of players at a particular score. This is just the last linescore for each user.
-        if rank_data.get(player_pos):
-            rank_data[player_pos] += 1
-        else:
-            rank_data[player_pos] = 1
+                    score_data[user["athlete"]["displayName"]] = {
+                        "score": player_score,
+                        "position": player_pos,
+                        "earnings": int(user.get("earnings", 0)),
+                        "points": -1,
+                        "freq": 1,
+                        "round": idx + 1,
+                    }
+
+            # Store the number of players at a particular score. This is just the last linescore for each user.
+            if rank_data.get(player_pos):
+                rank_data[player_pos] += 1
+            else:
+                rank_data[player_pos] = 1
 
     for user, vals in score_data.items():
         vals["freq"] = rank_data[vals["position"]]

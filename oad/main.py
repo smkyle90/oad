@@ -121,6 +121,7 @@ def league():
 @login_required
 def pick():
     curr_event, avail_picks, tournament_state, __, tournament_round = get_event_info()
+    print(curr_event, avail_picks, tournament_state, tournament_round)
 
     # Check if the user has made a previous pick for this event
     prev_pick = (
