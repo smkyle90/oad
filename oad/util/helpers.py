@@ -206,7 +206,7 @@ def get_earnings_from_data(data, player=None):
         return (
             sum(
                 [
-                    int(user["earnings"])
+                    int(user.get("earnings", 0))
                     for user in data["events"][0]["competitions"][0]["competitors"]
                 ]
             )
@@ -215,7 +215,7 @@ def get_earnings_from_data(data, player=None):
 
     for user in data["events"][0]["competitions"][0]["competitors"]:
         if user["athlete"]["displayName"] == player:
-            return user["earnings"]
+            return user.get("earnings", 0)
     return -1
 
 
