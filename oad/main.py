@@ -302,7 +302,7 @@ def update():
     users = User.query.all()
     users = [user.name for user in users]
 
-    update_button = False
+    update_button = True
 
     if tournament_state == "post":
         update_button = True

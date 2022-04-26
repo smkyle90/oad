@@ -19,7 +19,7 @@ https://pthree.org/2012/01/07/encrypted-mutt-imap-smtp-passwords/
 https://gist.github.com/bnagy/8914f712f689cc01c267
 """
 
-EVENT_TYPE = "major"
+EVENT_TYPE = "regular"
 
 dirname = os.path.dirname(__file__)
 filename = os.path.join(dirname, "points.csv")
@@ -202,6 +202,7 @@ def live_scores_from_data(data, current_players):
 def get_earnings_from_data(data, player=None):
     """Get earnings. Function to ensure modularity if API fails.
     """
+    return 0
     if player is None:
         return (
             sum(
