@@ -202,21 +202,24 @@ def live_scores_from_data(data, current_players):
 def get_earnings_from_data(data, player=None):
     """Get earnings. Function to ensure modularity if API fails.
     """
-    if player is None:
-        return (
-            sum(
-                [
-                    int(user.get("earnings", 0))
-                    for user in data["events"][0]["competitions"][0]["competitors"]
-                ]
+    try:
+        if player is None:
+            return (
+                sum(
+                    [
+                        int(user.get("earnings", 0))
+                        for user in data["events"][0]["competitions"][0]["competitors"]
+                    ]
+                )
+                > 0
             )
-            > 0
-        )
 
-    for user in data["events"][0]["competitions"][0]["competitors"]:
-        if user["athlete"]["displayName"] == player:
-            return user.get("earnings", 0)
-    return -1
+        for user in data["events"][0]["competitions"][0]["competitors"]:
+            if user["athlete"]["displayName"] == player:
+                return user.get("earnings", 0)
+        return -1
+    except:
+        return 0
 
 
 def remove_canceled(data):
