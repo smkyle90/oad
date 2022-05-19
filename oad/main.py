@@ -185,6 +185,7 @@ def pick():
         else:
             pick_state = "you are out of options for this week."
     else:
+        print(tournament_round)
         if tournament_round < 1:
             pick_state = (
                 "our friends at ESPN have not released the field for this week."
