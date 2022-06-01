@@ -19,7 +19,7 @@ https://pthree.org/2012/01/07/encrypted-mutt-imap-smtp-passwords/
 https://gist.github.com/bnagy/8914f712f689cc01c267
 """
 
-EVENT_TYPE = "major"
+EVENT_TYPE = "flagship"
 
 dirname = os.path.dirname(__file__)
 filename = os.path.join(dirname, "points.csv")
@@ -85,7 +85,7 @@ def send_email(receiver_email, subject, html):
 
 def get_tournament_round(data):
     try:
-        tournament_round = int(data["events"][0]["competitions"][0]["status"]["period"])
+        tournament_round = int(data["events"][1]["competitions"][0]["status"]["period"])
     except Exception:
         tournament_round = 0
 
@@ -96,7 +96,7 @@ def get_event_from_data(data):
     """Get event info. Function to ensure modularity if API fails.
     """
     # Get the current event name
-    return data["events"][0]["name"]
+    return data["events"][1]["name"]
 
 
 def get_avail_from_data(data):
@@ -105,7 +105,7 @@ def get_avail_from_data(data):
     # Get the players in the field, who have yet to tee off
     return [
         a["athlete"]["displayName"]
-        for a in data["events"][0]["competitions"][0]["competitors"]
+        for a in data["events"][1]["competitions"][0]["competitors"]
         if (a["status"]["period"] <= 2) and (a["status"]["type"]["state"] == "pre")
     ]
 
@@ -118,18 +118,18 @@ def get_tournament_info(data):
     data_dict = {}
 
     try:
-        data_dict["Purse"] = data["events"][0]["displayPurse"]
+        data_dict["Purse"] = data["events"][1]["displayPurse"]
     except Exception:
         data_dict["Purse"] = "Unavailable"
 
     try:
         data_dict["Courses"] = courses_separator.join(
-            [course["name"] for course in data["events"][0]["courses"]]
+            [course["name"] for course in data["events"][1]["courses"]]
         )
     except Exception:
         data_dict["Courses"] = "Unavailable"
     try:
-        data_dict["Defending Champion"] = data["events"][0]["defendingChampion"][
+        data_dict["Defending Champion"] = data["events"][1]["defendingChampion"][
             "athlete"
         ]["displayName"]
     except Exception:
@@ -148,7 +148,7 @@ def get_tournament_info(data):
 def get_tourn_state_from_data(data):
     """Get tournament state. Function to ensure modularity if API fails.
     """
-    return data["events"][0]["status"]["type"]["state"]
+    return data["events"][1]["status"]["type"]["state"]
 
 
 def live_scores_from_data(data, current_players):
@@ -157,7 +157,7 @@ def live_scores_from_data(data, current_players):
     score_data = {}
     rank_data = {}
 
-    for user in data["events"][0]["competitions"][0]["competitors"]:
+    for user in data["events"][1]["competitions"][0]["competitors"]:
         player_score = 0
         player_pos = "--"
 
@@ -205,13 +205,13 @@ def get_earnings_from_data(data, player=None):
             sum(
                 [
                     int(user["earnings"])
-                    for user in data["events"][0]["competitions"][0]["competitors"]
+                    for user in data["events"][1]["competitions"][0]["competitors"]
                 ]
             )
             > 0
         )
 
-    for user in data["events"][0]["competitions"][0]["competitors"]:
+    for user in data["events"][1]["competitions"][0]["competitors"]:
         if user["athlete"]["displayName"] == player:
             return user["earnings"]
     return -1
@@ -338,7 +338,7 @@ def get_withdrawl_list():
         data = redis_cache.get("data")
         data = json.loads(data)
 
-        all_users = data["events"][0]["competitions"][0]["competitors"]
+        all_users = data["events"][1]["competitions"][0]["competitors"]
 
         withdrawl_list = [
             user["athlete"]["displayName"]
