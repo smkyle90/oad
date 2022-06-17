@@ -65,12 +65,12 @@ def major_draft_pool():
 
     # live scores from API for each pick.
     live_scores = get_live_scores(df.Player.to_list())
-    print(live_scores)
+
     curr_round = 0
     for player, data in live_scores.items():
         curr_round = max(curr_round, data["round"])
 
-    df["Pick"] = [i // 8 + 1 for i in range(len(df))]
+    df["Pick"] = [i // len(df.User.unique()) + 1 for i in range(len(df))]
     df["Total Score"] = [live_scores[player]["score"] for player in df.Player]
     df["Position"] = [live_scores[player]["position"] for player in df.Player]
     df["Round"] = [live_scores[player]["round"] for player in df.Player]
