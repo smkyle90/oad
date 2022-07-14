@@ -38,7 +38,7 @@ ALL_PICKS = [
     ("David", "Marc Leishman"),
     ("David", "Patrick Reed"),
     ("Scott", "Robert MacIntyre"),
-    ("Tom", "Brian Harman    "),
+    ("Tom", "Brian Harman"),
     ("Lucas", "Talor Gooch"),
     ("Brady", "Cameron Tringale"),
     ("Brock", "Abraham Ancer"),
