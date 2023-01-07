@@ -4,6 +4,7 @@ __pycache__
 
 # Database
 *.sqlite
+*.rdb
 
 # Compiled
 *.pyc

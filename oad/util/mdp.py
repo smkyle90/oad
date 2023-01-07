@@ -3,7 +3,56 @@ import pandas as pd
 from .helpers import get_live_scores
 
 # Major DRAFT POOL
-ALL_PICKS = [("Player", "Pick")]
+ALL_PICKS = [
+    ("David", "Rory McIlroy"),
+    ("Scott", "Xander Schauffele"),
+    ("Tom", "Matt Fitzpatrick"),
+    ("Lucas", "Scottie Scheffler"),
+    ("Brady", "Jon Rahm"),
+    ("Brock", "Justin Thomas"),
+    ("Jamil", "Shane Lowry"),
+    ("Sohale", "Patrick Cantlay"),
+    ("Sohale", "Tommy Fleetwood"),
+    ("Jamil", "Collin Morikawa"),
+    ("Brock", "Tiger Woods"),
+    ("Brady", "Will Zalatoris"),
+    ("Lucas", "Jordan Spieth"),
+    ("Tom", "Hideki Matsuyama"),
+    ("Scott", "Max Homa"),
+    ("David", "Cameron Smith"),
+    ("David", "Tyrrell Hatton"),
+    ("Scott", "Dustin Johnson"),
+    ("Tom", "Joaquin Niemann"),
+    ("Lucas", "Sam Burns"),
+    ("Brady", "Tony Finau"),
+    ("Brock", "Louis Oosthuizen"),
+    ("Jamil", "Viktor Hovland"),
+    ("Sohale", "Seamus Power"),
+    ("Sohale", "Ryan Fox"),
+    ("Jamil", "Brooks Koepka"),
+    ("Brock", "Keith Mitchell"),
+    ("Brady", "Corey Conners"),
+    ("Lucas", "Sungjae Im"),
+    ("Tom", "Gary Woodland"),
+    ("Scott", "Adam Scott"),
+    ("David", "Marc Leishman"),
+    ("David", "Patrick Reed"),
+    ("Scott", "Robert MacIntyre"),
+    ("Tom", "Brian Harman"),
+    ("Lucas", "Talor Gooch"),
+    ("Brady", "Cameron Tringale"),
+    ("Brock", "Abraham Ancer"),
+    ("Jamil", "Christiaan Bezuidenhout"),
+    ("Sohale", "Thomas Pieters"),
+    ("Sohale", "Jordan Smith"),
+    ("Jamil", "Danny Willett"),
+    ("Brock", "Cameron Young"),
+    ("Brady", "Paul Casey"),
+    ("Lucas", "Bryson DeChambeau"),
+    ("Tom", "Kurt Kitayama"),
+    ("Scott", "Min Woo Lee"),
+    ("David", "Billy Horschel"),
+]
 
 
 def major_draft_pool():
@@ -27,7 +76,7 @@ def major_draft_pool():
     for player, data in live_scores.items():
         curr_round = max(curr_round, data["round"])
 
-    df["Pick"] = [i // 8 + 1 for i in range(len(df))]
+    df["Pick"] = [i // len(df.User.unique()) + 1 for i in range(len(df))]
     df["Total Score"] = [live_scores[player]["score"] for player in df.Player]
     df["Position"] = [live_scores[player]["position"] for player in df.Player]
     df["Round"] = [live_scores[player]["round"] for player in df.Player]
@@ -48,7 +97,10 @@ def major_draft_pool():
     invalid_teams = all_teams - valid_teams
     count_df = count_df[count_df.User.isin(valid_teams)]
     count_df = count_df.groupby("User").agg(
-        {"Total Score": "sum", "Scores": lambda x: ", ".join(x),}
+        {
+            "Total Score": "sum",
+            "Scores": lambda x: ", ".join(x),
+        }
     )
     count_df.sort_values(["Total Score"], inplace=True, ascending=True)
 

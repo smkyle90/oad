@@ -24,7 +24,7 @@ from .util import (
 from .util.admin import add_user_points
 from .views import league_page
 
-SEASON = int(os.getenv("OADYR", 2022))
+SEASON = int(os.getenv("OADYR", 2023))
 
 EMPTY_HTML = "<div></div>"
 
@@ -158,7 +158,7 @@ def pick():
         eligible_picks.sort()
 
         # Warn the user about the picking state
-        if tournament_round < 1:
+        if tournament_round < 1 or tournament_state == "pre":
             if prev_pick is None:
                 pick_state = "you have yet to pick. Pick any golfer in the field."
             else:
@@ -185,6 +185,7 @@ def pick():
         else:
             pick_state = "you are out of options for this week."
     else:
+        print(tournament_round)
         if tournament_round < 1:
             pick_state = (
                 "our friends at ESPN have not released the field for this week."
@@ -205,6 +206,13 @@ def pick():
     else:
         tournament_round = "Pre-tournament"
 
+    if prev_pick is None:
+        prev_pick_show = ""
+        prev_alt_show = ""
+    else:
+        prev_pick_show = prev_pick.pick
+        prev_alt_show = prev_pick.alternate
+
     return render_template(
         "pick.html",
         avail=eligible_picks,
@@ -216,6 +224,8 @@ def pick():
         substitute_button_state=substitute_button_state,
         double_up_button_state=double_up_button_state,
         current_round=tournament_round,
+        prev_pick_show=prev_pick_show,
+        prev_alt_show=prev_alt_show,
     )
 
 
@@ -287,14 +297,19 @@ def submit_pick():
 @main.route("/update")
 @login_required
 def update():
-    __, __, tournament_state, __, __ = get_event_info()
+    __, avail_picks, tournament_state, __, __ = get_event_info()
+
+    users = User.query.all()
+    users = [user.name for user in users]
 
     update_button = False
 
     if tournament_state == "post":
         update_button = True
 
-    return render_template("update.html", update_button=update_button)
+    return render_template(
+        "update.html", update_button=update_button, avail_picks=avail_picks, users=users
+    )
 
 
 @main.route("/end_week")
@@ -303,6 +318,43 @@ def end_week():
     add_user_points()
     # update_player_earnings()
     flash("Update complete!")
+    return redirect(url_for("main.update"))
+
+
+@main.route("/manual_pick", methods=["POST"])
+@login_required
+def manual_pick():
+    # Get current event from the session
+    curr_event, _, _, _, _ = get_event_info()
+
+    # Get the selection
+    user = request.form.get("user")
+    selection = request.form.get("main")
+    alternate = request.form.get("alternate")
+
+    prev_pick = (
+        Pick.query.filter_by(season=SEASON)
+        .filter_by(event=curr_event)
+        .filter_by(name=user)
+        .first()
+    )
+
+    if prev_pick is None:
+        manual_pick = Pick(
+            event=curr_event,
+            pick=selection,
+            alternate=alternate,
+            name=user,
+            season=SEASON,
+        )
+        db.session.add(manual_pick)
+    else:
+        prev_pick.pick = selection
+        prev_pick.alternate = alternate
+
+    # The user is able to make a pick
+    db.session.commit()
+
     return redirect(url_for("main.update"))
 
 
