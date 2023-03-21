@@ -302,7 +302,7 @@ def get_event_info():
 
         event_name = get_event_from_data(data)
         avail_picks = get_avail_from_data(data)
-        # tournament_state = "in"  # get_tourn_state_from_data(data)
+        tournament_state = get_tourn_state_from_data(data)
         # tournament_info = None
         # tournament_round = 2
         tournament_info = get_tournament_info(data)
@@ -338,7 +338,7 @@ def get_live_scores(current_players):
         return live_scores
     except Exception as e:
         print("Issue getting datafrom ESPN API. Message: {}".format(e))
-        return None
+        return {}
 
 
 def get_withdrawl_list():
