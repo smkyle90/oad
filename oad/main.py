@@ -24,7 +24,7 @@ from .util import (
 from .util.admin import add_user_points
 from .views import league_page
 
-SEASON = int(os.getenv("OADYR", 2022))
+SEASON = int(os.getenv("OADYR", 2023))
 
 EMPTY_HTML = "<div></div>"
 

@@ -301,20 +301,20 @@ def get_event_info():
         data = json.loads(data)
 
         event_name = get_event_from_data(data)
-        avail_picks = []  # , "Thomas Pieters", "Max Homa"] #get_avail_from_data(data)
-        tournament_state = "in"  # get_tourn_state_from_data(data)
-        tournament_info = None
-        tournament_round = 2
-        # tournament_info = get_tournament_info(data)
-        # tournament_round = get_tournament_round(data)
+        avail_picks = get_avail_from_data(data)
+        # tournament_state = "in"  # get_tourn_state_from_data(data)
+        # tournament_info = None
+        # tournament_round = 2
+        tournament_info = get_tournament_info(data)
+        tournament_round = get_tournament_round(data)
 
-        # if tournament_state in ["in", "post"]:
-        #     # check if the earnings are posteds
-        #     earnings_posted = get_earnings_from_data(data)
-        #     if earnings_posted:
-        #         tournament_state = "post"
-        #     else:
-        #         tournament_state = "in"
+        if tournament_state in ["in", "post"]:
+            # check if the earnings are posteds
+            earnings_posted = get_earnings_from_data(data)
+            if earnings_posted:
+                tournament_state = "post"
+            else:
+                tournament_state = "in"
 
         return (
             event_name,
