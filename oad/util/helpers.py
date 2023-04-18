@@ -103,12 +103,16 @@ def get_avail_from_data(data):
     """Get players in field. Function to ensure modularity if API fails.
     """
     # Get the players in the field, who have yet to tee off
-    return [
-        b["athlete"]["displayName"]
-        for a in data["events"][0]["competitions"][0]["competitors"]
-        for b in a["roster"]
-        if (a["status"]["period"] <= 2) and (a["status"]["type"]["state"] == "pre")
-    ]
+    golfers = []
+    for event in data['events']:
+        for team in event['competitions'][0]['competitors']:
+            for competitor in team.get("roster", {}):
+
+                golfer = competitor.get('athlete', {}).get('displayName', "")
+                print(golfer)
+                golfers.append(golfer)
+
+    return golfers
 
 
 def get_tournament_info(data):
@@ -159,39 +163,41 @@ def live_scores_from_data(data, current_players):
     rank_data = {}
 
     for team in data["events"][0]["competitions"][0]["competitors"]:
-        for user in team["roster"]:
-            player_score = 0
-            player_pos = "--"
+        for user in team.get("roster"):
+            print(user.keys())
+            if user is not None:
+                player_score = 0
+                player_pos = "--"
 
-            # Deal with players who have WD after starting
-            if team["status"].get("displayValue", False) == "WD":
-                continue
+                # Deal with players who have WD after starting
+                if team["status"].get("displayValue", False) == "WD":
+                    continue
 
-            for idx, user_score_data in enumerate(team["linescores"]):
-                if user_score_data.get("value"):
-                    player_pos = user_score_data.get("currentPosition")
-
-                if user["athlete"]["displayName"] in current_players:
+                for idx, user_score_data in enumerate(team["linescores"]):
                     if user_score_data.get("value"):
-                        try:
-                            player_score += int(user_score_data["displayValue"])
-                        except Exception:
-                            player_score += 0
+                        player_pos = user_score_data.get("currentPosition")
 
-                    score_data[user["athlete"]["displayName"]] = {
-                        "score": player_score,
-                        "position": player_pos,
-                        "earnings": int(user.get("earnings", 0)),
-                        "points": -1,
-                        "freq": 1,
-                        "round": idx + 1,
-                    }
+                    if user["athlete"]["displayName"] in current_players:
+                        if user_score_data.get("value"):
+                            try:
+                                player_score += int(user_score_data["displayValue"])
+                            except Exception:
+                                player_score += 0
 
-            # Store the number of players at a particular score. This is just the last linescore for each user.
-            if rank_data.get(player_pos):
-                rank_data[player_pos] += 1
-            else:
-                rank_data[player_pos] = 1
+                        score_data[user["athlete"]["displayName"]] = {
+                            "score": player_score,
+                            "position": player_pos,
+                            "earnings": int(user.get("earnings", 0)),
+                            "points": -1,
+                            "freq": 1,
+                            "round": idx + 1,
+                        }
+
+                # Store the number of players at a particular score. This is just the last linescore for each user.
+                if rank_data.get(player_pos):
+                    rank_data[player_pos] += 1
+                else:
+                    rank_data[player_pos] = 1
 
     for user, vals in score_data.items():
         vals["freq"] = rank_data[vals["position"]]
@@ -287,6 +293,8 @@ def update_cache_from_api():
         r = requests.get(EVENT_URL)
         data = r.json()
         data = remove_canceled(data)
+        print(data.keys())
+        del data["events"][0]["competitions"][0]["competitors"][0]
         data = json.dumps(data)
         redis_cache.set("data", data)
         redis_cache.set("api_last_update", time.time())
@@ -301,9 +309,9 @@ def get_event_info():
 
         event_name = get_event_from_data(data)
         avail_picks = get_avail_from_data(data)
-        tournament_state = get_tourn_state_from_data(data)
+        tournament_state = "pre" # get_tourn_state_from_data(data)
         tournament_info = get_tournament_info(data)
-        tournament_round = get_tournament_round(data)
+        tournament_round = 0 # get_tournament_round(data)
 
         if tournament_state in ["in", "post"]:
             # check if the earnings are posteds
@@ -331,7 +339,7 @@ def get_live_scores(current_players):
     try:
         data = redis_cache.get("data")
         data = json.loads(data)
-        live_scores = live_scores_from_data(data, current_players)
+        live_scores = {} # live_scores_from_data(data, current_players)
         return live_scores
     except Exception as e:
         print("Issue getting datafrom ESPN API. Message: {}".format(e))
@@ -598,7 +606,6 @@ def weekly_pick_table(users, picks, event_info, user_data):
     )
 
     curr_event, _, _, _, curr_round = get_event_info()
-
     # Add the projected fedex points for this event
     for pick in live_scores:
         try:
