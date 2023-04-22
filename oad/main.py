@@ -168,7 +168,7 @@ def pick():
             strike_button_state = True
             button_text = "Submit Pick"
 
-        elif tournament_round <= 2:
+        elif tournament_round < 2:
             # Allow user to use strike
             if not strike_used:
                 if prev_pick is None:
@@ -186,6 +186,7 @@ def pick():
         else:
             pick_state = "you are out of options for this week."
     else:
+        print(tournament_round)
         if tournament_round < 1:
             pick_state = (
                 "our friends at ESPN have not released the field for this week."
