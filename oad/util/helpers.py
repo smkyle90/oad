@@ -109,7 +109,6 @@ def get_avail_from_data(data):
             for competitor in team.get("roster", {}):
 
                 golfer = competitor.get('athlete', {}).get('displayName', "")
-                print(golfer)
                 golfers.append(golfer)
 
     return golfers
@@ -164,7 +163,6 @@ def live_scores_from_data(data, current_players):
 
     for team in data["events"][0]["competitions"][0]["competitors"]:
         for user in team.get("roster"):
-            print(user.keys())
             if user is not None:
                 player_score = 0
                 player_pos = "--"
@@ -289,11 +287,10 @@ def update_cache_from_api():
 
     api_last_update = float(api_last_update)
 
-    if time.time() - api_last_update > UPDATE_TIME:
+    if True: #time.time() - api_last_update > UPDATE_TIME:
         r = requests.get(EVENT_URL)
         data = r.json()
         data = remove_canceled(data)
-        print(data.keys())
         del data["events"][0]["competitions"][0]["competitors"][0]
         data = json.dumps(data)
         redis_cache.set("data", data)
@@ -339,7 +336,7 @@ def get_live_scores(current_players):
     try:
         data = redis_cache.get("data")
         data = json.loads(data)
-        live_scores = {} # live_scores_from_data(data, current_players)
+        live_scores = live_scores_from_data(data, current_players)
         return live_scores
     except Exception as e:
         print("Issue getting datafrom ESPN API. Message: {}".format(e))
@@ -604,6 +601,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
     live_scores = get_live_scores(
         set(pick_dict["pick"]).union(set(pick_dict["alternate"]))
     )
+    print(live_scores)
 
     curr_event, _, _, _, curr_round = get_event_info()
     # Add the projected fedex points for this event
@@ -657,6 +655,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
         pick_dict["initials"].append("--")
 
     for idx, pick in enumerate(pick_dict["pick"]):
+        print(pick in live_scores)
         if pick not in live_scores:
             pick = pick_dict["alternate"][idx]
             pick_dict["pick"][idx] = pick
@@ -664,6 +663,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
         try:
             in_play = live_scores.get(pick, {}).get("round", 0) == curr_round
         except Exception as e:
+            print(e)
             in_play = False
 
         try:
