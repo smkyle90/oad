@@ -309,9 +309,9 @@ def get_event_info():
 
         event_name = get_event_from_data(data)
         avail_picks = get_avail_from_data(data)
-        tournament_state = "pre" # get_tourn_state_from_data(data)
+        tournament_state = get_tourn_state_from_data(data)
         tournament_info = get_tournament_info(data)
-        tournament_round = 0 # get_tournament_round(data)
+        tournament_round = get_tournament_round(data)
 
         if tournament_state in ["in", "post"]:
             # check if the earnings are posteds
