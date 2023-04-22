@@ -4,54 +4,54 @@ from .helpers import get_live_scores
 
 # Major DRAFT POOL
 ALL_PICKS = [
-    ("Scott", "Jon Rahm"),
-    ("Lucas", "Justin Thomas"),
-    ("Tom", "Cameron Smith"),
-    ("Sohale", "Scottie Scheffler"),
-    ("David", "Dustin Johnson"),
-    ("Jamil", "Viktor Hovland"),
-    ("Brock", "Patrick Cantlay"),
-    ("Brady", "Brooks Koepka"),
-    ("Brady", "Jordan Spieth"),
-    ("Brock", "Collin Morikawa"),
-    ("Jamil", "Xander Schauffele"),
-    ("David", "Rory McIlroy"),
-    ("Sohale", "Will Zalatoris"),
-    ("Tom", "Tiger Woods"),
-    ("Lucas", "Daniel Berger"),
-    ("Scott", "Shane Lowry"),
-    ("Scott", "Corey Conners"),
-    ("Lucas", "Hideki Matsuyama"),
-    ("Tom", "Cam Davis"),
-    ("Sohale", "Matt Fitzpatrick"),
-    ("David", "Sam Burns"),
-    ("Jamil", "Adam Scott"),
-    ("Brock", "Danny Willett"),
-    ("Brady", "Sungjae Im"),
-    ("Brady", "Patrick Reed"),
-    ("Brock", "Tyrrell Hatton"),
-    ("Jamil", "Joaquin Niemann"),
-    ("David", "Tony Finau"),
-    ("Sohale", "Russell Henley"),
-    ("Tom", "Tommy Fleetwood"),
-    ("Lucas", "Webb Simpson"),
-    ("Scott", "Marc Leishman"),
-    ("Scott", "Billy Horschel"),
-    ("Lucas", "Bryson DeChambeau"),
-    ("Tom", "Max Homa"),
-    ("Sohale", "Gary Woodland"),
-    ("David", "Abraham Ancer"),
-    ("Jamil", "Talor Gooch"),
-    ("Brock", "Kevin Kisner"),
-    ("Brady", "Matthew Wolff"),
-    ("Brady", "Sergio Garcia"),
-    ("Brock", "Francesco Molinari"),
-    ("Jamil", "Justin Rose"),
-    ("David", "Bubba Watson"),
-    ("Sohale", "Seamus Power"),
-    ("Tom", "Mackenzie Hughes"),
-    ("Lucas", "Brian Harman"),
-    ("Scott", "Jason Kokrak"),
+    ('Scott', 'Scottie Scheffler'),
+    ('Tom ', 'Rory McIlroy'),
+    ('Lucas', 'Jon Rahm'),
+    ('Brady', 'Jordan Spieth'),
+    ('Brock', 'Cameron Smith'),
+    ('Jamil', 'Justin Thomas'),
+    ('Sohale', 'Xander Schauffele'),
+    ('David', 'Patrick Cantlay'),
+    ('David', 'Max Homa'),
+    ('Sohale', 'Tony Finau'),
+    ('Jamil', 'Collin Morikawa'),
+    ('Brock', 'Dustin Johnson'),
+    ('Brady', 'Jason Day'),
+    ('Lucas', 'Cameron Young'),
+    ('Tom ', 'Sungjae Im'),
+    ('Scott', 'Sam Burns'),
+    ('Scott', 'Will Zalatoris'),
+    ('Tom ', 'Hideki Matsuyama'),
+    ('Lucas', 'Corey Conners'),
+    ('Brady', 'Matt Fitzpatrick'),
+    ('Brock', 'Brooks Koepka'),
+    ('Jamil', 'Viktor Hovland'),
+    ('Sohale', 'Justin Rose'),
+    ('David', 'Shane Lowry'),
+    ('David', 'Tyrrell Hatton'),
+    ('Sohale', 'Si Woo Kim'),
+    ('Jamil', 'Tiger Woods'),
+    ('Brock', 'Joaquin Niemann'),
+    ('Brady', 'Keegan Bradley'),
+    ('Lucas', 'Patrick Reed'),
+    ('Tom ', 'Tommy Fleetwood'),
+    ('Scott', 'Tom Kim'),
+    ('Scott', 'Min Woo Lee'),
+    ('Tom ', 'Adam Scott'),
+    ('Lucas', 'Mito Pereira'),
+    ('Brady', 'Abraham Ancer'),
+    ('Brock', 'Keith Mitchell'),
+    ('Jamil', 'Louis Oosthuizen'),
+    ('Sohale', 'Kurt Kitayama'),
+    ('David', 'Sahith Theegala'),
+    ('David', 'Taylor Moore'),
+    ('Sohale', 'Russell Henley'),
+    ('Jamil', 'Tom Hoge'),
+    ('Brock', 'Harris English'),
+    ('Brady', 'Cameron Champ'),
+    ('Lucas', 'Talor Gooch'),
+    ('Tom ', 'Chris Kirk'),
+    ('Scott', 'Danny Willett'),
 ]
 
 
@@ -71,12 +71,12 @@ def major_draft_pool():
 
     # live scores from API for each pick.
     live_scores = get_live_scores(df.Player.to_list())
-    print(live_scores)
+
     curr_round = 0
     for player, data in live_scores.items():
         curr_round = max(curr_round, data["round"])
 
-    df["Pick"] = [i // 8 + 1 for i in range(len(df))]
+    df["Pick"] = [i // len(df.User.unique()) + 1 for i in range(len(df))]
     df["Total Score"] = [live_scores[player]["score"] for player in df.Player]
     df["Position"] = [live_scores[player]["position"] for player in df.Player]
     df["Round"] = [live_scores[player]["round"] for player in df.Player]
@@ -97,7 +97,10 @@ def major_draft_pool():
     invalid_teams = all_teams - valid_teams
     count_df = count_df[count_df.User.isin(valid_teams)]
     count_df = count_df.groupby("User").agg(
-        {"Total Score": "sum", "Scores": lambda x: ", ".join(x),}
+        {
+            "Total Score": "sum",
+            "Scores": lambda x: ", ".join(x),
+        }
     )
     count_df.sort_values(["Total Score"], inplace=True, ascending=True)
 
