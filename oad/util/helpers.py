@@ -19,7 +19,7 @@ https://pthree.org/2012/01/07/encrypted-mutt-imap-smtp-passwords/
 https://gist.github.com/bnagy/8914f712f689cc01c267
 """
 
-EVENT_TYPE = "flagship"
+EVENT_TYPE = "major"
 
 dirname = os.path.dirname(__file__)
 filename = os.path.join(dirname, "points.csv")
