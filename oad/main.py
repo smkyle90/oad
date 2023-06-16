@@ -174,7 +174,8 @@ def pick():
                     pick_state = "the tourney has started and you have not picked, but you have a Breakfast Ball. Picking now will use this up. Prior to the start of Round 2, you can pick a player who has yet to tee off."
                     button_text = "Pick and Use Breakfast Ball"
                 else:
-                    pick_state = "the tourney has started and you've made a pick, but you have a Breakfast Ball. Picking now will use this up. Prior to the start of Round 2, you can pick a player who has yet to tee off."
+                    pick_state = "the tourney has started and you've made a pick, but you have a Breakfast Ball. Picking now will use this up. You can pick any of your eligible golfers prior to the commencement of round 2."
+
                     button_text = "Re-pick and Use Breakfast Ball"
 
                 strike_button_state = True
