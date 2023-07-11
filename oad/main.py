@@ -285,6 +285,10 @@ def submit_pick():
         )
         db.session.add(user_pick)
 
+        # Set points multipluier to zero
+        if prev_pick is not None:
+            prev_pick.point_multiplier = 0
+
         # Need to issue a strike to user.
         current_user.strikes_remaining = 0
         current_user.strike_event = curr_event
