@@ -145,9 +145,9 @@ def get_tournament_info(data):
         data_dict["Defending Champion"] = "Unavailable"
 
     try:
-        data_dict["Fedex Points"] = get_event_type().capitalize()
+        data_dict["Fedex Cup Event Type"] = get_event_type().capitalize()
     except Exception:
-        data_dict["Fedex Points"] = "Unavailable"
+        data_dict["Fedex Cup Event Type"] = "Unavailable"
 
     event_dict = {
         "col1": list(data_dict.keys()),
