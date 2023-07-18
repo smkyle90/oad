@@ -11,6 +11,7 @@ from .helpers import (
     get_weekly_pick_table,
     get_withdrawl_list,
     send_email,
+    cache_event_type,
     update_cache_from_api,
     update_weekly_pick_table,
 )

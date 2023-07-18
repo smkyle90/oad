@@ -19,7 +19,6 @@ https://pthree.org/2012/01/07/encrypted-mutt-imap-smtp-passwords/
 https://gist.github.com/bnagy/8914f712f689cc01c267
 """
 
-EVENT_TYPE = "regular"
 EVENT_NO = 0
 
 dirname = os.path.dirname(__file__)
@@ -100,15 +99,24 @@ def get_event_from_data(data):
     return data["events"][EVENT_NO]["name"]
 
 
-def get_avail_from_data(data):
+def get_avail_from_data(data, all_picks):
     """Get players in field. Function to ensure modularity if API fails.
     """
     # Get the players in the field, who have yet to tee off
-    return [
-        a["athlete"]["displayName"]
-        for a in data["events"][EVENT_NO]["competitions"][0]["competitors"]
-        if (a["status"]["period"] <= 2) and (a["status"]["type"]["state"] == "pre")
-    ]
+
+    if all_picks:
+        picks = [
+            a["athlete"]["displayName"]
+            for a in data["events"][EVENT_NO]["competitions"][0]["competitors"]
+        ]
+    else:
+        picks = [
+            a["athlete"]["displayName"]
+            for a in data["events"][EVENT_NO]["competitions"][0]["competitors"]
+            if (a["status"]["period"] <= 2) and (a["status"]["type"]["state"] == "pre")
+        ]
+
+    return picks
 
 
 def get_tournament_info(data):
@@ -135,6 +143,11 @@ def get_tournament_info(data):
         ]["displayName"]
     except Exception:
         data_dict["Defending Champion"] = "Unavailable"
+
+    try:
+        data_dict["Fedex Points"] = get_event_type().capitalize()
+    except Exception:
+        data_dict["Fedex Points"] = "Unavailable"
 
     event_dict = {
         "col1": list(data_dict.keys()),
@@ -288,7 +301,7 @@ def update_cache_from_api():
         redis_cache.set("api_last_update", time.time())
 
 
-def get_event_info():
+def get_event_info(all_picks=False):
     """Get event info. Requires access to API.
     """
     try:
@@ -296,7 +309,7 @@ def get_event_info():
         data = json.loads(data)
 
         event_name = get_event_from_data(data)
-        avail_picks = get_avail_from_data(data)
+        avail_picks = get_avail_from_data(data, all_picks)
         tournament_state = get_tourn_state_from_data(data)
         tournament_info = get_tournament_info(data)
         tournament_round = get_tournament_round(data)
@@ -595,11 +608,14 @@ def weekly_pick_table(users, picks, event_info, user_data):
 
     curr_event, _, _, _, curr_round = get_event_info()
 
+    # Get the event type
+    event_type = get_event_type()
+    
     # Add the projected fedex points for this event
     for pick in live_scores:
         try:
             fedex_pts = round(
-                POINTS_DF[EVENT_TYPE]
+                POINTS_DF[event_type]
                 .loc[
                     (live_scores[pick]["position"] - 1) : (
                         live_scores[pick]["position"] - 1
@@ -761,3 +777,16 @@ def weekly_pick_table(users, picks, event_info, user_data):
     df.columns = [x.upper() for x in df.columns]
 
     return df
+
+def cache_event_type(event_type):
+    redis_cache.set("event_type", event_type)
+
+def get_event_type():
+    event_type = redis_cache.get("event_type")
+    if event_type is None:
+        event_type = "regular"
+        cache_event_type(event_type)
+    else:
+        event_type = event_type.decode()    
+
+    return event_type.lower()

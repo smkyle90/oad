@@ -36,6 +36,26 @@
   </form>
 </section>
 
+<section>
+  <form name="Select" action="{{ url_for('main.set_event_type') }}" method="POST">
+  <h3>Event Type</h3>
+    <select
+      class="dropbtn is-block ids-fullwidth"
+      id="event_type"
+      name="event_type"
+      type="text"
+      placeholder="Select event type."
+      style="width: 100%"
+    >
+      {% for points in points_list %}
+      <option>{{ points }}</option>
+      {% endfor %}
+    </select>
+    <button class="button is-block is-info is-large is-fullwidth">
+      Select
+    </button>
+
+</section>
 
 
 <section>

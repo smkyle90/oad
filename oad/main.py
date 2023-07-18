@@ -18,6 +18,7 @@ from .util import (
     get_weekly_pick_table,
     major_draft_pool,
     send_email,
+    cache_event_type,
     update_cache_from_api,
     update_weekly_pick_table,
 )
@@ -27,6 +28,8 @@ from .views import league_page
 SEASON = int(os.getenv("OADYR", 2023))
 
 EMPTY_HTML = "<div></div>"
+
+POINTS_LIST = ["regular", "flagship", "major"]
 
 main = Blueprint("main", __name__)
 
@@ -302,7 +305,7 @@ def submit_pick():
 @main.route("/update")
 @login_required
 def update():
-    __, avail_picks, tournament_state, __, __ = get_event_info()
+    __, avail_picks, tournament_state, __, __ = get_event_info(all_picks=True)
 
     users = User.query.all()
     users = [user.name for user in users]
@@ -311,9 +314,11 @@ def update():
 
     if tournament_state == "post":
         update_button = True
+    
+    avail_picks.sort()
 
     return render_template(
-        "update.html", update_button=update_button, avail_picks=avail_picks, users=users
+        "update.html", update_button=update_button, avail_picks=avail_picks, users=users, points_list=POINTS_LIST,
     )
 
 
@@ -325,6 +330,14 @@ def end_week():
     flash("Update complete!")
     return redirect(url_for("main.update"))
 
+
+@main.route("/set_event_type", methods=["POST"])
+@login_required
+def set_event_type():
+    event_type = request.form.get("event_type")
+    print(event_type)
+    cache_event_type(event_type)
+    return redirect(url_for("main.update"))
 
 @main.route("/manual_pick", methods=["POST"])
 @login_required
