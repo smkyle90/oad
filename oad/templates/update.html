@@ -54,6 +54,7 @@
     <button class="button is-block is-info is-large is-fullwidth">
       Select
     </button>
+  </form>
 
 </section>
 
@@ -62,7 +63,7 @@
   <h3 class="subtitle">Manual Pick</h3>
 
 
-  <form name="Select" action="{{ url_for('main.manual_pick') }}" method="POST">
+  <form name="Pick" action="{{ url_for('main.manual_pick') }}" method="POST">
   <h3>User</h3>
     <select
       class="dropbtn is-block ids-fullwidth"
@@ -103,9 +104,23 @@
       <option>{{ pick }}</option>
       {% endfor %}
     </select>
+  <h3>Helper</h3>
+    <select
+      class="dropbtn is-block ids-fullwidth"
+      id="helper"
+      name="helper"
+      type="text"
+      placeholder="Select your helper."
+      style="width: 100%"
+    >
+      {% for helper in helpers_list %}
+      <option>{{ helper }}</option>
+      {% endfor %}
+    </select>
     <button class="button is-block is-info is-large is-fullwidth">
       Pick
     </button>
+  </form>
 
 </section>
 

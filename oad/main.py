@@ -30,6 +30,7 @@ SEASON = int(os.getenv("OADYR", 2023))
 EMPTY_HTML = "<div></div>"
 
 POINTS_LIST = ["regular", "flagship", "major"]
+HELPERS_LIST = [None, "breakfast", "tapin", "double"]
 
 main = Blueprint("main", __name__)
 
@@ -318,7 +319,7 @@ def update():
     avail_picks.sort()
 
     return render_template(
-        "update.html", update_button=update_button, avail_picks=avail_picks, users=users, points_list=POINTS_LIST,
+        "update.html", update_button=update_button, avail_picks=avail_picks, users=users, points_list=POINTS_LIST, helpers_list=HELPERS_LIST,
     )
 
 
@@ -349,6 +350,7 @@ def manual_pick():
     user = request.form.get("user")
     selection = request.form.get("main")
     alternate = request.form.get("alternate")
+    helper = request.form.get("helper")
 
     prev_pick = (
         Pick.query.filter_by(season=SEASON)
@@ -357,18 +359,26 @@ def manual_pick():
         .first()
     )
 
-    if prev_pick is None:
-        manual_pick = Pick(
-            event=curr_event,
-            pick=selection,
-            alternate=alternate,
-            name=user,
-            season=SEASON,
-        )
-        db.session.add(manual_pick)
-    else:
-        prev_pick.pick = selection
-        prev_pick.alternate = alternate
+    manual_pick = Pick(
+        event=curr_event,
+        pick=selection,
+        alternate=alternate,
+        name=user,
+        season=SEASON,
+    )
+    db.session.add(manual_pick)
+
+    update_user = User.query.filter_by(name=user).first()
+
+    if helper == "breakfast":
+        update_user.strikes_remaining = 0
+        update_user.strike_event = curr_event
+    elif helper == "tapin":
+        update_user.substitutes_remaining = 0
+        update_user.substitute_event = curr_event
+    elif helper == "double":
+        update_user.double_up_remaining = 0
+        update_user.double_up_event = curr_event
 
     # The user is able to make a pick
     db.session.commit()
