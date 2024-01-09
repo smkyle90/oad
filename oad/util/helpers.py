@@ -107,12 +107,12 @@ def get_avail_from_data(data, all_picks):
     if all_picks:
         picks = [
             a["athlete"]["displayName"]
-            for a in data["events"][EVENT_NO]["competitions"][0].get("competitors", [])
+            for a in data.get("events", [EVENT_NO])[EVENT_NO].get("competitions", [0])[0].get("competitors", [])
         ]
     else:
         picks = [
             a["athlete"]["displayName"]
-            for a in data["events"][EVENT_NO]["competitions"][0].get("competitors", [])
+            for a in data.get("events", [EVENT_NO])[EVENT_NO].get("competitions", [0])[0].get("competitors", [])
             if (a["status"]["period"] <= 2) and (a["status"]["type"]["state"] == "pre")
         ]
 
@@ -171,7 +171,7 @@ def live_scores_from_data(data, current_players):
     score_data = {}
     rank_data = {}
 
-    for user in data["events"][EVENT_NO]["competitions"][0].get("competitors", [])
+    for user in data.get("events", [EVENT_NO])[EVENT_NO].get("competitions", [0])[0].get("competitors", []):
         player_score = 0
         player_pos = "--"
 
@@ -219,13 +219,13 @@ def get_earnings_from_data(data, player=None):
             sum(
                 [
                     int(user["earnings"])
-                    for user in data["events"][EVENT_NO]["competitions"][0].get("competitors", [])
+                    for user in data.get("events", [EVENT_NO])[EVENT_NO].get("competitions", [0])[0].get("competitors", [])
                 ]
             )
             > 0
         )
 
-    for user in data["events"][EVENT_NO]["competitions"][0].get("competitors", [])
+    for user in data.get("events", [EVENT_NO])[EVENT_NO].get("competitions", [0])[0].get("competitors", []):
         if user["athlete"]["displayName"] == player:
             return user["earnings"]
     return -1
@@ -352,7 +352,7 @@ def get_withdrawl_list():
         data = redis_cache.get("data")
         data = json.loads(data)
 
-        all_users = data["events"][EVENT_NO]["competitions"][0].get("competitors", [])
+        all_users = data.get("events", [EVENT_NO])[EVENT_NO].get("competitions", [0])[0].get("competitors", [])
 
         withdrawl_list = [
             user["athlete"]["displayName"]
