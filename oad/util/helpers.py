@@ -171,7 +171,7 @@ def live_scores_from_data(data, current_players):
     score_data = {}
     rank_data = {}
 
-    for user in data["events"][EVENT_NO]["competitions"][0].get("competitors"], [])
+    for user in data["events"][EVENT_NO]["competitions"][0].get("competitors", [])
         player_score = 0
         player_pos = "--"
 
@@ -225,7 +225,7 @@ def get_earnings_from_data(data, player=None):
             > 0
         )
 
-    for user in data["events"][EVENT_NO]["competitions"][0].get("competitors"], [])
+    for user in data["events"][EVENT_NO]["competitions"][0].get("competitors", [])
         if user["athlete"]["displayName"] == player:
             return user["earnings"]
     return -1
