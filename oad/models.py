@@ -29,8 +29,10 @@ class User(UserMixin, db.Model, Serializer):
     strike_event = db.Column(db.Text, default="")
     substitute_event = db.Column(db.Text, default="")
     double_up_event = db.Column(db.Text, default="")
+    liv_line_event = db.Column(db.Text, default="")
     substitutes_remaining = db.Column(db.Integer, default=1)  # tap_in
     double_up_remaining = db.Column(db.Integer, default=1)  # double_up
+    liv_line_remaining = db.Column(db.Integer, default=1)  # liv_line
 
 
 class Pick(db.Model, Serializer):

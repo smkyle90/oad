@@ -26,6 +26,8 @@ def add_user_points():
     picks = Pick.query.filter(Pick.points < 0).all()
 
     withdrawl_list = get_withdrawl_list()
+    liv_withdrawl_list = get_withdrawl_list(data_source="liv_data")
+    withdrawl_list.extend(liv_withdrawl_list)
 
     for pick in picks:
         # Get the golfer's name

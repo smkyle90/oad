@@ -25,12 +25,12 @@ from .util import (
 from .util.admin import add_user_points
 from .views import league_page
 
-SEASON = int(os.getenv("OADYR", 2023))
+SEASON = int(os.getenv("OADYR", 2024))
 
 EMPTY_HTML = "<div></div>"
 
 POINTS_LIST = ["regular", "flagship", "major"]
-HELPERS_LIST = [None, "breakfast", "tapin", "double"]
+HELPERS_LIST = [None, "breakfast", "tapin", "double", "liv"]
 
 main = Blueprint("main", __name__)
 
@@ -142,6 +142,7 @@ def pick():
     # Get the list of players already picked
     all_players = [pick.pick for pick in all_picks]
 
+    print(all_players)
     # We can pick from the available picks, minus the players we've already picked.
     # TODO: set operations?
     try:
@@ -149,13 +150,14 @@ def pick():
     except Exception:
         eligible_picks = []
 
-    strike_used, tap_in_used, double_up_used = check_rule_status(
+    strike_used, tap_in_used, double_up_used, liv_line_used = check_rule_status(
         current_user, curr_event
     )
 
     strike_button_state = False
     substitute_button_state = False
     double_up_button_state = False
+    liv_line_button_state = False
     button_text = ""
 
     if eligible_picks:
@@ -171,9 +173,15 @@ def pick():
             strike_button_state = True
             button_text = "Submit Pick"
 
-        elif tournament_round < 2:
+        # elif tournament_round < 20000:
+        elif True:
+            _, whole_field, _, _, _ = get_event_info(True)
+            eligible_picks = [p for p in whole_field if p not in all_players]
+            print(eligible_picks)
+
             # Allow user to use strike
-            if not strike_used:
+            # if not strike_used:
+            if True:
                 if prev_pick is None:
                     pick_state = "the tourney has started and you have not picked, but you have a Breakfast Ball. Picking now will use this up. Prior to the start of Round 2, you can pick a player who has yet to tee off."
                     button_text = "Pick and Use Breakfast Ball"
@@ -206,6 +214,10 @@ def pick():
     if (prev_pick) and (not double_up_used) and (1 <= tournament_round < 4):
         double_up_button_state = True
 
+    # Allow user to pick from LIV
+    if (not prev_pick) and (not liv_line_used) and (tournament_round < 1):
+        liv_line_button_state = True
+
     if tournament_round:
         tournament_round = str(tournament_round)
     else:
@@ -228,9 +240,11 @@ def pick():
         submit_text=button_text,
         substitute_button_state=substitute_button_state,
         double_up_button_state=double_up_button_state,
+        liv_line_button_state=liv_line_button_state,
         current_round=tournament_round,
         prev_pick_show=prev_pick_show,
         prev_alt_show=prev_alt_show,
+        main_pick=True,
     )
 
 
@@ -307,6 +321,7 @@ def submit_pick():
 @login_required
 def update():
     __, avail_picks, tournament_state, __, __ = get_event_info(all_picks=True)
+    __, liv_avail_picks, __, __, __ = get_event_info(all_picks=True, data_source="liv_data")
 
     users = User.query.all()
     users = [user.name for user in users]
@@ -317,6 +332,8 @@ def update():
         update_button = True
     
     avail_picks.sort()
+    liv_liv_avail_picks.sort()
+    avail_picks.extend(liv_avail_picks)
 
     return render_template(
         "update.html", update_button=update_button, avail_picks=avail_picks, users=users, points_list=POINTS_LIST, helpers_list=HELPERS_LIST,
@@ -379,6 +396,9 @@ def manual_pick():
     elif helper == "double":
         update_user.double_up_remaining = 0
         update_user.double_up_event = curr_event
+    elif helper == "liv":
+        update_user.liv_line_remaining = 0
+        update_user.liv_line_event = curr_event
 
     # The user is able to make a pick
     db.session.commit()
@@ -480,6 +500,54 @@ def use_tap_in():
 def use_double_up():
     return render_template("double_up.html")
 
+@main.route("/use_liv_line")
+@login_required
+def use_liv_line():
+    curr_event, avail_picks, tournament_state, __, tournament_round = get_event_info(data_source="liv_data")
+
+    # Check if the user has made a previous pick for this event
+    prev_pick = (
+        Pick.query.filter_by(season=SEASON)
+        .filter_by(event=curr_event)
+        .filter_by(name=current_user.name)
+        .first()
+    )
+
+    # Get all picks for this user
+    all_picks = (
+        Pick.query.filter_by(season=SEASON).filter_by(name=current_user.name).all()
+    )
+
+    # Get the list of players already picked
+    all_players = [pick.pick for pick in all_picks]
+
+    print(all_players)
+    # We can pick from the available picks, minus the players we've already picked.
+    # TODO: set operations?
+    try:
+        eligible_picks = [p for p in avail_picks if p not in all_players]
+    except Exception:
+        eligible_picks = []
+
+    pick_state = "you have yet to pick. Pick your any golfer in the LIV field."
+    button_text = "Use LIV-Line"
+    
+    return render_template(
+        "pick.html",
+        avail=eligible_picks,
+        event=curr_event,
+        user=current_user.name,
+        pick_text=pick_state,
+        strike_button_state=False,
+        submit_text=button_text,
+        substitute_button_state=False,
+        double_up_button_state=False,
+        liv_line_button_state=False,
+        current_round=tournament_round,
+        prev_pick_show="LIV-Line. No previous pick.",
+        prev_alt_show="LIV-Line. No previous alternate.",
+        main_pick=False,
+    )
 
 @main.route("/user_display_name_change", methods=["POST"])
 @login_required

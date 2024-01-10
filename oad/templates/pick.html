@@ -48,8 +48,9 @@
 </section>
 
 
+{% if main_pick %}
 
-<h2 class="title">Modify Your Pick</h2>
+<h2 class="title">Available Lifelines</h2>
     <p> {{ prev_alt_show }} </p>
     <p>Tap-In. Replace your Primary selection with your Alternate. Use before the start of the third round.</p>
 
@@ -78,5 +79,19 @@
     </button>
   {% endif %}
 
+  <p> LIV-Line. Pick a LIV golfer in a LIV event with Flagship points. Use before the start of the fourth round.</p>
+
+  {% if liv_line_button_state %}
+
+    <button class="button" onclick="window.location.href='/use_liv_line';">
+      Use LIV-Line
+    </button>
+  {% else %}
+    <button class="button disabled" diabled>
+      Unable to Use LIV-Line
+    </button>
+  {% endif %}
+
+{% endif %}
 
 {% endblock %}

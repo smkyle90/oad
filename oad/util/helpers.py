@@ -29,6 +29,10 @@ EVENT_URL = (
     "https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga"
 )
 
+LIV_EVENT_URL = (
+    "https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=liv"
+)
+
 PGA_URL = "https://www.pgatour.com/stats/stat.109.html"
 NON_PGA_URL = "https://www.pgatour.com/stats/stat.02677.html"
 
@@ -42,20 +46,29 @@ def check_rule_status(user, current_event):
     strike_used = bool(user.strike_event)
     tap_in_used = bool(user.substitute_event)
     double_up_used = bool(user.double_up_event)
+    liv_line_used = bool(user.liv_line_event)
 
     if user.strike_event == current_event:
         tap_in_used = True
         double_up_used = True
+        liv_line_used = True
 
     if user.substitute_event == current_event:
         strike_used = True
         double_up_used = True
+        liv_line_used = True
 
     if user.double_up_event == current_event:
         strike_used = True
         tap_in_used = True
+        liv_line_used = True
 
-    return strike_used, tap_in_used, double_up_used
+    if user.liv_line_event == current_event:
+        strike_used = True
+        tap_in_used = True
+        double_up_used = True
+
+    return strike_used, tap_in_used, double_up_used, liv_line_used
 
 
 def get_random_password_string(length):
@@ -280,7 +293,14 @@ def get_weekly_pick_table():
     return redis_cache.get("pick_table").decode()
 
 
-def update_cache_from_api():
+def update_event_data_from_api(event_url, redis_key):
+    r = requests.get(EVENT_URL)
+    data = r.json()
+    data = remove_canceled(data)
+    data = json.dumps(data)
+    redis_cache.set(redis_key, data)   
+
+def update_cache_from_api(event_url=None):
     """
     Make a single API call and update the cache. We use this info to do our
     calculations
@@ -293,19 +313,20 @@ def update_cache_from_api():
     api_last_update = float(api_last_update)
 
     if time.time() - api_last_update > UPDATE_TIME:
-        r = requests.get(EVENT_URL)
-        data = r.json()
-        data = remove_canceled(data)
-        data = json.dumps(data)
-        redis_cache.set("data", data)
+        update_event_data_from_api(EVENT_URL, "pga_data")
+        update_event_data_from_api(LIV_EVENT_URL, "liv_data")
+
         redis_cache.set("api_last_update", time.time())
 
 
-def get_event_info(all_picks=False):
+def get_event_info(all_picks=False, data_source=None):
     """Get event info. Requires access to API.
     """
+    if data_source is None:
+        data_source = "pga_data"
+
     try:
-        data = redis_cache.get("data")
+        data = redis_cache.get(data_source)
         data = json.loads(data)
 
         event_name = get_event_from_data(data)
@@ -334,11 +355,14 @@ def get_event_info(all_picks=False):
         return None, None, None, None, None
 
 
-def get_live_scores(current_players):
+def get_live_scores(current_players, data_source=None):
     """Get live scores. Requires access to API.
     """
+    if data_source is None:
+        data_source = "pga_data"
+
     try:
-        data = redis_cache.get("data")
+        data = redis_cache.get(data_source)
         data = json.loads(data)
         live_scores = live_scores_from_data(data, current_players)
         return live_scores
@@ -347,9 +371,15 @@ def get_live_scores(current_players):
         return None
 
 
-def get_withdrawl_list():
+def get_withdrawl_list(data_source=None):
+    """
+    Gets the withdrawl list.
+    """
+    if data_source is None:
+        data_source = "pga_data"
+
     try:
-        data = redis_cache.get("data")
+        data = redis_cache.get(data_source)
         data = json.loads(data)
 
         all_users = data.get("events", [EVENT_NO])[EVENT_NO].get("competitions", [0])[0].get("competitors", [])
@@ -365,11 +395,14 @@ def get_withdrawl_list():
         return []
 
 
-def get_earnings(player):
+def get_earnings(player, data_source=None):
     """Get player earnings. Requires access to API.
     """
+    if data_source is None:
+        data_source = "pga_data"
+
     try:
-        data = redis_cache.get("data")
+        data = redis_cache.get("pga_data")
         data = json.loads(data)
     except Exception as e:
         print("Issue getting data from ESPN API. Message: {}".format(e))
@@ -573,6 +606,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
             user.strike_event,
             user.substitute_event,
             user.double_up_event,
+            user.liv_line_event,
         )
         for user in users
     }
@@ -581,6 +615,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
         0: "brekky ball",
         1: "tap-in",
         2: "double-up",
+        3: "liv-line",
     }
 
     pick_dict = {
@@ -606,40 +641,53 @@ def weekly_pick_table(users, picks, event_info, user_data):
         set(pick_dict["pick"]).union(set(pick_dict["alternate"]))
     )
 
+    liv_live_scores = live_scores = get_live_scores(
+        set(pick_dict["pick"]).union(set(pick_dict["alternate"])), "liv_data"
+    )
+
     curr_event, _, _, _, curr_round = get_event_info()
+    liv_curr_event, _, _, _, liv_curr_round = get_event_info("liv_data")
 
     # Get the event type
-    event_type = get_event_type()
-    
-    # Add the projected fedex points for this event
-    for pick in live_scores:
-        try:
-            fedex_pts = round(
-                POINTS_DF[event_type]
-                .loc[
-                    (live_scores[pick]["position"] - 1) : (
-                        live_scores[pick]["position"] - 1
-                    )
-                    + (live_scores[pick]["freq"] - 1)
-                ]
-                .sum()
-                / (live_scores[pick]["freq"]),
-                0,
-            )
-        except Exception as e:
-            print(e)
-            fedex_pts = 0
-        if curr_round <= 2:
-            in_play = True
-        elif curr_round <= 4:
-            in_play = live_scores.get(pick, {}).get("round", 0) == curr_round
-        else:
-            in_play = live_scores.get(pick, {}).get("round", 0) >= curr_round - 1
+    pga_event_type = get_event_type()
+    liv_event_type = "flagship"
 
-        if in_play:
-            live_scores[pick]["points"] = fedex_pts
-        else:
-            live_scores[pick]["points"] = 0
+    # Add the projected fedex points for this event
+    def add_live_scores(live_scores, event_type):
+        for pick in live_scores:
+            try:
+                fedex_pts = round(
+                    POINTS_DF[event_type]
+                    .loc[
+                        (live_scores[pick]["position"] - 1) : (
+                            live_scores[pick]["position"] - 1
+                        )
+                        + (live_scores[pick]["freq"] - 1)
+                    ]
+                    .sum()
+                    / (live_scores[pick]["freq"]),
+                    0,
+                )
+            except Exception as e:
+                print(e)
+                fedex_pts = 0
+
+            if curr_round <= 2:
+                in_play = True
+            elif curr_round <= 4:
+                in_play = live_scores.get(pick, {}).get("round", 0) == curr_round
+            else:
+                in_play = live_scores.get(pick, {}).get("round", 0) >= curr_round - 1
+
+            if in_play:
+                live_scores[pick]["points"] = fedex_pts
+            else:
+                live_scores[pick]["points"] = 0
+
+        return live_scores
+
+    live_scores = add_live_scores(live_scores, pga_event_type)
+    liv_live_scores = add_live_scores(liv_live_scores, liv_event_type)
 
     # extract the user data for use in the table
     current_points = {
@@ -660,22 +708,26 @@ def weekly_pick_table(users, picks, event_info, user_data):
         pick_dict["alternate"].append("--")
         pick_dict["mult"].append(0)
         pick_dict["initials"].append("--")
+    
+    all_live_scores = {**live_scores, **liv_live_scores}
+
+    print(all_live_scores)
 
     for idx, pick in enumerate(pick_dict["pick"]):
-        if pick not in live_scores:
+        if pick not in all_live_scores:
             pick = pick_dict["alternate"][idx]
             pick_dict["pick"][idx] = pick
 
         try:
-            in_play = live_scores.get(pick, {}).get("round", 0) == curr_round
+            in_play = all_live_scores.get(pick, {}).get("round", 0) == curr_round
         except Exception as e:
             in_play = False
 
         try:
-            pick_dict["tot"].append(live_scores[pick]["score"])
-            pick_dict["pos"].append(live_scores[pick]["position"])
-            pick_dict["points"].append(live_scores[pick]["points"])
-            pick_dict["earnings"].append(live_scores[pick]["earnings"])
+            pick_dict["tot"].append(all_live_scores[pick]["score"])
+            pick_dict["pos"].append(all_live_scores[pick]["position"])
+            pick_dict["points"].append(all_live_scores[pick]["points"])
+            pick_dict["earnings"].append(all_live_scores[pick]["earnings"])
         except Exception as e:
             pick_dict["tot"].append(1000)
             pick_dict["pos"].append(1000)
@@ -696,7 +748,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
         pick_dict["helpers"] = ["--" for _ in pick_dict["team"]]
 
     df = pd.DataFrame(pick_dict)
-    df.sort_values(["pos", "pick", "team"], inplace=True, ascending=True)
+    df.sort_values(["points", "pick", "team"], inplace=True, ascending=False)
 
     # Format the score
     df["tot"] = ["+{}".format(score) if score > 0 else score for score in df["tot"]]
