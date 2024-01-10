@@ -130,7 +130,7 @@ def get_avail_from_data(data, all_picks):
             for a in data.get("events", [EVENT_NO])[EVENT_NO]
             .get("competitions", [0])[0]
             .get("competitors", [])
-            if (a["status"]["period"] <= 2) and (a["status"]["type"]["state"] == "pre")
+            if (a["status"]["period"] < 2) and (a["status"]["type"]["state"] == "pre")
         ]
 
     return picks
