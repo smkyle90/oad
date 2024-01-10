@@ -20,8 +20,7 @@ def update_player_earnings():
 
 
 def add_user_points():
-    """Add the user points for their pick.
-    """
+    """Add the user points for their pick."""
     # Get the picks for the week
     picks = Pick.query.filter(Pick.points < 0).all()
 

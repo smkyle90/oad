@@ -9,6 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from . import db
 from .models import Pick, Player, User
 from .util import (
+    cache_event_type,
     check_rule_status,
     construct_user_table,
     create_pick_table,
@@ -18,7 +19,6 @@ from .util import (
     get_weekly_pick_table,
     major_draft_pool,
     send_email,
-    cache_event_type,
     update_cache_from_api,
     update_weekly_pick_table,
 )
@@ -321,7 +321,9 @@ def submit_pick():
 @login_required
 def update():
     __, avail_picks, tournament_state, __, __ = get_event_info(all_picks=True)
-    __, liv_avail_picks, __, __, __ = get_event_info(all_picks=True, data_source="liv_data")
+    __, liv_avail_picks, __, __, __ = get_event_info(
+        all_picks=True, data_source="liv_data"
+    )
 
     users = User.query.all()
     users = [user.name for user in users]
@@ -330,13 +332,18 @@ def update():
 
     if tournament_state == "post":
         update_button = True
-    
+
     avail_picks.sort()
     liv_liv_avail_picks.sort()
     avail_picks.extend(liv_avail_picks)
 
     return render_template(
-        "update.html", update_button=update_button, avail_picks=avail_picks, users=users, points_list=POINTS_LIST, helpers_list=HELPERS_LIST,
+        "update.html",
+        update_button=update_button,
+        avail_picks=avail_picks,
+        users=users,
+        points_list=POINTS_LIST,
+        helpers_list=HELPERS_LIST,
     )
 
 
@@ -356,6 +363,7 @@ def set_event_type():
     print(event_type)
     cache_event_type(event_type)
     return redirect(url_for("main.update"))
+
 
 @main.route("/manual_pick", methods=["POST"])
 @login_required
@@ -500,10 +508,13 @@ def use_tap_in():
 def use_double_up():
     return render_template("double_up.html")
 
+
 @main.route("/use_liv_line")
 @login_required
 def use_liv_line():
-    curr_event, avail_picks, tournament_state, __, tournament_round = get_event_info(data_source="liv_data")
+    curr_event, avail_picks, tournament_state, __, tournament_round = get_event_info(
+        data_source="liv_data"
+    )
 
     # Check if the user has made a previous pick for this event
     prev_pick = (
@@ -531,7 +542,7 @@ def use_liv_line():
 
     pick_state = "you have yet to pick. Pick your any golfer in the LIV field."
     button_text = "Use LIV-Line"
-    
+
     return render_template(
         "pick.html",
         avail=eligible_picks,
@@ -549,10 +560,10 @@ def use_liv_line():
         main_pick=False,
     )
 
+
 @main.route("/user_display_name_change", methods=["POST"])
 @login_required
 def user_display_name_change():
-
     new_name = request.form.get("new_name")
 
     user = User.query.filter_by(email=current_user.email).first()
@@ -567,7 +578,6 @@ def user_display_name_change():
 @main.route("/update_display_name")
 @login_required
 def update_display_name():
-
     user = User.query.filter_by(email=current_user.email).first()
 
     team_name = user.display_name

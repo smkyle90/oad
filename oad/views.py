@@ -187,7 +187,10 @@ def create_plots(raw_picks):
 
     line_data = [
         go.Scatter(
-            mode="lines+markers", x=tournaments[-5:], y=user_pts[-5:], name=str(user),
+            mode="lines+markers",
+            x=tournaments[-5:],
+            y=user_pts[-5:],
+            name=str(user),
         )
         for user, user_pts in cum_points.items()
     ]

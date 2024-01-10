@@ -1,4 +1,5 @@
 from .helpers import (
+    cache_event_type,
     check_rule_status,
     construct_user_table,
     create_pick_table,
@@ -11,7 +12,6 @@ from .helpers import (
     get_weekly_pick_table,
     get_withdrawl_list,
     send_email,
-    cache_event_type,
     update_cache_from_api,
     update_weekly_pick_table,
 )

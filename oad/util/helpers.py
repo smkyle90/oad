@@ -82,7 +82,7 @@ def send_email(receiver_email, subject, html):
     smtp_server = "smtp.gmail.com"
     sender_email = "1993oad@gmail.com"
     password = "iuoeigckonvtfhns"
-    
+
     message = "{}".format(html)
     msg = MIMEText(message, "html")
     msg["Subject"] = subject
@@ -98,7 +98,9 @@ def send_email(receiver_email, subject, html):
 
 def get_tournament_round(data):
     try:
-        tournament_round = int(data["events"][EVENT_NO]["competitions"][0]["status"]["period"])
+        tournament_round = int(
+            data["events"][EVENT_NO]["competitions"][0]["status"]["period"]
+        )
     except Exception:
         tournament_round = 0
 
@@ -106,26 +108,28 @@ def get_tournament_round(data):
 
 
 def get_event_from_data(data):
-    """Get event info. Function to ensure modularity if API fails.
-    """
+    """Get event info. Function to ensure modularity if API fails."""
     # Get the current event name
     return data["events"][EVENT_NO]["name"]
 
 
 def get_avail_from_data(data, all_picks):
-    """Get players in field. Function to ensure modularity if API fails.
-    """
+    """Get players in field. Function to ensure modularity if API fails."""
     # Get the players in the field, who have yet to tee off
 
     if all_picks:
         picks = [
             a["athlete"]["displayName"]
-            for a in data.get("events", [EVENT_NO])[EVENT_NO].get("competitions", [0])[0].get("competitors", [])
+            for a in data.get("events", [EVENT_NO])[EVENT_NO]
+            .get("competitions", [0])[0]
+            .get("competitors", [])
         ]
     else:
         picks = [
             a["athlete"]["displayName"]
-            for a in data.get("events", [EVENT_NO])[EVENT_NO].get("competitions", [0])[0].get("competitors", [])
+            for a in data.get("events", [EVENT_NO])[EVENT_NO]
+            .get("competitions", [0])[0]
+            .get("competitors", [])
             if (a["status"]["period"] <= 2) and (a["status"]["type"]["state"] == "pre")
         ]
 
@@ -133,8 +137,7 @@ def get_avail_from_data(data, all_picks):
 
 
 def get_tournament_info(data):
-    """Get tournament purse. Function to ensure modularity if API fails.
-    """
+    """Get tournament purse. Function to ensure modularity if API fails."""
     courses_separator = ", "
 
     data_dict = {}
@@ -173,18 +176,20 @@ def get_tournament_info(data):
 
 
 def get_tourn_state_from_data(data):
-    """Get tournament state. Function to ensure modularity if API fails.
-    """
+    """Get tournament state. Function to ensure modularity if API fails."""
     return data["events"][EVENT_NO]["status"]["type"]["state"]
 
 
 def live_scores_from_data(data, current_players):
-    """Get live scores. Function to ensure modularity if API fails.
-    """
+    """Get live scores. Function to ensure modularity if API fails."""
     score_data = {}
     rank_data = {}
 
-    for user in data.get("events", [EVENT_NO])[EVENT_NO].get("competitions", [0])[0].get("competitors", []):
+    for user in (
+        data.get("events", [EVENT_NO])[EVENT_NO]
+        .get("competitions", [0])[0]
+        .get("competitors", [])
+    ):
         player_score = 0
         player_pos = "--"
 
@@ -225,29 +230,32 @@ def live_scores_from_data(data, current_players):
 
 
 def get_earnings_from_data(data, player=None):
-    """Get earnings. Function to ensure modularity if API fails.
-    """
+    """Get earnings. Function to ensure modularity if API fails."""
     if player is None:
         return (
             sum(
                 [
                     int(user["earnings"])
-                    for user in data.get("events", [EVENT_NO])[EVENT_NO].get("competitions", [0])[0].get("competitors", [])
+                    for user in data.get("events", [EVENT_NO])[EVENT_NO]
+                    .get("competitions", [0])[0]
+                    .get("competitors", [])
                 ]
             )
             > 0
         )
 
-    for user in data.get("events", [EVENT_NO])[EVENT_NO].get("competitions", [0])[0].get("competitors", []):
+    for user in (
+        data.get("events", [EVENT_NO])[EVENT_NO]
+        .get("competitions", [0])[0]
+        .get("competitors", [])
+    ):
         if user["athlete"]["displayName"] == player:
             return user["earnings"]
     return -1
 
 
 def remove_canceled(data):
-    """Remove canceled tournaments from data list.
-
-    """
+    """Remove canceled tournaments from data list."""
     return {
         k: [
             event for event in v if event["status"]["type"]["description"] != "Canceled"
@@ -298,7 +306,8 @@ def update_event_data_from_api(event_url, redis_key):
     data = r.json()
     data = remove_canceled(data)
     data = json.dumps(data)
-    redis_cache.set(redis_key, data)   
+    redis_cache.set(redis_key, data)
+
 
 def update_cache_from_api(event_url=None):
     """
@@ -320,8 +329,7 @@ def update_cache_from_api(event_url=None):
 
 
 def get_event_info(all_picks=False, data_source=None):
-    """Get event info. Requires access to API.
-    """
+    """Get event info. Requires access to API."""
     if data_source is None:
         data_source = "pga_data"
 
@@ -356,8 +364,7 @@ def get_event_info(all_picks=False, data_source=None):
 
 
 def get_live_scores(current_players, data_source=None):
-    """Get live scores. Requires access to API.
-    """
+    """Get live scores. Requires access to API."""
     if data_source is None:
         data_source = "pga_data"
 
@@ -382,7 +389,11 @@ def get_withdrawl_list(data_source=None):
         data = redis_cache.get(data_source)
         data = json.loads(data)
 
-        all_users = data.get("events", [EVENT_NO])[EVENT_NO].get("competitions", [0])[0].get("competitors", [])
+        all_users = (
+            data.get("events", [EVENT_NO])[EVENT_NO]
+            .get("competitions", [0])[0]
+            .get("competitors", [])
+        )
 
         withdrawl_list = [
             user["athlete"]["displayName"]
@@ -396,8 +407,7 @@ def get_withdrawl_list(data_source=None):
 
 
 def get_earnings(player, data_source=None):
-    """Get player earnings. Requires access to API.
-    """
+    """Get player earnings. Requires access to API."""
     if data_source is None:
         data_source = "pga_data"
 
@@ -708,7 +718,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
         pick_dict["alternate"].append("--")
         pick_dict["mult"].append(0)
         pick_dict["initials"].append("--")
-    
+
     all_live_scores = {**live_scores, **liv_live_scores}
 
     print(all_live_scores)
@@ -830,8 +840,10 @@ def weekly_pick_table(users, picks, event_info, user_data):
 
     return df
 
+
 def cache_event_type(event_type):
     redis_cache.set("event_type", event_type)
+
 
 def get_event_type():
     event_type = redis_cache.get("event_type")
@@ -839,6 +851,6 @@ def get_event_type():
         event_type = "regular"
         cache_event_type(event_type)
     else:
-        event_type = event_type.decode()    
+        event_type = event_type.decode()
 
     return event_type.lower()
