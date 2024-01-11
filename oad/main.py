@@ -124,6 +124,8 @@ def league():
 @main.route("/pick")
 @login_required
 def pick():
+    update_cache_from_api()
+
     curr_event, avail_picks, tournament_state, __, tournament_round = get_event_info(
         all_picks=True
     )
