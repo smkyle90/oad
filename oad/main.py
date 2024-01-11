@@ -124,7 +124,9 @@ def league():
 @main.route("/pick")
 @login_required
 def pick():
-    curr_event, avail_picks, tournament_state, __, tournament_round = get_event_info()
+    curr_event, avail_picks, tournament_state, __, tournament_round = get_event_info(
+        all_picks=True
+    )
 
     # Check if the user has made a previous pick for this event
     prev_pick = (
@@ -173,26 +175,18 @@ def pick():
             strike_button_state = True
             button_text = "Submit Pick"
 
-        # elif tournament_round < 20000:
-        elif True:
-            _, whole_field, _, _, _ = get_event_info(True)
-            eligible_picks = [p for p in whole_field if p not in all_players]
-            print(eligible_picks)
-
+        elif tournament_round < 2:
             # Allow user to use strike
-            # if not strike_used:
-            if True:
+            if not strike_used:
                 if prev_pick is None:
-                    pick_state = "the tourney has started and you have not picked, but you have a Breakfast Ball. Picking now will use this up. Prior to the start of Round 2, you can pick a player who has yet to tee off."
+                    pick_state = "the tourney has started and you have not picked, but you have a Breakfast Ball. Picking now will use this up. You can pick any of your eligible golfers prior to the commencement of round 2."
                     button_text = "Pick and Use Breakfast Ball"
                 else:
                     pick_state = "the tourney has started and you've made a pick, but you have a Breakfast Ball. Picking now will use this up. You can pick any of your eligible golfers prior to the commencement of round 2."
-
                     button_text = "Re-pick and Use Breakfast Ball"
 
                 strike_button_state = True
                 button_text = "Use Breakfast Ball"
-
             else:
                 pick_state = "the tourney has started and you have either made your pick, Round 2 has started, or don't have a Breakfast Ball."
         else:

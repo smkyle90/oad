@@ -115,7 +115,7 @@ def get_event_from_data(data):
 
 def get_avail_from_data(data, all_picks):
     """Get players in field. Function to ensure modularity if API fails."""
-    # Get the players in the field, who have yet to tee off
+    # Get the players in the field. You cannot pick if we are in the second round.
 
     if all_picks:
         picks = [
@@ -130,6 +130,11 @@ def get_avail_from_data(data, all_picks):
             for a in data.get("events", [EVENT_NO])[EVENT_NO]
             .get("competitions", [0])[0]
             .get("competitors", [])
+            # Need to check this condition. For the breakfast ball, we want all
+            # golfers Up until the start of round 2. But we need to make sure we
+            # can pick AFTER round 1. Need to check if the status/period ticks
+            # up to round 2 in between round 1 and 2. So maybe we just return
+            # all golfers and constrain picks by the tournament round.
             if (a["status"]["period"] < 2) and (a["status"]["type"]["state"] == "pre")
         ]
 
@@ -474,6 +479,22 @@ def create_pick_table(picks):
     return pick_table.to_html(classes="data", border=0, index=False)
 
 
+def generate_helpers_left_string(user):
+    helpers_string = []
+    if user.strikes_remaining:
+        helpers_string.append("breakfast ball")
+    if user.substitutes_remaining:
+        helpers_string.append("tap-in")
+
+    if user.double_up_remaining:
+        helpers_string.append("double-up")
+
+    if user.liv_line_remaining:
+        helpers_string.append("liv-line")
+
+    return helpers_string
+
+
 def construct_user_table(users, picks, curr_event=None, as_html=True):
     user_dict = {
         "team": [],
@@ -485,8 +506,10 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
         "breakfast balls left": [],
         "tap-ins left": [],
         "double-ups left": [],
+        "liv-lines left": [],
+        "helpers left": [],
     }
-
+    join_string = " | "
     for usr in users:
         if usr.display_name:
             user_dict["team"].append(usr.display_name)
@@ -526,6 +549,11 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
         user_dict["breakfast balls left"].append(int(usr.strikes_remaining))
         user_dict["tap-ins left"].append(int(usr.substitutes_remaining))
         user_dict["double-ups left"].append(int(usr.double_up_remaining))
+        user_dict["liv-lines left"].append(int(usr.liv_line_remaining))
+        user_dict["helpers left"].append(
+            join_string.join(generate_helpers_left_string(usr))
+        )
+
         user_dict["total earnings"].append(
             sum([int(x.points) for x in picks if x.name == usr.name])
         )
@@ -563,6 +591,8 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
             "breakfast balls left",
             "tap-ins left",
             "double-ups left",
+            "liv-lines left",
+            "helpers left",
         ]
     ]
 
@@ -583,6 +613,10 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
                 "weekly points",
                 "total earnings",
                 "dollars back",
+                "breakfast balls left",
+                "tap-ins left",
+                "double-ups left",
+                "liv-lines left",
             ],
             inplace=True,
         )
