@@ -165,8 +165,10 @@ def pick():
     if eligible_picks:
         eligible_picks.sort()
 
+        if liv_line_used:
+            pick_state = "you have used your LIV Line this week."
         # Warn the user about the picking state
-        if tournament_round < 1 or tournament_state == "pre":
+        elif tournament_round < 1 or tournament_state == "pre":
             if prev_pick is None:
                 pick_state = "you have yet to pick. Pick any golfer in the field."
             else:
@@ -247,7 +249,7 @@ def pick():
 def submit_pick():
     # Get current event from the session
     curr_event, __, tournament_state, __, tournament_round = get_event_info()
-
+    print(curr_event, tournament_state, tournament_round)
     # Get the selection
     selection = request.form.get("main")
     alternate = request.form.get("alternate")
@@ -286,8 +288,7 @@ def submit_pick():
         else:
             prev_pick.pick = selection
             prev_pick.alternate = alternate
-
-    elif (tournament_round <= 2) and (current_user.strikes_remaining):
+    elif (tournament_round < 2) and (current_user.strikes_remaining):
         user_pick = Pick(
             event=curr_event,
             pick=selection,
@@ -304,6 +305,12 @@ def submit_pick():
         # Need to issue a strike to user.
         current_user.strikes_remaining = 0
         current_user.strike_event = curr_event
+
+    # LIV Line submit
+    main_pick = request.form.get("main_pick").lower() == "true"
+    if not main_pick:
+        current_user.liv_line_remaining = 0
+        current_user.liv_line_event = curr_event
 
     # The user is able to make a pick
     db.session.commit()
@@ -354,7 +361,6 @@ def end_week():
 @login_required
 def set_event_type():
     event_type = request.form.get("event_type")
-    print(event_type)
     cache_event_type(event_type)
     return redirect(url_for("main.update"))
 
@@ -526,13 +532,14 @@ def use_liv_line():
     # Get the list of players already picked
     all_players = [pick.pick for pick in all_picks]
 
-    print(all_players)
     # We can pick from the available picks, minus the players we've already picked.
     # TODO: set operations?
     try:
         eligible_picks = [p for p in avail_picks if p not in all_players]
     except Exception:
         eligible_picks = []
+
+    eligible_picks.sort()
 
     pick_state = "you have yet to pick. Pick your any golfer in the LIV field."
     button_text = "Use LIV-Line"
@@ -543,7 +550,7 @@ def use_liv_line():
         event=curr_event,
         user=current_user.name,
         pick_text=pick_state,
-        strike_button_state=False,
+        strike_button_state=True,
         submit_text=button_text,
         substitute_button_state=False,
         double_up_button_state=False,
