@@ -337,7 +337,7 @@ def update():
         update_button = True
 
     avail_picks.sort()
-    liv_liv_avail_picks.sort()
+    liv_avail_picks.sort()
     avail_picks.extend(liv_avail_picks)
 
     return render_template(
