@@ -146,7 +146,6 @@ def pick():
     # Get the list of players already picked
     all_players = [pick.pick for pick in all_picks]
 
-    print(all_players)
     # We can pick from the available picks, minus the players we've already picked.
     # TODO: set operations?
     try:
@@ -167,7 +166,7 @@ def pick():
     if eligible_picks:
         eligible_picks.sort()
 
-        if liv_line_used:
+        if current_user.liv_line_event == curr_event:
             pick_state = "you have used your LIV Line this week."
         # Warn the user about the picking state
         elif tournament_round < 1 or tournament_state == "pre":
@@ -178,7 +177,6 @@ def pick():
 
             strike_button_state = True
             button_text = "Submit Pick"
-
         elif tournament_round < 2:
             # Allow user to use strike
             if not strike_used:
@@ -192,11 +190,10 @@ def pick():
                 strike_button_state = True
                 button_text = "Use Breakfast Ball"
             else:
-                pick_state = "the tourney has started and you have either made your pick, Round 2 has started, or don't have a Breakfast Ball."
+                pick_state = "the tourney has started and you have either made your pick, Round 2 has started, or used or don't have a Breakfast Ball."
         else:
             pick_state = "you are out of options for this week."
     else:
-        print(tournament_round)
         if tournament_round < 1:
             pick_state = (
                 "our friends at ESPN have not released the field for this week."
@@ -251,7 +248,7 @@ def pick():
 def submit_pick():
     # Get current event from the session
     curr_event, __, tournament_state, __, tournament_round = get_event_info()
-    print(curr_event, tournament_state, tournament_round)
+
     # Get the selection
     selection = request.form.get("main")
     alternate = request.form.get("alternate")
