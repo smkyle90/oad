@@ -223,7 +223,8 @@
             id="dup_butt"
           >
             <i class="fa fa-user fa-lg"></i>
-            <span id="text">&nbsp;{{ current_user.name }}</span>
+            <!-- {% set initials = current_user.name.split() | map('first') | join('') %} -->
+            <span id="text">&nbsp;My Profile</span>
           </button>
           <div class="dropdown-menu text-left">
             <a href="{{ url_for('auth.logout') }}" class="dropdown-item">
