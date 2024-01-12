@@ -190,7 +190,7 @@ def pick():
                 strike_button_state = True
                 button_text = "Use Breakfast Ball"
             else:
-                pick_state = "the tourney has started and you have either made your pick, Round 2 has started, or used or don't have a Breakfast Ball."
+                pick_state = "the tourney has started and you have either made your pick, used your Breakfast Ball, or Round 2 has started."
         else:
             pick_state = "you are out of options for this week."
     else:
