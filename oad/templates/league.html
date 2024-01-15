@@ -38,7 +38,9 @@
 <section>
 <div>
   <h3 class="subtitle">League Leaders</h3>
-<div>{{ u_table | safe }}</div>
+<div>
+{{ u_table | safe }}
+</div>
 </div>
 </section>
 
@@ -46,7 +48,7 @@
 <section>
 <div>
   <h3 class="subtitle">Pick History</h3>
-  <div style="width: 100%; overflow-x: scroll;">
+  <div style="width: 100%; overflow-x: scroll;" class="league-picks">
     {{ ph_table | safe }}
   </div>
     <!-- <div class="chart" id="bargraph">
