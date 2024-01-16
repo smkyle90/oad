@@ -29,7 +29,7 @@ SEASON = int(os.getenv("OADYR", 2024))
 
 EMPTY_HTML = "<div></div>"
 
-POINTS_LIST = ["regular", "flagship", "major"]
+POINTS_LIST = ["regular", "signature", "major"]
 HELPERS_LIST = [None, "breakfast", "tapin", "double", "liv"]
 
 main = Blueprint("main", __name__)
@@ -129,6 +129,9 @@ def pick():
     curr_event, avail_picks, tournament_state, __, tournament_round = get_event_info(
         all_picks=True
     )
+    liv_event, __, liv_tournament_state, __, liv_tournament_round = get_event_info(
+        all_picks=True, data_source="liv_data"
+    )
 
     # Check if the user has made a previous pick for this event
     prev_pick = (
@@ -210,7 +213,13 @@ def pick():
         double_up_button_state = True
 
     # Allow user to pick from LIV
-    if (not prev_pick) and (not liv_line_used) and (tournament_round < 1):
+    # print(liv_tournament_state, liv_tournament_round)
+    if (
+        (not prev_pick)
+        and (not liv_line_used)
+        and (liv_tournament_round < 1)
+        and (liv_tournament_state == "pre")
+    ):
         liv_line_button_state = True
 
     if tournament_round:

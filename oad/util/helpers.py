@@ -307,7 +307,7 @@ def get_weekly_pick_table():
 
 
 def update_event_data_from_api(event_url, redis_key):
-    r = requests.get(EVENT_URL)
+    r = requests.get(event_url)
     data = r.json()
     data = remove_canceled(data)
     data = json.dumps(data)
@@ -690,11 +690,11 @@ def weekly_pick_table(users, picks, event_info, user_data):
     )
 
     curr_event, _, _, _, curr_round = get_event_info()
-    liv_curr_event, _, _, _, liv_curr_round = get_event_info("liv_data")
+    liv_curr_event, _, _, _, liv_curr_round = get_event_info(data_source="liv_data")
 
     # Get the event type
     pga_event_type = get_event_type()
-    liv_event_type = "flagship"
+    liv_event_type = "signature"
 
     # Add the projected fedex points for this event
     def add_live_scores(live_scores, event_type):
@@ -754,8 +754,6 @@ def weekly_pick_table(users, picks, event_info, user_data):
         pick_dict["initials"].append("--")
 
     all_live_scores = {**live_scores, **liv_live_scores}
-
-    print(all_live_scores)
 
     for idx, pick in enumerate(pick_dict["pick"]):
         if pick not in all_live_scores:
