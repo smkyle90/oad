@@ -30,7 +30,7 @@ EVENT_URL = (
 )
 
 LIV_EVENT_URL = (
-    "https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=liv"
+    "https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=lpga"
 )
 
 PGA_URL = "https://www.pgatour.com/stats/stat.109.html"
