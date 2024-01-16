@@ -558,7 +558,7 @@ def use_liv_line():
         event=curr_event,
         user=current_user.name,
         pick_text=pick_state,
-        strike_button_state=True,
+        strike_button_state=bool(eligible_picks),
         submit_text=button_text,
         substitute_button_state=False,
         double_up_button_state=False,
