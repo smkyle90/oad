@@ -479,7 +479,7 @@ def create_pick_table(picks):
     return pick_table.to_html(classes="data", border=0, index=False)
 
 
-def generate_helpers_left_string(user):
+def generate_helpers_left_string(user, current_event, tournament_round):
     helpers_string = []
     if user.strikes_remaining:
         helpers_string.append("breakfast ball")
@@ -489,13 +489,17 @@ def generate_helpers_left_string(user):
     if user.double_up_remaining:
         helpers_string.append("double-up")
 
-    if user.liv_line_remaining:
+    if user.liv_line_remaining or (
+        (user.liv_line_event == current_event) and tournament_round < 1
+    ):
         helpers_string.append("liv-line")
 
     return helpers_string
 
 
-def construct_user_table(users, picks, curr_event=None, as_html=True):
+def construct_user_table(
+    users, picks, curr_event=None, as_html=True, liv_line_event=None, tournament_round=1
+):
     user_dict = {
         "team": [],
         "weekly pick": [],
@@ -551,7 +555,9 @@ def construct_user_table(users, picks, curr_event=None, as_html=True):
         user_dict["double-ups left"].append(int(usr.double_up_remaining))
         user_dict["liv-lines left"].append(int(usr.liv_line_remaining))
         user_dict["helpers left"].append(
-            join_string.join(generate_helpers_left_string(usr))
+            join_string.join(
+                generate_helpers_left_string(usr, liv_line_event, tournament_round)
+            )
         )
 
         user_dict["total earnings"].append(

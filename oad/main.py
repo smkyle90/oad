@@ -70,11 +70,17 @@ def profile():
 def league():
     update_cache_from_api()
 
-    curr_event, __, tournament_state, event_table, __ = get_event_info()
+    curr_event, __, tournament_state, event_table, tournament_round = get_event_info()
 
     users = User.query.all()
     all_picks = Pick.query.filter_by(season=SEASON).all()
-    user_table = construct_user_table(users, all_picks, as_html=False)
+    user_table = construct_user_table(
+        users,
+        all_picks,
+        as_html=False,
+        liv_line_event=curr_event,
+        tournament_round=tournament_round,
+    )
 
     week_picks = Pick.query.filter_by(season=SEASON).filter_by(event=curr_event).all()
 
@@ -215,8 +221,9 @@ def pick():
     # Allow user to pick from LIV
     # print(liv_tournament_state, liv_tournament_round)
     if (
-        (not prev_pick)
-        and (not liv_line_used)
+        True
+        # and (not prev_pick)
+        # and (not liv_line_used)
         and (liv_tournament_round < 1)
         and (liv_tournament_state == "pre")
     ):
