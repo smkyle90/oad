@@ -527,6 +527,7 @@ def use_double_up():
 @main.route("/use_liv_line")
 @login_required
 def use_liv_line():
+    main_event, __, __, __, __ = get_event_info()
     curr_event, avail_picks, tournament_state, __, tournament_round = get_event_info(
         data_source="liv_data"
     )
@@ -534,7 +535,7 @@ def use_liv_line():
     # Check if the user has made a previous pick for this event
     prev_pick = (
         Pick.query.filter_by(season=SEASON)
-        .filter_by(event=curr_event)
+        .filter_by(event=main_event)
         .filter_by(name=current_user.name)
         .first()
     )
@@ -559,6 +560,13 @@ def use_liv_line():
     pick_state = "you have yet to pick. Pick your any golfer in the LIV field."
     button_text = "Use LIV-Line"
 
+    if prev_pick is None:
+        prev_pick_show = "No previous pick."
+        prev_alt_show = "No previous alternate."
+    else:
+        prev_pick_show = f"Previous pick: {prev_pick.pick}."
+        prev_alt_show = f"Previous alternate: {prev_pick.alternate}."
+
     return render_template(
         "pick.html",
         avail=eligible_picks,
@@ -571,8 +579,8 @@ def use_liv_line():
         double_up_button_state=False,
         liv_line_button_state=False,
         current_round=tournament_round,
-        prev_pick_show="LIV-Line. No previous pick.",
-        prev_alt_show="LIV-Line. No previous alternate.",
+        prev_pick_show=prev_pick_show,
+        prev_alt_show=prev_alt_show,
         main_pick=False,
     )
 
