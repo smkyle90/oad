@@ -202,11 +202,11 @@ def live_scores_from_data(data, current_players):
         if user["status"].get("displayValue", False) == "WD":
             continue
 
-        for idx, user_score_data in enumerate(user["linescores"]):
+        for idx, user_score_data in enumerate(user.get("linescores", [])):
             if user_score_data.get("value"):
                 player_pos = user_score_data.get("currentPosition")
 
-            if user["athlete"]["displayName"] in current_players:
+            if user.get("athlete", {}).get("displayName") in current_players:
                 if user_score_data.get("value"):
                     try:
                         player_score += int(user_score_data["displayValue"])
@@ -635,6 +635,42 @@ def construct_user_table(
         return user_df
 
 
+# Add the projected fedex points for this event
+def add_live_scores(live_scores, curr_round, event_type):
+    for pick in live_scores:
+        # print(pick, live_scores.get(pick))
+        try:
+            fedex_pts = round(
+                POINTS_DF[event_type]
+                .loc[
+                    (live_scores[pick]["position"] - 1) : (
+                        live_scores[pick]["position"] - 1
+                    )
+                    + (live_scores[pick]["freq"] - 1)
+                ]
+                .sum()
+                / (live_scores[pick]["freq"]),
+                0,
+            )
+        except Exception as e:
+            print(f"Live scores: {e}")
+            fedex_pts = 0
+
+        if curr_round <= 2:
+            in_play = True
+        elif curr_round <= 4:
+            in_play = live_scores.get(pick, {}).get("round", 0) == curr_round
+        else:
+            in_play = live_scores.get(pick, {}).get("round", 0) >= curr_round - 1
+
+        if in_play:
+            live_scores[pick]["points"] = fedex_pts
+        else:
+            live_scores[pick]["points"] = 0
+
+    return live_scores
+
+
 # flake8: noqa: C901
 def weekly_pick_table(users, picks, event_info, user_data):
     # get purse value
@@ -691,7 +727,7 @@ def weekly_pick_table(users, picks, event_info, user_data):
         set(pick_dict["pick"]).union(set(pick_dict["alternate"]))
     )
 
-    liv_live_scores = live_scores = get_live_scores(
+    liv_live_scores = get_live_scores(
         set(pick_dict["pick"]).union(set(pick_dict["alternate"])), "liv_data"
     )
 
@@ -702,43 +738,8 @@ def weekly_pick_table(users, picks, event_info, user_data):
     pga_event_type = get_event_type()
     liv_event_type = "signature"
 
-    # Add the projected fedex points for this event
-    def add_live_scores(live_scores, event_type):
-        for pick in live_scores:
-            try:
-                fedex_pts = round(
-                    POINTS_DF[event_type]
-                    .loc[
-                        (live_scores[pick]["position"] - 1) : (
-                            live_scores[pick]["position"] - 1
-                        )
-                        + (live_scores[pick]["freq"] - 1)
-                    ]
-                    .sum()
-                    / (live_scores[pick]["freq"]),
-                    0,
-                )
-            except Exception as e:
-                print(e)
-                fedex_pts = 0
-
-            if curr_round <= 2:
-                in_play = True
-            elif curr_round <= 4:
-                in_play = live_scores.get(pick, {}).get("round", 0) == curr_round
-            else:
-                in_play = live_scores.get(pick, {}).get("round", 0) >= curr_round - 1
-
-            if in_play:
-                live_scores[pick]["points"] = fedex_pts
-            else:
-                live_scores[pick]["points"] = 0
-
-        return live_scores
-
-    live_scores = add_live_scores(live_scores, pga_event_type)
-    liv_live_scores = add_live_scores(liv_live_scores, liv_event_type)
-
+    live_scores = add_live_scores(live_scores, curr_round, pga_event_type)
+    liv_live_scores = add_live_scores(liv_live_scores, curr_round, liv_event_type)
     # extract the user data for use in the table
     current_points = {
         user: (points, rank)
