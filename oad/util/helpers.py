@@ -30,7 +30,7 @@ EVENT_URL = (
 )
 
 LIV_EVENT_URL = (
-    "https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=lpga"
+    "https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=liv"
 )
 
 PGA_URL = "https://www.pgatour.com/stats/stat.109.html"
@@ -658,8 +658,8 @@ def add_live_scores(live_scores, curr_round, event_type):
 
         if curr_round <= 2:
             in_play = True
-        elif curr_round <= 4:
-            in_play = live_scores.get(pick, {}).get("round", 0) == curr_round
+        # elif curr_round <= 4:
+        # in_play = live_scores.get(pick, {}).get("round", 0) == curr_round
         else:
             in_play = live_scores.get(pick, {}).get("round", 0) >= curr_round - 1
 
