@@ -264,6 +264,7 @@ def pick():
 def submit_pick():
     # Get current event from the session
     curr_event, __, tournament_state, __, tournament_round = get_event_info()
+    __, __, __, __, liv_tournament_round = get_event_info(data_source="liv_data")
 
     # Get the selection
     selection = request.form.get("main")
@@ -290,8 +291,25 @@ def submit_pick():
     # Ensure a player does not pick before the tournament has started.
     # If they do not pick before it starts, and have a strike, they can make
     # a pick and use it.
-    if tournament_round < 1:
-        if prev_pick is None:
+    # LIV Line submit
+    main_pick = request.form.get("main_pick").lower() == "true"
+
+    # PGA Events. This is the old logic
+    if main_pick:
+        if tournament_round < 1:
+            if prev_pick is None:
+                user_pick = Pick(
+                    event=curr_event,
+                    pick=selection,
+                    alternate=alternate,
+                    name=current_user.name,
+                    season=SEASON,
+                )
+                db.session.add(user_pick)
+            else:
+                prev_pick.pick = selection
+                prev_pick.alternate = alternate
+        elif (tournament_round < 2) and (current_user.strikes_remaining):
             user_pick = Pick(
                 event=curr_event,
                 pick=selection,
@@ -300,32 +318,33 @@ def submit_pick():
                 season=SEASON,
             )
             db.session.add(user_pick)
-        else:
-            prev_pick.pick = selection
-            prev_pick.alternate = alternate
-    elif (tournament_round < 2) and (current_user.strikes_remaining):
-        user_pick = Pick(
-            event=curr_event,
-            pick=selection,
-            alternate=alternate,
-            name=current_user.name,
-            season=SEASON,
-        )
-        db.session.add(user_pick)
 
-        # Set points multipluier to zero
-        if prev_pick is not None:
-            prev_pick.point_multiplier = 0
+            # Set points multipluier to zero
+            if prev_pick is not None:
+                prev_pick.point_multiplier = 0
 
-        # Need to issue a strike to user.
-        current_user.strikes_remaining = 0
-        current_user.strike_event = curr_event
+            # Need to issue a strike to user.
+            current_user.strikes_remaining = 0
+            current_user.strike_event = curr_event
+    # LIV events. Previous we were using up a substitute to pick a LIV player
+    # before that event started.
+    else:
+        if (liv_tournament_round < 1) and (current_user.liv_line_remaining):
+            if prev_pick is None:
+                user_pick = Pick(
+                    event=curr_event,
+                    pick=selection,
+                    alternate=alternate,
+                    name=current_user.name,
+                    season=SEASON,
+                )
+                db.session.add(user_pick)
+            else:
+                prev_pick.pick = selection
+                prev_pick.alternate = alternate
 
-    # LIV Line submit
-    main_pick = request.form.get("main_pick").lower() == "true"
-    if not main_pick:
-        current_user.liv_line_remaining = 0
-        current_user.liv_line_event = curr_event
+            current_user.liv_line_remaining = 0
+            current_user.liv_line_event = curr_event
 
     # The user is able to make a pick
     db.session.commit()
