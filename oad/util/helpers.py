@@ -661,7 +661,7 @@ def add_live_scores(live_scores, curr_round, event_type):
         # elif curr_round <= 4:
         # in_play = live_scores.get(pick, {}).get("round", 0) == curr_round
         else:
-            in_play = live_scores.get(pick, {}).get("round", 0) >= curr_round - 1
+            in_play = live_scores.get(pick, {}).get("round", 0) >= curr_round - 2
 
         if in_play:
             live_scores[pick]["points"] = fedex_pts
