@@ -223,7 +223,7 @@ def pick():
     if (
         True
         # and (not prev_pick)
-        # and (not liv_line_used)
+        and (not liv_line_used)
         and (liv_tournament_round < 1)
         and (liv_tournament_state == "pre")
     ):
