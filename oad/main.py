@@ -492,6 +492,7 @@ def confirm_tap_in():
     )
 
     prev_pick.point_multiplier = 0
+    db.session.commit()
 
     new_pick = Pick(
         event=curr_event,
