@@ -220,14 +220,14 @@ def pick():
 
     # Allow user to pick from LIV
     # print(liv_tournament_state, liv_tournament_round)
-    if (
-        True
-        # and (not prev_pick)
-        and (not liv_line_used)
-        and (liv_tournament_round < 1)
-        and (liv_tournament_state == "pre")
-    ):
-        liv_line_button_state = True
+    # if (
+    #     True
+    #     # and (not prev_pick)
+    #     and (not liv_line_used)
+    #     and (liv_tournament_round < 1)
+    #     and (liv_tournament_state == "pre")
+    # ):
+    #     liv_line_button_state = True
 
     if tournament_round:
         tournament_round = str(tournament_round)
