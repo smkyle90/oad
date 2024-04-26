@@ -26,7 +26,7 @@ filename = os.path.join(dirname, "points.csv")
 POINTS_DF = pd.read_csv(filename)
 
 EVENT_URL = (
-    "https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga"
+    "https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=liv"
 )
 
 LIV_EVENT_URL = (
