@@ -348,13 +348,13 @@ def get_event_info(all_picks=False, data_source=None):
         tournament_info = get_tournament_info(data)
         tournament_round = get_tournament_round(data)
 
-        if tournament_state in ["in", "post"]:
-            # check if the earnings are posteds
-            earnings_posted = get_earnings_from_data(data)
-            if earnings_posted:
-                tournament_state = "post"
-            else:
-                tournament_state = "in"
+        # if tournament_state in ["in", "post"]:
+        #     # check if the earnings are posteds
+        #     earnings_posted = get_earnings_from_data(data)
+        #     if earnings_posted:
+        #         tournament_state = "post"
+        #     else:
+        #         tournament_state = "in"
 
         return (
             event_name,
