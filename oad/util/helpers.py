@@ -653,7 +653,7 @@ def add_live_scores(live_scores, curr_round, event_type):
                 0,
             )
         except Exception as e:
-            print(f"Live scores: {e}")
+            print(f"Live scores: {e} {pick}")
             fedex_pts = 0
 
         if curr_round <= 2:
