@@ -80,7 +80,7 @@ def add_user_points():
             weekly_fedex = get_fedex_points(player_name)
 
             # Update the pick with this value
-            pick.points = weekly_earnings
+            pick.points = max(weekly_earnings, 0)
             pick.fedex = weekly_fedex
 
         # Commit the changes
