@@ -25,7 +25,8 @@ from .util import (
 from .util.admin import add_user_points
 from .views import league_page
 
-DEBUG = False
+LIV_DEBUG = True
+PGA_DEBUG = False
 
 SEASON = int(os.getenv("OADYR", 2025))
 
@@ -140,6 +141,13 @@ def pick():
     liv_event, __, liv_tournament_state, __, liv_tournament_round = get_event_info(
         all_picks=True, data_source="liv_data"
     )
+    if PGA_DEBUG:
+        tournament_round -= 1
+        tournament_state = "pre"
+
+    if LIV_DEBUG:
+        liv_tournament_round = tournament_round - 1
+        liv_tournament_state = "pre"
 
     # Check if the user has made a previous pick for this event
     prev_pick = (
@@ -220,11 +228,6 @@ def pick():
     if (prev_pick) and (not double_up_used) and (1 <= tournament_round < 4):
         double_up_button_state = True
 
-    if DEBUG:
-        liv_tournament_round -= 1
-        liv_tournament_state = "pre"
-        print(liv_tournament_state, liv_tournament_round)
-
     # Allow user to pick from LIV
     if (
         True
@@ -249,6 +252,7 @@ def pick():
         )
         and (liv_tournament_round < 1)  # change back to 1
         and (liv_tournament_state == "pre")  # Remove as comment
+        and (tournament_round < 1)
     ):
         liv_line_button_state = True
 
@@ -289,6 +293,12 @@ def submit_pick():
     curr_event, __, tournament_state, __, tournament_round = get_event_info()
     __, __, __, __, liv_tournament_round = get_event_info(data_source="liv_data")
 
+    if PGA_DEBUG:
+        tournament_round -= 1
+
+    if LIV_DEBUG:
+        liv_tournament_round = tournament_round - 1
+
     # Get the selection
     selection = request.form.get("main")
     alternate = request.form.get("alternate")
@@ -316,9 +326,6 @@ def submit_pick():
     # a pick and use it.
     # LIV Line submit
     main_pick = request.form.get("main_pick").lower() == "true"
-
-    if DEBUG:
-        liv_tournament_round -= 1
 
     # PGA Events. This is the old logic
     if main_pick:
@@ -356,24 +363,21 @@ def submit_pick():
     # LIV events. Previous we were using up a substitute to pick a LIV player
     # before that event started.
     else:
-        if (liv_tournament_round < 1) and (
-            current_user.liv_line_remaining or current_user.liv_line_event == curr_event
-        ):
-            if prev_pick is None:
-                user_pick = Pick(
-                    event=curr_event,
-                    pick=selection,
-                    alternate=alternate,
-                    name=current_user.name,
-                    season=SEASON,
-                )
-                db.session.add(user_pick)
-            else:
-                prev_pick.pick = selection
-                prev_pick.alternate = alternate
+        if prev_pick is None:
+            user_pick = Pick(
+                event=curr_event,
+                pick=selection,
+                alternate=alternate,
+                name=current_user.name,
+                season=SEASON,
+            )
+            db.session.add(user_pick)
+        else:
+            prev_pick.pick = selection
+            prev_pick.alternate = alternate
 
-            current_user.liv_line_remaining = 0
-            current_user.liv_line_event = curr_event
+        current_user.liv_line_remaining = 0
+        current_user.liv_line_event = curr_event
 
     # The user is able to make a pick
     db.session.commit()
