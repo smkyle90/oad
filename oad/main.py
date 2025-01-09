@@ -25,6 +25,8 @@ from .util import (
 from .util.admin import add_user_points
 from .views import league_page
 
+DEBUG = True
+
 SEASON = int(os.getenv("OADYR", 2025))
 
 EMPTY_HTML = "<div></div>"
@@ -218,8 +220,12 @@ def pick():
     if (prev_pick) and (not double_up_used) and (1 <= tournament_round < 4):
         double_up_button_state = True
 
+    if DEBUG:
+        liv_tournament_round = 0
+        liv_tournament_state = "pre"
+        print(liv_tournament_state, liv_tournament_round)
+
     # Allow user to pick from LIV
-    # print(liv_tournament_state, liv_tournament_round)
     if (
         True
         # Account for the case the the user has picked so we cannot use a liv line, if have not used it
@@ -229,8 +235,8 @@ def pick():
             or (prev_pick is None and current_user.liv_line_remaining)
         )
         and (not liv_line_used)
-        and (liv_tournament_round < 2)  # change back to 1
-        # and (liv_tournament_state == "pre") # Remove as comment
+        and (liv_tournament_round < 1)  # change back to 1
+        and (liv_tournament_state == "pre")  # Remove as comment
     ):
         liv_line_button_state = True
 
