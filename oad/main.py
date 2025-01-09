@@ -25,8 +25,13 @@ from .util import (
 from .util.admin import add_user_points
 from .views import league_page
 
+PGA_DEBUG = True
+PGA_DEBUG_ROUND = 1
+PGA_DEBUG_STATE = "in"
+
 LIV_DEBUG = True
-PGA_DEBUG = False
+LIV_DEBUG_ROUND = PGA_DEBUG_ROUND - 1
+LIV_DEBUG_STATE = "pre"
 
 SEASON = int(os.getenv("OADYR", 2025))
 
@@ -142,12 +147,12 @@ def pick():
         all_picks=True, data_source="liv_data"
     )
     if PGA_DEBUG:
-        tournament_round -= 1
-        tournament_state = "pre"
+        tournament_round = PGA_DEBUG_ROUND
+        tournament_state = PGA_DEBUG_STATE
 
     if LIV_DEBUG:
-        liv_tournament_round = tournament_round - 1
-        liv_tournament_state = "pre"
+        liv_tournament_round = LIV_DEBUG_ROUND
+        liv_tournament_state = LIV_DEBUG_STATE
 
     # Check if the user has made a previous pick for this event
     prev_pick = (
@@ -294,7 +299,7 @@ def submit_pick():
     __, __, __, __, liv_tournament_round = get_event_info(data_source="liv_data")
 
     if PGA_DEBUG:
-        tournament_round -= 1
+        tournament_round = PGA_DEBUG_ROUND
 
     if LIV_DEBUG:
         liv_tournament_round = tournament_round - 1
