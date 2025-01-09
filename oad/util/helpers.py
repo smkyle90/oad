@@ -279,7 +279,10 @@ def update_weekly_pick_table(users, week_picks, event_table, user_table):
         pick_table = weekly_pick_table(users, week_picks, event_table, user_table)
 
         redis_cache.set(
-            "pick_table", pick_table.to_html(classes="data", border=0, index=False)
+            "pick_table",
+            pick_table.drop(columns=["MULT"]).to_html(
+                classes="data", border=0, index=False
+            ),
         )
         redis_cache.set("picks_last_update", time.time())
 
