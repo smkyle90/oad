@@ -25,8 +25,8 @@ from .util import (
 from .util.admin import add_user_points
 from .views import league_page
 
-PGA_DEBUG = True
-PGA_DEBUG_ROUND = 1
+PGA_DEBUG = False
+PGA_DEBUG_ROUND = 2
 PGA_DEBUG_STATE = "in"
 
 LIV_DEBUG = True
