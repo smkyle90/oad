@@ -221,7 +221,7 @@ def pick():
         double_up_button_state = True
 
     if DEBUG:
-        liv_tournament_round = 0
+        liv_tournament_round -= 1
         liv_tournament_state = "pre"
         print(liv_tournament_state, liv_tournament_round)
 
@@ -318,7 +318,7 @@ def submit_pick():
     main_pick = request.form.get("main_pick").lower() == "true"
 
     if DEBUG:
-        liv_tournament_round = 0
+        liv_tournament_round -= 1
 
     # PGA Events. This is the old logic
     if main_pick:
