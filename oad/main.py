@@ -25,7 +25,7 @@ from .util import (
 from .util.admin import add_user_points
 from .views import league_page
 
-SEASON = int(os.getenv("OADYR", 2024))
+SEASON = int(os.getenv("OADYR", 2025))
 
 EMPTY_HTML = "<div></div>"
 
@@ -222,10 +222,15 @@ def pick():
     # print(liv_tournament_state, liv_tournament_round)
     if (
         True
-        # and (not prev_pick)
+        # Account for the case the the user has picked so we cannot use a liv line, if have not used it
+        # OR we want to modify our liv line pick.
+        and (
+            (prev_pick is not None and not current_user.liv_line_remaining)
+            or (prev_pick is None and current_user.liv_line_remaining)
+        )
         and (not liv_line_used)
-        and (liv_tournament_round < 1)
-        and (liv_tournament_state == "pre")
+        and (liv_tournament_round < 2)  # change back to 1
+        # and (liv_tournament_state == "pre") # Remove as comment
     ):
         liv_line_button_state = True
 
@@ -326,6 +331,7 @@ def submit_pick():
             # Need to issue a strike to user.
             current_user.strikes_remaining = 0
             current_user.strike_event = curr_event
+
     # LIV events. Previous we were using up a substitute to pick a LIV player
     # before that event started.
     else:
