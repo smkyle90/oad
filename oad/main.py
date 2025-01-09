@@ -25,7 +25,7 @@ from .util import (
 from .util.admin import add_user_points
 from .views import league_page
 
-DEBUG = True
+DEBUG = False
 
 SEASON = int(os.getenv("OADYR", 2025))
 
@@ -231,10 +231,22 @@ def pick():
         # Account for the case the the user has picked so we cannot use a liv line, if have not used it
         # OR we want to modify our liv line pick.
         and (
-            (prev_pick is not None and not current_user.liv_line_remaining)
-            or (prev_pick is None and current_user.liv_line_remaining)
+            # Base case of just using the LIV line without a prior pick
+            (
+                prev_pick is None
+                and current_user.liv_line_remaining
+                and not liv_line_used
+            )
+            # The case we have picked the PGA event but want to swap to LIV.
+            or (
+                prev_pick is not None
+                and current_user.liv_line_remaining
+                and not liv_line_used
+                and tournament_round < 1
+            )
+            # The case we have picked the LIV event and want to pick again.
+            or (prev_pick is not None and current_user.liv_line_event == curr_event)
         )
-        and (not liv_line_used)
         and (liv_tournament_round < 1)  # change back to 1
         and (liv_tournament_state == "pre")  # Remove as comment
     ):
@@ -305,6 +317,9 @@ def submit_pick():
     # LIV Line submit
     main_pick = request.form.get("main_pick").lower() == "true"
 
+    if DEBUG:
+        liv_tournament_round = 0
+
     # PGA Events. This is the old logic
     if main_pick:
         if tournament_round < 1:
@@ -341,7 +356,9 @@ def submit_pick():
     # LIV events. Previous we were using up a substitute to pick a LIV player
     # before that event started.
     else:
-        if (liv_tournament_round < 1) and (current_user.liv_line_remaining):
+        if (liv_tournament_round < 1) and (
+            current_user.liv_line_remaining or current_user.liv_line_event == curr_event
+        ):
             if prev_pick is None:
                 user_pick = Pick(
                     event=curr_event,
