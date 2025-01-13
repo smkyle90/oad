@@ -359,6 +359,8 @@ def submit_pick():
 
             # Set points multipluier to zero
             if prev_pick is not None:
+                prev_pick.points = 0
+                prev_pick.fedex = 0
                 prev_pick.point_multiplier = 0
 
             # Need to issue a strike to user.
@@ -529,6 +531,10 @@ def confirm_tap_in():
         .first()
     )
 
+    # Update the previous pick's points so we don't process it at the end of the
+    # week.
+    prev_pick.points = 0
+    prev_pick.fedex = 0
     prev_pick.point_multiplier = 0
     db.session.commit()
 
