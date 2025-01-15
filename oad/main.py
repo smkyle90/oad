@@ -257,7 +257,7 @@ def pick():
         )
         and (liv_tournament_round < 1)  # change back to 1
         and (liv_tournament_state == "pre")  # Remove as comment
-        and (tournament_round < 1)
+        # and (tournament_round < 1)
     ):
         liv_line_button_state = True
 
