@@ -593,8 +593,11 @@ def use_double_up():
 def use_liv_line():
     main_event, __, __, __, __ = get_event_info()
     curr_event, avail_picks, tournament_state, __, tournament_round = get_event_info(
-        data_source="liv_data"
+        data_source="liv_data", all_picks=LIV_DEBUG
     )
+
+    if LIV_DEBUG:
+        tournament_round = LIV_DEBUG_ROUND
 
     # Check if the user has made a previous pick for this event
     prev_pick = (
@@ -621,7 +624,7 @@ def use_liv_line():
 
     eligible_picks.sort()
 
-    pick_state = "you have yet to pick. Pick your any golfer in the LIV field."
+    pick_state = "you have yet to pick. Pick any golfer in the LIV field."
     button_text = "Use LIV-Line"
 
     if prev_pick is None:
