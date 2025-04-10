@@ -3,7 +3,7 @@ __pycache__
 
 
 # Database
-*.sqlite
+*.sqlite*
 *.rdb
 
 # Compiled
