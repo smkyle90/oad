@@ -723,7 +723,7 @@ def get_player_picks(name):
 
 
 @main.route("/mdp")
-@login_required
+# @login_required
 def mdp():
     # __, __, tournament_state, __, __ = get_event_info()
 

@@ -1,4 +1,5 @@
 """App entry point."""
+
 from oad import create_app
 
 application = create_app()
@@ -8,6 +9,8 @@ application = create_app()
 
 """
 ensure tto use venv not pipenv when installing the virtual environment
+
+sudo apt install libxml2-dev libxslt-dev
 
 python3 -m venv venv
 
