@@ -9,6 +9,7 @@ from .helpers import (
     get_event_info,
     get_fedex_points,
     get_live_scores,
+    get_primary_event,
     get_random_password_string,
     get_weekly_pick_table,
     get_withdrawl_list,

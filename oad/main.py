@@ -17,6 +17,7 @@ from .util import (
     format_earnings,
     get_earnings,
     get_event_info,
+    get_primary_event,
     get_weekly_pick_table,
     major_draft_pool,
     send_email,
@@ -262,6 +263,9 @@ def pick():
         # and (tournament_round < 1)
     ):
         liv_line_button_state = True
+
+    if get_primary_event().lower() == "liv":
+        liv_line_button_state = False
 
     if tournament_round:
         tournament_round = str(tournament_round)
