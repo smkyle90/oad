@@ -37,6 +37,27 @@
 </section>
 
 <section>
+  <form name="Select" action="{{ url_for('main.set_primary_event') }}" method="POST">
+  <h3>Primary Event</h3>
+    <select
+      class="dropbtn is-block ids-fullwidth"
+      id="primary_event"
+      name="primary_event"
+      type="text"
+      placeholder="Select event type."
+      style="width: 100%"
+    >
+      {% for event in primary_event %}
+      <option>{{ event }}</option>
+      {% endfor %}
+    </select>
+    <button class="button is-block is-info is-large is-fullwidth">
+      Select
+    </button>
+  </form>
+</section>
+
+<section>
   <form name="Select" action="{{ url_for('main.set_event_type') }}" method="POST">
   <h3>Event Type</h3>
     <select
@@ -55,7 +76,6 @@
       Select
     </button>
   </form>
-
 </section>
 
 

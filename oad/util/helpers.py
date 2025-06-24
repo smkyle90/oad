@@ -1,5 +1,5 @@
-"""App helper functions
-"""
+"""App helper functions"""
+
 import json
 import os
 import random
@@ -25,19 +25,20 @@ dirname = os.path.dirname(__file__)
 filename = os.path.join(dirname, "points.csv")
 POINTS_DF = pd.read_csv(filename)
 
-EVENT_URL = (
-    "https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga"
-)
 
-LIV_EVENT_URL = (
-    "https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=liv"
-)
+def generate_event_url(primary_event=None):
+    if primary_event is None:
+        primary_event = get_primary_event()
+    return f"https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league={primary_event}"
+
+
+LIV_EVENT_URL = generate_event_url("liv")
 
 PGA_URL = "https://www.pgatour.com/stats/stat.109.html"
 NON_PGA_URL = "https://www.pgatour.com/stats/stat.02677.html"
 
 # Ping API at most every UDPATE_TIME seconds
-UPDATE_TIME = 60
+UPDATE_TIME = 1
 
 
 def check_rule_status(user, current_event):
@@ -330,6 +331,7 @@ def update_cache_from_api(event_url=None):
     api_last_update = float(api_last_update)
 
     if time.time() - api_last_update > UPDATE_TIME:
+        EVENT_URL = generate_event_url()
         update_event_data_from_api(EVENT_URL, "pga_data")
         update_event_data_from_api(LIV_EVENT_URL, "liv_data")
 
@@ -607,9 +609,11 @@ def construct_user_table(
 
     for col in ["weekly earnings", "total earnings", "dollars back"]:
         new_col = [
-            format_earnings(val)
-            if val >= 0
-            else "-{}".format(format_earnings(abs(val)))
+            (
+                format_earnings(val)
+                if val >= 0
+                else "-{}".format(format_earnings(abs(val)))
+            )
             for val in user_df[col]
         ]
         user_df[col] = new_col
@@ -896,3 +900,18 @@ def get_event_type():
         event_type = event_type.decode()
 
     return event_type.lower()
+
+
+def cache_primary_event(primary_event):
+    redis_cache.set("primary_event", primary_event)
+
+
+def get_primary_event():
+    primary_event = redis_cache.get("primary_event")
+    if primary_event is None:
+        primary_event = "pga"
+        cache_primary_event(primary_event)
+    else:
+        primary_event = primary_event.decode()
+
+    return primary_event.lower()

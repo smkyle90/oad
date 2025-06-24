@@ -10,6 +10,7 @@ from . import db
 from .models import Pick, Player, User
 from .util import (
     cache_event_type,
+    cache_primary_event,
     check_rule_status,
     construct_user_table,
     create_pick_table,
@@ -39,6 +40,7 @@ EMPTY_HTML = "<div></div>"
 
 POINTS_LIST = ["regular", "signature", "major"]
 HELPERS_LIST = [None, "breakfast", "tapin", "double", "liv"]
+PRIMARY_EVENT = ["pga", "liv"]
 
 main = Blueprint("main", __name__)
 
@@ -419,6 +421,7 @@ def update():
         users=users,
         points_list=POINTS_LIST,
         helpers_list=HELPERS_LIST,
+        primary_event=PRIMARY_EVENT,
     )
 
 
@@ -436,6 +439,14 @@ def end_week():
 def set_event_type():
     event_type = request.form.get("event_type")
     cache_event_type(event_type)
+    return redirect(url_for("main.update"))
+
+
+@main.route("/set_primary_event", methods=["POST"])
+@login_required
+def set_primary_event():
+    primary_event = request.form.get("primary_event")
+    cache_primary_event(primary_event)
     return redirect(url_for("main.update"))
 
 

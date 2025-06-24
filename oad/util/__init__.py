@@ -1,5 +1,6 @@
 from .helpers import (
     cache_event_type,
+    cache_primary_event,
     check_rule_status,
     construct_user_table,
     create_pick_table,
