@@ -1,5 +1,4 @@
-"""Admin actions.
-"""
+"""Admin actions."""
 
 from .. import db
 from ..models import Pick, Player
