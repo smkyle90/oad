@@ -409,7 +409,7 @@ def update():
     users = User.query.all()
     users = [user.name for user in users]
 
-    update_button = False
+    update_button = get_primary_event().lower() == "liv"
 
     if tournament_state == "post":
         update_button = True
