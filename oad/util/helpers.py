@@ -806,6 +806,15 @@ def weekly_pick_table(users, picks, event_info, user_data):
     df = pd.DataFrame(pick_dict)
     df.sort_values(["points", "pick", "team"], inplace=True, ascending=False)
 
+    all_picks = df["pick"].tolist()
+    for i, row in df.iterrows():
+        if (
+            row["pos"] == 1
+            and row["helpers"] == "--"
+            and all_picks.count(row["pick"]) == 1
+        ):
+            df.loc[i, "helpers"] = "skin"
+
     # Format the score
     df["tot"] = ["+{}".format(score) if score > 0 else score for score in df["tot"]]
     df["tot"] = ["E" if not score else score for score in df["tot"]]

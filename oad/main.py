@@ -35,7 +35,7 @@ LIV_DEBUG = False
 LIV_DEBUG_ROUND = 0
 LIV_DEBUG_STATE = "pre"
 
-SEASON = int(os.getenv("OADYR", 2025))
+SEASON = int(os.getenv("OADYR", 0x2025))
 
 EMPTY_HTML = "<div></div>"
 
@@ -190,6 +190,13 @@ def pick():
     liv_line_button_state = False
     button_text = ""
 
+    is_liv = get_primary_event().lower() == "liv"
+
+    if is_liv:
+        tournament_rounds = 3
+    else:
+        tournament_rounds = 4
+
     if eligible_picks:
         eligible_picks.sort()
 
@@ -229,16 +236,24 @@ def pick():
             pick_state = "no players left to pick from."
 
     # Allow user to substitue their alternate in
-    if (prev_pick) and (not tap_in_used) and (1 <= tournament_round < 3):
+    if (
+        (prev_pick)
+        and (not tap_in_used)
+        and (1 <= tournament_round < tournament_rounds - 1)
+    ):
         substitute_button_state = True
 
     # Allow user the double up their earnings for the week
-    if (prev_pick) and (not double_up_used) and (1 <= tournament_round < 4):
+    if (
+        (prev_pick)
+        and (not double_up_used)
+        and (1 <= tournament_round < tournament_rounds)
+    ):
         double_up_button_state = True
 
     # Allow user to pick from LIV
     if (
-        True
+        not is_liv
         # Account for the case the the user has picked so we cannot use a liv line, if have not used it
         # OR we want to modify our liv line pick.
         and (
@@ -264,8 +279,8 @@ def pick():
     ):
         liv_line_button_state = True
 
-    if get_primary_event().lower() == "liv":
-        liv_line_button_state = False
+    # if is_liv:
+    #     liv_line_button_state = False
 
     if tournament_round:
         tournament_round = str(tournament_round)
