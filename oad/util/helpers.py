@@ -644,6 +644,10 @@ def construct_user_table(
 
 # Add the projected fedex points for this event
 def add_live_scores(live_scores, curr_round, event_type):
+
+    if live_scores is None:
+        return {}
+
     for pick in live_scores:
         # print(pick, live_scores.get(pick))
         try:

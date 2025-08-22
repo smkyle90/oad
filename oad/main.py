@@ -197,12 +197,16 @@ def pick():
     else:
         tournament_rounds = 4
 
+    pick_state = ""
+
     if eligible_picks:
         eligible_picks.sort()
 
         if current_user.liv_line_event == curr_event:
             pick_state = "you have used your LIV Line this week."
         # Warn the user about the picking state
+        elif tournament_round is None:
+            pick_state = "you are unable to pick (invalid round)."
         elif tournament_round < 1 or tournament_state == "pre":
             if prev_pick is None:
                 pick_state = "you have yet to pick. Pick any golfer in the field."
@@ -228,7 +232,10 @@ def pick():
         else:
             pick_state = "you are out of options for this week."
     else:
-        if tournament_round < 1:
+        print(tournament_round)
+        if tournament_round is None:
+            pick_state = "you are unable to pick (invalid round)."
+        elif tournament_round < 1:
             pick_state = (
                 "our friends at ESPN have not released the field for this week."
             )
@@ -355,7 +362,9 @@ def submit_pick():
 
     # PGA Events. This is the old logic
     if main_pick:
-        if tournament_round < 1:
+        if tournament_round is None:
+            pass
+        elif tournament_round < 1:
             if prev_pick is None:
                 user_pick = Pick(
                     event=curr_event,
