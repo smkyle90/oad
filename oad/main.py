@@ -35,7 +35,7 @@ LIV_DEBUG = False
 LIV_DEBUG_ROUND = 0
 LIV_DEBUG_STATE = "pre"
 
-SEASON = int(os.getenv("OADYR", 0x2025))
+SEASON = int(os.getenv("OADYR", 2026))
 
 EMPTY_HTML = "<div></div>"
 
@@ -193,7 +193,7 @@ def pick():
     is_liv = get_primary_event().lower() == "liv"
 
     if is_liv:
-        tournament_rounds = 3
+        tournament_rounds = 4
     else:
         tournament_rounds = 4
 
