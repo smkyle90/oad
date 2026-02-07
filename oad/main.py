@@ -65,8 +65,7 @@ def profile():
 
     pick_table = create_pick_table(picks)
 
-    total_points = format_earnings(sum([int(x.points) for x in picks]))
-    # total_points = 1
+    total_points = int(sum([x.fedex for x in picks]))
     return render_template(
         "profile.html",
         user=current_user,

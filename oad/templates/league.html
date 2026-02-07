@@ -1,75 +1,147 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Plotly (keep it here or move into base.html if used site-wide) -->
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
- -->
-{% extends "base.html" %} {% block content %}
-<h1 class="title">{{ season }} League Information</h1>
-<p><a href="{{ url_for('main.rules') }}">
-  See full rules.
-</a></p>
 
-<section>
-<div>
-  <h2>Weekly Leaderboard</h2>
-</div>
-</section>
-
-{% if show_picks %}
-<section>
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2 mb-3">
   <div>
-    <h3 class="subtitle" style="text-align: center">LEADERS</h3>
-    {{ p_table | safe }}
+    <h1 class="mb-1">{{ season }} League Information</h1>
+    <div class="text-muted" style="color: rgba(255,255,255,0.68) !important;">
+      Leaderboards, tournament info, and history.
+    </div>
   </div>
-</section>
-{% endif %}
 
-<section>
-<div>
-  <h3 class="subtitle">Tournament Info</h3>
-    {{ event_table | safe }}
+  <a class="btn btn-sm btn-outline-light" href="{{ url_for('main.rules') }}">
+    <i class="fa-solid fa-book me-2"></i>Rules
+  </a>
 </div>
-</section>
 
-<section>
-<div>
-  <h2>League</h2>
-</div>
-</section>
+<!-- Weekly Leaderboard -->
+<div class="mb-4">
+  <div class="d-flex align-items-center justify-content-between mb-2">
+    <h2 class="mb-0">Weekly Leaderboard</h2>
+  </div>
 
-<section>
-<div>
-  <h3 class="subtitle">League Leaders</h3>
-<div>
-{{ u_table | safe }}
+  {% if show_picks %}
+  <div class="p-3 p-md-4 rounded-4 border" style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.10) !important;">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <h3 class="mb-0">Leaders</h3>
+      <span class="small" style="color: rgba(255,255,255,0.60);">Updated automatically</span>
+    </div>
+
+    <div class="table-wrap">
+      {{ p_table | safe }}
+    </div>
+  </div>
+  {% else %}
+  <div class="p-3 p-md-4 rounded-4 border" style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.10) !important;">
+    <p class="mb-0" style="color: rgba(255,255,255,0.68);">
+      Weekly picks aren’t available yet.
+    </p>
+  </div>
+  {% endif %}
 </div>
+
+<!-- Tournament Info -->
+<div class="mb-4">
+  <h2 class="mb-2">Tournament Info</h2>
+  <div class="p-3 p-md-4 rounded-4 border" style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.10) !important;">
+    <div class="table-wrap">
+      {{ event_table | safe }}
+    </div>
+  </div>
 </div>
-</section>
+
+<!-- League Leaders -->
+<div class="mb-4">
+  <h2 class="mb-2">League</h2>
+  <div class="p-3 p-md-4 rounded-4 border" style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.10) !important;">
+    <h3 class="mb-2">League Leaders</h3>
+    <div class="table-wrap">
+      {{ u_table | safe }}
+    </div>
+  </div>
+</div>
 
 {% if show_data %}
-<section>
-<div>
-  <h3 class="subtitle">Pick History</h3>
-  <div style="width: 100%; overflow-x: scroll;" class="league-picks">
-    {{ ph_table | safe }}
-  </div>
-    <!-- <div class="chart" id="bargraph">
-      <script style="width: 100%">
-        var graphs = {{ plot | safe }};
-        Plotly.plot('bargraph',graphs,{});
-      </script>
-    </div> -->
-</div>
-</section>
-<section>
-<div>
-  <h3 class="subtitle">Points History</h3>
-    <div class="chart" id="chart">
-      <script style="width: 100%">
-        var graphs = {{ points | safe }};
-        Plotly.plot('chart',graphs,{});
-      </script>
+<!-- Pick History -->
+<div class="mb-4">
+  <h2 class="mb-2">History</h2>
+  <div class="p-3 p-md-4 rounded-4 border" style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.10) !important;">
+    <h3 class="mb-3">Pick History</h3>
+
+    <div class="league-picks table-scroll rounded-3">
+      {{ ph_table | safe }}
     </div>
+
+    <div class="small mt-2" style="color: rgba(255,255,255,0.60);">
+      Tip: scroll horizontally to view all columns.
+    </div>
+  </div>
 </div>
-</section>
+
+<!-- Points History -->
+<div class="mb-2">
+  <div class="p-3 p-md-4 rounded-4 border" style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.10) !important;">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <h3 class="mb-0">Points History</h3>
+      <span class="small" style="color: rgba(255,255,255,0.60);">Interactive</span>
+    </div>
+
+    <div id="chart" class="plotly-card"></div>
+
+    <script>
+      (function () {
+        var graphs = {{ points | safe }};
+        Plotly.newPlot('chart', graphs, {
+          margin: { l: 40, r: 20, t: 20, b: 40 },
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: 'rgba(255,255,255,0.88)' }
+        }, { responsive: true });
+      })();
+    </script>
+  </div>
+</div>
 {% endif %}
-<br>
+
+<!-- Page-local styling helpers for safe-rendered tables -->
+<style>
+  /* Make any injected tables look like Bootstrap tables */
+  .table-wrap table,
+  .table-scroll table {
+    width: 100%;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    overflow: hidden;
+  }
+
+  /* If your |safe tables don't include classes, we still style them */
+  .table-wrap th,
+  .table-wrap td,
+  .table-scroll th,
+  .table-scroll td {
+    border-color: rgba(255,255,255,0.10) !important;
+  }
+
+  /* Scroll container for pick history */
+  .table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.03);
+  }
+
+  /* Plotly container */
+  .plotly-card {
+    width: 100%;
+    min-height: 320px;
+  }
+
+  /* Optional: soften the old "red columns" if desired */
+  /* .league-picks td:nth-child(3),
+     .league-picks td:nth-child(4) { color: rgba(255,255,255,0.86) !important; } */
+</style>
+
 {% endblock %}

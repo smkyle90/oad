@@ -1,321 +1,340 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>1993 OAD. pick 'em and stick 'em.</title>
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.0/css/bulma.min.css" /> -->
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" /> -->
+
     <link
       rel="icon"
       type="image/png"
       href="https://www.pngfind.com/pngs/m/523-5231197_patrick-reed-celebrating-ultimate-software-patrick-reed-hd.png"
     />
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> -->
-    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"> -->
-    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> -->
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Icons -->
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css"
-      type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      referrerpolicy="no-referrer"
     />
+
+    <!-- Bootstrap 5 (replaces your dead Pingendo Bootstrap 4 beta) -->
     <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
-      href="https://pingendo.com/assets/bootstrap/bootstrap-4.0.0-beta.1.css"
-      type="text/css"
     />
-    <!-- <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script> -->
-    <!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script> -->
-    <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script> -->
-    <style media="screen" type="text/css">
-      /*https://coolors.co/FBE200-006747-FFFFFF-fc5130*/
-      /*charcoal #006747
-      blue #FBE200
-      red #FC5130
-      light grey #FFFFFF*/
+
+    <style>
+      :root {
+        --bg: #0f1115;
+        --panel: #151922;
+        --panel-2: #1b2030;
+        --border: #2a3244;
+        --text: #e8edf6;
+        --muted: #aab3c5;
+
+        --brand: #22c55e;
+        --danger: #ef4444;
+
+        --radius: 12px;
+      }
+
       * {
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       }
+
       body {
-        background-color: #FFFFFF;
-        padding-bottom: 70px;
+        background: var(--bg);
+        color: var(--text);
+        padding-bottom: 90px; /* room for fixed bottom nav */
       }
 
-      section {
-        padding-top: 20px;
+      /* Main page wrapper */
+      section { padding-top: 28px; }
+
+      .app-shell {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 0 16px;
       }
 
+      .app-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 22px;
+      }
+
+      /* Typography */
+      /* Titles — brand coloured but dark-mode friendly */
       h1 {
-        color: #006747;
-        padding-top: 50px;
+        color: #34d399;   /* emerald green */
+        font-weight: 800;
       }
+
       h2 {
-        color: #FBE200;
-        padding-top: 30px;
+        color: #facc15;   /* gold */
+        font-weight: 700;
       }
+
       h3 {
-        color: #006747;
-        padding-top: 10px;
-      }
-      p {
-        color: #006747;
-        padding-top: 10px;
+        color: #a7f3d0;   /* softer green for hierarchy */
+        font-weight: 700;
       }
 
-      table {
-        border-collapse: collapse;
+      /* Optional: subtle section subtitles */
+      .subtitle,
+      .text-muted-title {
+        color: #93c5fd;   /* cool soft blue accent */
+      }
+
+      p  { color: var(--muted); }
+
+      a { color: var(--text); }
+      a:hover { color: var(--brand); }
+
+      /* Inputs */
+      input[type="text"],
+      input[type="password"],
+      input[type="email"],
+      select,
+      textarea {
+        background: var(--panel-2) !important;
+        border: 1px solid var(--border) !important;
+        color: var(--text) !important;
+        border-radius: 10px !important;
+        padding: 12px 14px !important;
+        box-shadow: none !important;
+      }
+      input::placeholder, textarea::placeholder { color: rgba(232,237,246,0.45); }
+      input:focus, select:focus, textarea:focus {
+        border-color: rgba(34,197,94,0.8) !important;
+        outline: none !important;
+        box-shadow: none !important;
+      }
+
+      /* Buttons (works for your existing .button class) */
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
         width: 100%;
-        font-size: small;
-        position: relative;
+        padding: 12px 16px;
+        border-radius: 10px;
+        border: 1px solid rgba(34,197,94,0.55);
+        background: var(--brand);
+        color: #07110b;
+        font-weight: 800;
+        transition: filter 0.15s ease;
+      }
+      .button:hover { filter: brightness(1.05); }
+      .button:active { filter: brightness(0.98); }
+
+      .button.disabled,
+      .disabled {
+        opacity: 0.55;
+        background: #2a2f3a;
+        border-color: #2a2f3a;
+        color: var(--text);
+        cursor: not-allowed;
       }
 
-      td {
-        border: 1px solid #000000;
-        text-align: center;
-        padding: 4px;
-        cursor: pointer;
-        font-size: x-small;
-        text-transform: uppercase;
-        font-weight: bold;
-      }
-
-      td:nth-child(3) { color: red; }
-      td:nth-child(4) { color: red; }
-
-      .league-picks td:nth-child(3) {
-        color: black; /* your new color for the third column */
-      }
-
-      .league-picks td:nth-child(4) {
-        color: black; /* your new color for the fourth column */
+      /* Tables */
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--panel);
+        font-size: 0.9rem;
       }
 
       th {
-        border: 1px solid #000000;
+        padding: 10px 8px;
+        background: var(--panel-2);
+        color: var(--text);
+        font-weight: 800;
+        border-bottom: 1px solid var(--border);
         text-align: center;
-        padding: 4px;
-        cursor: pointer;
-        font-size: x-small;
-        background-color: #CCCACE;
-
+        white-space: nowrap;
       }
 
-      tr:nth-child(even) {
-        background-color: #CCCACE;
-      }
-
-      input[type="text"],
-      input[type="password"],
-      input[type="email"] {
-        font-size: 16px;
-        padding: 20px 20px;
-        margin: 20px 0;
-        box-sizing: border-box;
-        border: 2px #fea698;
-        border-radius: 10px;
-        width: 100%;
-        /*max-width: 600px*/
-      }
-
-      .button {
-        background-color: #006747;
-        border: none;
-        color: white;
-        padding: 16px 32px;
+      td {
+        padding: 9px 8px;
+        color: var(--text);
+        border-bottom: 1px solid var(--border);
         text-align: center;
-        font-size: 16px;
-        margin: 4px 2px;
-        transition: 0.3s;
-        width: 100%;
-        /*max-width: 600px*/
-      }
-
-      .disabled {background-color: #e7e7e7; color: black;} /* Gray */
-      .disabled:hover {
-        background-color: #e7e7e7;
-      }
-
-      .button:hover {
-        background-color: #FBE200;
-      }
-
-      /* Style the tab */
-      .tab {
-        overflow: hidden;
-        border: 1px solid #ccc;
-        background-color: #f1f1f1;
-      }
-      /* Style the buttons inside the tab */
-      .tab button {
-        background-color: inherit;
-        float: left;
-        border: none;
-        outline: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
         cursor: pointer;
-        padding: 14px 16px;
-        transition: 0.3s;
-        font-size: 17px;
       }
-      /* Change background color of buttons on hover */
-      .tab button:hover {
-        background-color: #ddd;
+
+      tr:last-child td { border-bottom: none; }
+      tr:hover td { background: rgba(255,255,255,0.03); }
+
+      /* Keep your “red” columns, but more subtle */
+      td:nth-child(3),
+      td:nth-child(4) { color: rgba(239,68,68,0.95); }
+
+      .league-picks td:nth-child(3),
+      .league-picks td:nth-child(4) { color: var(--text); }
+
+      /* Bottom navbar */
+      .navbar.fixed-bottom {
+        background: var(--panel);
+        border-top: 1px solid var(--border);
       }
-      /* Create an active/current tablink class */
-      .tab button.active {
-        background-color: #ccc;
+
+      .bottom-nav-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
       }
-      /* Style the tab content */
-      .tabcontent {
-        display: none;
-        padding: 6px 12px;
-        border: 1px solid #ccc;
-        border-top: none;
-      }
-      .dropup .dropdown-menu {
-        top: auto;
-        bottom: 100%;
-        /*left: -100%;*/
-        margin-bottom: 20px;
-        /*color: white;*/
-#        overflow-y: scroll;
-      }
-      .fa {
-        line-height: 40px;
-        vertical-align: middle;
-        color: #FBE200;
-      }
+
       .nav-link {
-        color: #FBE200;
+        color: var(--text) !important;
+        font-weight: 700;
+        padding: 8px 10px !important;
+        border-radius: 10px;
+      }
+      .nav-link:hover { background: rgba(255,255,255,0.04); }
+
+      .nav-icon {
+        width: 38px;
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: var(--panel-2);
+        border: 1px solid var(--border);
       }
 
-      #text {
-        color: #FFFFFF;
+      body {
+        padding-bottom: calc(90px + env(safe-area-inset-bottom));
       }
 
-      #dup_butt {
-        color: #FBE200;
-        background-color: #006747;
-        border-color: #006747;
+      .navbar.fixed-bottom {
+        padding-bottom: env(safe-area-inset-bottom);
       }
-      .bg-dark {
-        background-color: #006747 !important;
+
+
+      /* Dropdown */
+      .dropdown-menu {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 8px;
+      }
+      .dropdown-item {
+        color: var(--text);
+        border-radius: 10px;
+        padding: 10px 10px;
+      }
+      .dropdown-item:hover { background: rgba(255,255,255,0.05); }
+      .dropdown-divider { border-top: 1px solid var(--border); }
+
+      @media (max-width: 420px) {
+        .nav-text { display: none; }
+        .app-card { padding: 16px; }
       }
     </style>
+
+
   </head>
+
   <body>
-    <!-- START PAGE BOTTOM - CUSTOM !-->
     <section>
-      <div>
-        <div class="container has-text-centered">
-          {% block content %} {% endblock %}
+      <div class="app-shell">
+        <div class="app-card">
+          {% block content %}{% endblock %}
         </div>
       </div>
     </section>
-    <!-- END PAGE BOTTOM - CUSTOM !-->
-    <!-- START NAVBAR BOTTOM - CUSTOM !-->
-    <nav class="navbar fixed-bottom navbar-dark bg-dark">
-      <div class="container p-0">
-        <!-- Default dropup button -->
-        <div class="btn-group dropup btn-group-sm" style="color: blue">
-          {% if current_user.is_authenticated %}
+
+    <!-- Bottom navbar -->
+    <nav class="navbar fixed-bottom">
+      <div class="container bottom-nav-wrap px-3">
+        {% if current_user.is_authenticated %}
+        <div class="btn-group dropup">
           <button
+            class="btn btn-sm btn-outline-light dropdown-toggle d-inline-flex align-items-center gap-2"
             type="button"
-            class="btn dropdown-toggle btn-warning"
+            data-bs-toggle="dropdown"
             aria-expanded="false"
-            aria-haspopup="true"
-            data-toggle="dropdown"
-            id="dup_butt"
           >
-            <i class="fa fa-user fa-lg"></i>
-            <!-- {% set initials = current_user.name.split() | map('first') | join('') %} -->
-            <span id="text">&nbsp;My Profile</span>
+            <span class="nav-icon"><i class="fa-solid fa-user"></i></span>
+            <span class="nav-text">My Profile</span>
           </button>
-          <div class="dropdown-menu text-left">
+          <div class="dropdown-menu dropdown-menu-start">
             <a href="{{ url_for('auth.logout') }}" class="dropdown-item">
-              Logout
+              <i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Logout
             </a>
             <div class="dropdown-divider"></div>
+
             {% if current_user.is_admin %}
             <a href="{{ url_for('main.update') }}" class="dropdown-item">
-              Admin
+              <i class="fa-solid fa-shield-halved me-2"></i>Admin
             </a>
             {% endif %}
-            <a
-              href="{{ url_for('main.update_password') }}"
-              class="dropdown-item"
-            >
-              Update Password
+
+            <a href="{{ url_for('main.update_password') }}" class="dropdown-item">
+              <i class="fa-solid fa-key me-2"></i>Update Password
             </a>
-            <a
-              href="{{ url_for('main.update_display_name') }}"
-              class="dropdown-item"
-            >
-              Update Team Name
+
+            <a href="{{ url_for('main.update_display_name') }}" class="dropdown-item">
+              <i class="fa-solid fa-pen-to-square me-2"></i>Update Team Name
             </a>
+
             <a href="{{ url_for('main.profile') }}" class="dropdown-item">
-              Pick History
+              <i class="fa-solid fa-clock-rotate-left me-2"></i>Pick History
             </a>
           </div>
         </div>
-        <!-- START NAVBAR BOTTOM - NAV LEFT - CUSTOM !-->
-        <nav class="nav">
-          <a
-            class="nav-link text-warning px-0 pr-4"
-            href="{{ url_for('main.league') }}"
-          >
-            <i class="fa fa-golf-ball fa-lg"></i>
-            <span id="text">&nbsp;League</span>
+
+        <div class="d-flex align-items-center gap-2">
+          <a class="nav-link d-inline-flex align-items-center gap-2" href="{{ url_for('main.league') }}">
+            <span class="nav-icon"><i class="fa-solid fa-trophy"></i></span>
+            <span class="nav-text">League</span>
           </a>
-        </nav>
-        <nav class="nav">
-          <a
-            class="nav-link text-warning px-0 pr-4"
-            href="{{ url_for('main.pick') }}"
-          >
-            <i class="fa fa-ticket-alt fa-lg"></i>
-            <span id="text">&nbsp;Pick</span>
+
+          <a class="nav-link d-inline-flex align-items-center gap-2" href="{{ url_for('main.pick') }}">
+            <span class="nav-icon"><i class="fa-solid fa-ticket"></i></span>
+            <span class="nav-text">Pick</span>
           </a>
-        </nav>
-        {% endif %} {% if not current_user.is_authenticated %}
-        <nav class="nav">
-          <a
-            class="nav-link text-warning px-0 pr-4"
-            href="{{ url_for('auth.login') }}"
-          >
-            <i class="fa fa-sign-in-alt fa-lg"></i>
-            <span id="text">&nbsp;Login</span>
+        </div>
+
+        {% else %}
+        <div class="d-flex align-items-center gap-2 w-100 justify-content-between">
+          <a class="nav-link d-inline-flex align-items-center gap-2" href="{{ url_for('auth.login') }}">
+            <span class="nav-icon"><i class="fa-solid fa-right-to-bracket"></i></span>
+            <span class="nav-text">Login</span>
           </a>
-          <a
-            class="nav-link text-warning px-0 pr-4"
-            href="{{ url_for('auth.signup') }}"
-          >
-            <i class="fa fa-user-plus fa-lg"></i>
-            <span id="text">&nbsp;Sign Up</span>
+
+          <a class="nav-link d-inline-flex align-items-center gap-2" href="{{ url_for('auth.signup') }}">
+            <span class="nav-icon"><i class="fa-solid fa-user-plus"></i></span>
+            <span class="nav-text">Sign Up</span>
           </a>
-        </nav>
+        </div>
         {% endif %}
-        <!-- END NAVBAR BOTTOM - NAV LEFT - CUSTOM !-->
       </div>
     </nav>
-    <!-- END NAVBAR BOTTOM - CUSTOM !-->
-    <script
-      src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"
-      integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"
-      integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1"
-      crossorigin="anonymous"
-    ></script>
+
+    <!-- Bootstrap 5 JS (no jQuery required) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

@@ -1,98 +1,199 @@
-{% extends "base.html" %} {% block content %}
-<h1 class="title">{{ event }} pick</h1>
-<h3 class="title">Current Round: {{ current_round }}</h3>
-<h2 class="title">Pick</h2>
+{% extends "base.html" %}
+{% block content %}
 
-<section>
-  <p class="title">{{ user }}, {{ pick_text }}</p>
-  <p> {{ prev_pick_show }} </p>
-  {% if strike_button_state %}
-  <form name="Select" action="{{ url_for('main.submit_pick') }}" method="POST">
-  <h3>Main Pick</h3>
-    <select
-      class="dropbtn is-block ids-fullwidth"
-      name="main"
-      name="main"
-      type="text"
-      placeholder="Select your golfer."
-      style="width: 100%"
-    >
-      {% for pick in avail %}
-      <option>{{ pick }}</option>
-      {% endfor %}
-    </select>
-  <h3>Alternate Pick</h3>
-    <select
-      class="dropbtn is-block ids-fullwidth"
-      id="alternate"
-      name="alternate"
-      type="text"
-      placeholder="Select your alternate."
-      style="width: 100%"
-    >
-      {% for pick in avail %}
-      <option>{{ pick }}</option>
-      {% endfor %}
-    </select>
-    <button class="button is-block is-info is-large is-fullwidth">
-      {{ submit_text }}
-    </button>
-    <input type="hidden" name="main_pick" value="{{ main_pick }}">
-  </form>
-  {% else %}
-    <button class="button disabled" diabled>
-      Unable to Pick
-    </button>
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2 mb-3">
+  <div>
+    <h1 class="mb-1">{{ event }} Pick</h1>
+    <div class="text-muted" style="color: rgba(255,255,255,0.68) !important;">
+      Current Round: <span class="fw-semibold" style="color: rgba(255,255,255,0.90);">{{ current_round }}</span>
+    </div>
+  </div>
+</div>
 
-{% endif %}
+<div class="mb-4">
+  <h2 class="mb-2">Pick</h2>
 
-</section>
+  <div class="p-3 p-md-4 rounded-4 border"
+       style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.10) !important;">
 
+    <div class="mb-3">
+      <div class="fw-semibold" style="color: rgba(255,255,255,0.92);">
+        {{ user }}, {{ pick_text }}
+      </div>
+      {% if prev_pick_show %}
+      <div class="small mt-1" style="color: rgba(255,255,255,0.60);">
+        {{ prev_pick_show }}
+      </div>
+      {% endif %}
+    </div>
+
+    {% if strike_button_state %}
+    <form name="Select" action="{{ url_for('main.submit_pick') }}" method="POST" class="d-grid gap-3">
+
+      <div>
+        <label for="main" class="form-label mb-1 fw-semibold">Main Pick</label>
+        <select id="main" class="form-select" name="main" required>
+          {% for pick in avail %}
+          <option>{{ pick }}</option>
+          {% endfor %}
+        </select>
+        <div class="form-text" style="color: rgba(255,255,255,0.55) !important;">
+          Choose your primary golfer for the week.
+        </div>
+      </div>
+
+      <div>
+        <label for="alternate" class="form-label mb-1 fw-semibold">Alternate Pick</label>
+        <select id="alternate" class="form-select" name="alternate" required>
+          {% for pick in avail %}
+          <option>{{ pick }}</option>
+          {% endfor %}
+        </select>
+        <div class="form-text" style="color: rgba(255,255,255,0.55) !important;">
+          Backup golfer used by Tap-In.
+        </div>
+      </div>
+
+      <input type="hidden" name="main_pick" value="{{ main_pick }}">
+
+      <button type="submit" class="button">
+        <i class="fa-solid fa-paper-plane"></i>
+        {{ submit_text }}
+      </button>
+
+    </form>
+    {% else %}
+      <button class="button disabled" disabled>
+        <i class="fa-solid fa-ban"></i>
+        Unable to Pick
+      </button>
+      <div class="small mt-2" style="color: rgba(255,255,255,0.60);">
+        Picking is currently locked for this round/event.
+      </div>
+    {% endif %}
+
+  </div>
+</div>
 
 {% if main_pick %}
+<div class="mb-3">
+  <h2 class="mb-2">Available Lifelines</h2>
 
-<h2 class="title">Available Lifelines</h2>
-    <p> {{ prev_alt_show }} </p>
-    <p>Tap-In: Replace your Primary selection with your Alternate. Use before the start of the third round.</p>
-
-
-  {% if substitute_button_state %}
-
-  <button class="button" onclick="window.location.href='/use_tap_in';">
-    Use Tap-In
-  </button>
-  {% else %}
-    <button class="button disabled" diabled>
-      Unable to Use Tap-In
-    </button>
+  {% if prev_alt_show %}
+  <div class="small mb-3" style="color: rgba(255,255,255,0.60);">
+    {{ prev_alt_show }}
+  </div>
   {% endif %}
 
-  <p> Double-Up: Double your Primary golfer's points for this week. Use before the start of the fourth round.</p>
+  <div class="row g-3">
 
-  {% if double_up_button_state %}
+    <!-- Tap-In -->
+    <div class="col-12 col-lg-4">
+      <div class="p-3 rounded-4 border h-100"
+           style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.10) !important;">
+        <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+          <div>
+            <div class="fw-bold">Tap-In</div>
+            <div class="small" style="color: rgba(255,255,255,0.60);">
+              Replace your Primary selection with your Alternate.
+            </div>
+          </div>
+          <span class="badge rounded-pill"
+                style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.80);">
+            Before Round 3
+          </span>
+        </div>
 
-    <button class="button" onclick="window.location.href='/use_double_up';">
-      Use Double-Up
-    </button>
-  {% else %}
-    <button class="button disabled" diabled>
-      Unable to Use Double-Up
-    </button>
-  {% endif %}
+        <div class="small mb-3" style="color: rgba(255,255,255,0.60);">
+          Use before the start of the third round.
+        </div>
 
-  <p>LIV-Line: Pick a LIV golfer in a LIV event with Signature Event points. Use before the start of one LIV tournament.</p>
+        {% if substitute_button_state %}
+          <button class="button" onclick="window.location.href='/use_tap_in';">
+            <i class="fa-solid fa-rotate"></i>
+            Use Tap-In
+          </button>
+        {% else %}
+          <button class="button disabled" disabled>
+            <i class="fa-solid fa-lock"></i>
+            Unable to Use Tap-In
+          </button>
+        {% endif %}
+      </div>
+    </div>
 
-  {% if liv_line_button_state %}
+    <!-- Double-Up -->
+    <div class="col-12 col-lg-4">
+      <div class="p-3 rounded-4 border h-100"
+           style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.10) !important;">
+        <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+          <div>
+            <div class="fw-bold">Double-Up</div>
+            <div class="small" style="color: rgba(255,255,255,0.60);">
+              Double your Primary golfer’s points for this week.
+            </div>
+          </div>
+          <span class="badge rounded-pill"
+                style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.80);">
+            Before Round 4
+          </span>
+        </div>
 
-    <button class="button" onclick="window.location.href='/use_liv_line';">
-      Use LIV-Line
-    </button>
-  {% else %}
-    <button class="button disabled" diabled>
-      Unable to Use LIV-Line
-    </button>
-  {% endif %}
+        <div class="small mb-3" style="color: rgba(255,255,255,0.60);">
+          Use before the start of the fourth round.
+        </div>
 
+        {% if double_up_button_state %}
+          <button class="button" onclick="window.location.href='/use_double_up';">
+            <i class="fa-solid fa-bolt"></i>
+            Use Double-Up
+          </button>
+        {% else %}
+          <button class="button disabled" disabled>
+            <i class="fa-solid fa-lock"></i>
+            Unable to Use Double-Up
+          </button>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- LIV-Line -->
+    <div class="col-12 col-lg-4">
+      <div class="p-3 rounded-4 border h-100"
+           style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.10) !important;">
+        <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+          <div>
+            <div class="fw-bold">LIV-Line</div>
+            <div class="small" style="color: rgba(255,255,255,0.60);">
+              Pick a LIV golfer in a LIV event with Signature Event points.
+            </div>
+          </div>
+          <span class="badge rounded-pill"
+                style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.80);">
+            One-time
+          </span>
+        </div>
+
+        <div class="small mb-3" style="color: rgba(255,255,255,0.60);">
+          Use before the start of one LIV tournament.
+        </div>
+
+        {% if liv_line_button_state %}
+          <button class="button" onclick="window.location.href='/use_liv_line';">
+            <i class="fa-solid fa-flag-checkered"></i>
+            Use LIV-Line
+          </button>
+        {% else %}
+          <button class="button disabled" disabled>
+            <i class="fa-solid fa-lock"></i>
+            Unable to Use LIV-Line
+          </button>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
 {% endif %}
-<br>
+
 {% endblock %}
