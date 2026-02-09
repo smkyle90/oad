@@ -161,6 +161,34 @@
         font-size: 0.9rem;
       }
 
+      /* Scroll wrapper that keeps the table inside the card */
+      .table-scroll {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+
+        /* keeps it inside rounded card edges */
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--panel);
+      }
+
+      /* Make sure table doesn't force the page wider */
+      .table-scroll table {
+        width: max-content;   /* allow natural width so horizontal scroll works */
+        min-width: 100%;      /* but at least fill container */
+        max-width: none;
+        margin: 0;
+      }
+
+      /* Prevent long text from expanding columns infinitely */
+      .table-scroll th,
+      .table-scroll td {
+        white-space: nowrap;
+      }
+
+
       th {
         padding: 10px 8px;
         background: var(--panel-2);
@@ -252,6 +280,54 @@
         .nav-text { display: none; }
         .app-card { padding: 16px; }
       }
+      /* MOBILE DENSITY MODE */
+      @media (max-width: 600px) {
+
+        /* Overall type scale down slightly */
+        body {
+          font-size: 14px;
+        }
+
+        h1 { font-size: 1.35rem; }
+        h2 { font-size: 1.15rem; }
+        h3 { font-size: 1.05rem; }
+
+        /* Tables: biggest impact */
+        table {
+          font-size: 0.72rem;
+        }
+
+        th, td {
+          padding: 6px 6px;
+        }
+
+        /* Make numbers tighter */
+        td {
+          letter-spacing: -0.01em;
+        }
+
+        /* Navbar labels smaller */
+        .nav-link {
+          font-size: 0.78rem;
+        }
+
+        .nav-icon {
+          width: 32px;
+          height: 32px;
+        }
+
+        /* Buttons slightly tighter */
+        .button {
+          padding: 10px 12px;
+          font-size: 0.85rem;
+        }
+
+        /* Card padding reduced */
+        .app-card {
+          padding: 14px;
+        }
+      }
+
     </style>
 
 
