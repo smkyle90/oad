@@ -38,7 +38,7 @@ PGA_URL = "https://www.pgatour.com/stats/stat.109.html"
 NON_PGA_URL = "https://www.pgatour.com/stats/stat.02677.html"
 
 # Ping API at most every UDPATE_TIME seconds
-UPDATE_TIME = 1
+UPDATE_TIME = 300
 
 
 def check_rule_status(user, current_event):
