@@ -139,7 +139,14 @@ def get_avail_from_data(data, all_picks):
             if (a["status"]["period"] < 2) and (a["status"]["type"]["state"] == "pre")
         ]
 
-    return picks
+    all_picks = []
+    for pick in picks:
+        split = pick.split(" / ")
+        all_picks.extend(split)
+
+    print(all_picks)
+
+    return all_picks
 
 
 def get_tournament_info(data):
