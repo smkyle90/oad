@@ -40,6 +40,7 @@ NON_PGA_URL = "https://www.pgatour.com/stats/stat.02677.html"
 # Ping API at most every UDPATE_TIME seconds
 UPDATE_TIME = 300
 
+PLAYER_KEY = "team" # "athlete" for normal weeks
 
 def check_rule_status(user, current_event):
     # Check the user has not used their rules.
@@ -120,14 +121,14 @@ def get_avail_from_data(data, all_picks):
 
     if all_picks:
         picks = [
-            a["athlete"]["displayName"]
+            a[PLAYER_KEY]["displayName"]
             for a in data.get("events", [EVENT_NO])[EVENT_NO]
             .get("competitions", [0])[0]
             .get("competitors", [])
         ]
     else:
         picks = [
-            a["athlete"]["displayName"]
+            a[PLAYER_KEY]["displayName"]
             for a in data.get("events", [EVENT_NO])[EVENT_NO]
             .get("competitions", [0])[0]
             .get("competitors", [])

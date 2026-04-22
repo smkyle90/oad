@@ -438,6 +438,12 @@ def update():
     if tournament_state == "post":
         update_button = True
 
+    if avail_picks is None:
+        avail_picks = []
+
+    if liv_avail_picks is None:
+        liv_avail_picks = []
+  
     avail_picks.sort()
     liv_avail_picks.sort()
     avail_picks.extend(liv_avail_picks)
