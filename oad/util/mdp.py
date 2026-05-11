@@ -1,59 +1,7 @@
 import pandas as pd
 
 from .helpers import get_live_scores
-
-# Major DRAFT POOL
-ALL_PICKS = [
-    ("Brady", "Bryson DeChambeau"),
-    ("Jamil", "Scottie Scheffler"),
-    ("Tom ", "Jon Rahm"),
-    ("David", "Matt Fitzpatrick"),
-    ("Brock", "Xander Schauffele"),
-    ("Sohale", "Rory McIlroy"),
-    ("Scott", "Cameron Young"),
-    ("Lucas", "Ludvig Åberg"),
-    ("Lucas", "Tommy Fleetwood"),
-    ("Scott", "Justin Rose"),
-    ("Sohale", "Patrick Reed"),
-    ("Brock", "Hideki Matsuyama"),
-    ("David", "Robert MacIntyre"),
-    ("Tom ", "Akshay Bhatia"),
-    ("Jamil", "Chris Gotterup"),
-    ("Brady", "Jacob Bridgeman"),
-    ("Brady", "Justin Thomas"),
-    ("Jamil", "Brooks Koepka"),
-    ("Tom ", "Viktor Hovland"),
-    ("David", "Min Woo Lee"),
-    ("Brock", "Jordan Spieth"),
-    ("Sohale", "Russell Henley"),
-    ("Scott", "Collin Morikawa"),
-    ("Lucas", "Si Woo Kim"),
-    ("Lucas", "Jake Knapp"),
-    ("Scott", "J.J. Spaun"),
-    ("Sohale", "Corey Conners"),
-    ("Brock", "Keegan Bradley"),
-    ("David", "Jason Day"),
-    ("Tom ", "Adam Scott"),
-    ("Jamil", "Nicolai Højgaard"),
-    ("Brady", "Shane Lowry"),
-    ("Brady", "Sungjae Im"),
-    ("Jamil", "Maverick McNealy"),
-    ("Tom ", "Sepp Straka"),
-    ("David", "Sam Burns"),
-    ("Brock", "Max Homa"),
-    ("Sohale", "Harris English"),
-    ("Scott", "Tyrrell Hatton"),
-    ("Lucas", "Patrick Cantlay"),
-    ("Lucas", "Cameron Smith"),
-    ("Scott", "Gary Woodland"),
-    ("Sohale", "Rasmus Højgaard"),
-    ("Brock", "Nick Taylor"),
-    ("David", "Ben Griffin"),
-    ("Tom ", "Daniel Berger"),
-    ("Jamil", "Marco Penge"),
-    ("Brady", "Wyndham Clark"),
-]
-
+from .mdp_picks import ALL_PICKS
 
 def major_draft_pool():
     # df = pd.read_csv("./oad/util/mdp.csv")
