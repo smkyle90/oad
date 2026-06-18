@@ -40,7 +40,7 @@ NON_PGA_URL = "https://www.pgatour.com/stats/stat.02677.html"
 # Ping API at most every UDPATE_TIME seconds
 UPDATE_TIME = 300
 
-PLAYER_KEY = "team" # "athlete" for normal weeks
+PLAYER_KEY = "athlete" # "athlete" for normal weeks
 
 def check_rule_status(user, current_event):
     # Check the user has not used their rules.
