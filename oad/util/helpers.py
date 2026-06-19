@@ -521,6 +521,9 @@ def construct_user_table(
     }
     join_string = " | "
     for usr in users:
+        if not usr.email_confirmed:
+            continue
+
         if usr.display_name:
             user_dict["team"].append(usr.display_name)
         else:
