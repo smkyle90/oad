@@ -89,35 +89,41 @@ def signup():
 
 @auth.route("/signup", methods=["POST"])
 def signup_post():
+
+    # 1. Honeypot
+    if request.form.get("website"):
+        return "bot detected", 400
+
     email = request.form.get("email")
     name = request.form.get("name")
     password = request.form.get("password")
 
-    user = User.query.filter_by(
-        email=email
-    ).first()  # if this returns a user, then the email already exists in database
-
-    if (
-        user
-    ):  # if a user is found, we want to redirect back to signup page so user can try again
-        flash("Email address already exists")
+    # 2. Basic validation
+    if not email or not password:
+        flash("Missing required fields")
         return redirect(url_for("auth.signup"))
 
-    # create new user with the form data. Hash the password so plaintext version isn't saved.
+    # 3. Duplicate check
+    user = User.query.filter_by(email=email).first()
+    if user:
+        flash("Email already exists")
+        return redirect(url_for("auth.signup"))
+
+    # 4. DO NOT activate user yet (important change)
     new_user = User(
         email=email,
         name=name,
         password=generate_password_hash(password, method="sha256"),
+        email_confirmed=False
     )
 
-    generate_user_email(email)
-
-    # add the new user to the database
     db.session.add(new_user)
     db.session.commit()
 
-    return redirect(url_for("auth.login"))
+    # 5. send verification AFTER commit
+    generate_user_email(email)
 
+    return redirect(url_for("auth.login"))
 
 @auth.route("/confirm/<token>")
 def confirm_email(token):
