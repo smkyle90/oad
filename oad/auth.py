@@ -99,7 +99,7 @@ def signup_post():
     password = request.form.get("password")
 
     # 2. Basic validation
-    if not email or not password:
+    if not email or not password or not name:
         flash("Missing required fields")
         return redirect(url_for("auth.signup"))
 

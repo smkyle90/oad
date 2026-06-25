@@ -34,7 +34,7 @@ ALL_PICKS = [
     ('David', 'Joaquín Niemann'),
     ('Brady', 'Ben Griffin'),
     ('Sohale', 'Sepp Straka'),
-    ('Jamil', 'Jason Day'),
+    ('Jamil', 'Maverick McNealy'),
     ('Jamil', 'Cameron Smith'),
     ('Sohale', 'Harris English'),
     ('Brady', 'Bud Cauley'),
